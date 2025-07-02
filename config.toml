@@ -1,0 +1,9 @@
+
+app = "Sapphire"
+
+[user]
+name = "Haseeb"
+
+[logger]
+logfile = "sapphire.log"
+
