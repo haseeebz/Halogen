@@ -1,53 +1,82 @@
 import time
-from typing import MutableSequence
-from .base import EventBus, Event, SapphireModule, SapphireConfig, SapphireEvents
+from pathlib import Path
+from typing import MutableSequence, Literal
+from .base import (
+	EventBus, 
+	Event, 
+	SapphireModule, 
+	SapphireConfig, 
+	SapphireEvents,
+	SapphireModuleManager
+)
 
 
 class SapphireCore():
 
-	def __init__(self) -> None:
-		self.eventbus: EventBus = EventBus()
-		self.is_running: bool = True
+	def __init__(self, root: str) -> None:
 
-		self.modules: MutableSequence[SapphireModule] = []
-		self.dispatch_map: dict[type[Event], MutableSequence[SapphireModule]] = {}
-
+		self.root = Path(root).resolve().parent
 		self.config: SapphireConfig = SapphireConfig()
+		
+		self.eventbus: EventBus = EventBus()
+		self.manager = SapphireModuleManager(self.root, self.config, self.eventbus.emit)
+		
 
 		self.core_events: MutableSequence[type[Event]] = [
 			SapphireEvents.ShutdownEvent
 		]
 
-
-	def register_module(self, module_class: type[SapphireModule]) -> None:
-		module = module_class(self.eventbus.emit)
-		self.modules.append(module)
-		handled_events = module.handled_events()
-		for event in handled_events:
-			self.dispatch_map.setdefault(event, []).append(module)
+		self.is_running: bool = True
+		self.shutdown_requested = False
+		
 
 	def run(self):
+
+		self.manager.start_modules()
+		
 		while self.is_running:
 
 			if self.eventbus.is_empty():
+				if self.shutdown_requested:
+					self.shutdown()
+					break
 				time.sleep(0.05)
 				continue
 			
 			event = self.eventbus.receive()
 			event_type = type(event)
 
-			if event_type in self.dispatch_map.keys():
-				for module in self.dispatch_map[event_type]:
+			if event_type in self.core_events:
+				self.handle(event)
+
+			if event_type in self.manager.defined_events():
+				for module in self.manager.get_module_list(event_type):
 					module.handle(event)
 
-	def start_modules(self):
-		for module in self.modules:
-			try:
-				module.start()
-			except Exception as e:
-				raise Exception(
-					f"Could not start module with name {module.name()} (type:{type(module)})"
-				)
+
+	def handle(self, event: Event):
+		match event:
+			case SapphireEvents.ShutdownEvent():
+				if event.emergency:
+					self.shutdown() 
+					return
+				self.shutdown_requested = True
+
+
+	def log(self, level: Literal["debug", "info", "warning", "critical"], msg: str):
+		event = SapphireEvents.LogEvent(
+			"core",
+			SapphireEvents.make_timestamp(),
+			level,
+			msg
+		)
+		self.eventbus.emit(event)
+
 
 	def shutdown(self):
-		pass
+		self.is_running = False
+		self.manager.end_modules()
+
+
+			
+				

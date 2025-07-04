@@ -1,7 +1,7 @@
 
 import threading
-from .events import Event
-
+from .events import Event, SapphireEvents
+from typing import Literal
 
 class EventBus():
 
@@ -10,6 +10,8 @@ class EventBus():
 		self.lock = threading.Lock()
 
 	def emit(self, event: Event):
+		if not isinstance(event, Event):
+			return
 		with self.lock:
 			self.events.append(event)
 
@@ -26,3 +28,4 @@ class EventBus():
 		
 	def count(self) -> int:
 		return len(self.events)
+	

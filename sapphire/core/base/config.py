@@ -1,5 +1,7 @@
 import tomllib, os
-from typing import Any, Union
+from typing import Any, Union, TypeVar
+
+T = TypeVar("T")
 
 
 class SapphireConfig():
@@ -8,7 +10,6 @@ class SapphireConfig():
 
 		if isinstance(cfg, dict):
 			self.cfg: dict[str, Any] = cfg
-			return
 		
 		self.cfg_file = configfile
 		
@@ -22,7 +23,7 @@ class SapphireConfig():
 		
 		self.cfg = data
 
-	def get(self, path: str, default = None) -> Union[Any, None, "SapphireConfig"]:
+	def get(self, path: str, default: T = None) -> Union[T, "SapphireConfig"]:
 		parts = path.split(".")
 		current = self.cfg
 		for part in parts:
