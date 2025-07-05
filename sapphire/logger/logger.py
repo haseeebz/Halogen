@@ -1,8 +1,8 @@
 from collections.abc import Callable
 from typing import Tuple
-from sapphire.core.base import SapphireModule, SapphireEvents, Event, SapphireConfig
+from sapphire.core.base import SapphireModule, SapphireEvents, SapphireConfig
 import os
-
+from dataclasses import asdict
 
 class Color:
 	RESET = "\033[0m"
@@ -28,7 +28,7 @@ class Color:
 
 class Logger(SapphireModule):
 
-	def __init__(self, emit_event: Callable[[Event], None], config: SapphireConfig) -> None:
+	def __init__(self, emit_event: Callable[[SapphireEvents.Event], None], config: SapphireConfig) -> None:
 		super().__init__(emit_event, config)
 		self.log_file: str
 	
@@ -43,20 +43,27 @@ class Logger(SapphireModule):
 		if isinstance(path, str):
 			self.log_file = path
 
-		self.log("info", f"Now logging into file: {os.path.abspath(self.log_file)}")
+		self.log(
+			SapphireEvents.chain(),
+			"info", 
+			f"Now logging into file: {os.path.abspath(self.log_file)}"
+		)
 
 
-	def handled_events(self) -> list[type[Event]]:
+	def handled_events(self) -> list[type[SapphireEvents.Event]]:
 		return [
-			SapphireEvents.LogEvent
+			SapphireEvents.LogEvent,
+			SapphireEvents.InputEvent
 		]
 	
 
-	def handle(self, event: Event) -> None:
+	def handle(self, event: SapphireEvents.Event) -> None:
 		match event:
 			case SapphireEvents.LogEvent():
 				self.file_log(event)
 				self.terminal_log(event)
+			case SapphireEvents.InputEvent():
+				self.log(0, "debug", str(asdict(event)))
 
 
 	def terminal_log(self, event: SapphireEvents.LogEvent) -> None:

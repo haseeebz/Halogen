@@ -1,6 +1,5 @@
 from abc import ABC
 from typing import Tuple, Literal
-from .events import Event
 from .config import SapphireConfig
 from collections.abc import Callable
 from sapphire.core.base import SapphireEvents
@@ -8,7 +7,7 @@ from sapphire.core.base import SapphireEvents
 
 class SapphireModule(ABC):
 
-	def __init__(self, emit_event: Callable[[Event], None], config: SapphireConfig) -> None:
+	def __init__(self, emit_event: Callable[[SapphireEvents.Event], None], config: SapphireConfig) -> None:
 		super().__init__()
 		self.eventbus_emit = emit_event
 		self.config = config 
@@ -32,11 +31,11 @@ class SapphireModule(ABC):
 		raise NotImplementedError(f"start method of class {self.__class__} not implemented.")
 
 
-	def emit_event(self, event: Event) -> None:
+	def emit_event(self, event: SapphireEvents.Event) -> None:
 		"""
 		Internal function to call when the module wants to emit some event to the eventbus.
 		"""
-		if not isinstance(event, Event):
+		if not isinstance(event, SapphireEvents.Event):
 			log_event = SapphireEvents.LogEvent(
 				self.name(),
 				SapphireEvents.make_timestamp(),
@@ -51,7 +50,7 @@ class SapphireModule(ABC):
 		self.eventbus_emit(event)
 
 
-	def handled_events(self) -> list[type[Event]]:
+	def handled_events(self) -> list[type[SapphireEvents.Event]]:
 		"""
 		List of SapphireEvents that the module can handle. 
 		These will be dispatched to the module via SapphireModule.handle(). 
@@ -60,7 +59,7 @@ class SapphireModule(ABC):
 		raise NotImplementedError(f"handled_events method of class {self.__class__} not implemented.")
 
 
-	def handle(self, event: Event) -> None:
+	def handle(self, event: SapphireEvents.Event) -> None:
 		"""
 		The function called by SapphireCore to pass an event. 
 		Override this and do not call super().handle()
@@ -68,13 +67,14 @@ class SapphireModule(ABC):
 		raise NotImplementedError(f"handle method of class {self.__class__} not implemented.")
 
 
-	def log(self, level: Literal["debug", "info", "warning", "critical"], msg: str):
+	def log(self, chain_id: int, level: Literal["debug", "info", "warning", "critical"], msg: str):
 		"""
 		Shorthand for creating a log event and emitting it to the bus.
 		"""
 		event = SapphireEvents.LogEvent(
 			self.name(),
 			SapphireEvents.make_timestamp(),
+			chain_id,
 			level,
 			msg
 		)

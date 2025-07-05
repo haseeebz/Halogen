@@ -1,6 +1,6 @@
 from .module import SapphireModule
 from .config import SapphireConfig
-from .events import Event, SapphireEvents
+from .events import SapphireEvents
 from typing import Callable, MutableSequence, Type
 from pathlib import Path
 
@@ -12,7 +12,7 @@ class SapphireModuleManager():
 		self.emit_event = emit_event
 
 		self.modules: MutableSequence[SapphireModule] = []
-		self.dispatch_map: dict[type[Event], MutableSequence[SapphireModule]] = {}
+		self.dispatch_map: dict[type[SapphireEvents.Event], MutableSequence[SapphireModule]] = {}
 
 
 	def register_module(self, module_class: type[SapphireModule]) -> None:
@@ -55,6 +55,7 @@ class SapphireModuleManager():
 			log_event = SapphireEvents.LogEvent(
 				sender = "SapphireCore",
 				timestamp = SapphireEvents.make_timestamp(),
+				chain_id = SapphireEvents.chain(),
 				level = "warning",
 				message = msg
 			) 
@@ -66,5 +67,5 @@ class SapphireModuleManager():
 		return self.dispatch_map.keys()
 	
 	
-	def get_module_list(self, event: Type[Event]):
+	def get_module_list(self, event: Type[SapphireEvents.Event]):
 		return self.dispatch_map[event]

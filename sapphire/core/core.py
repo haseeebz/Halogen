@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import MutableSequence, Literal
 from .base import (
 	EventBus, 
-	Event, 
 	SapphireModule, 
 	SapphireConfig, 
 	SapphireEvents,
@@ -22,7 +21,7 @@ class SapphireCore():
 		self.manager = SapphireModuleManager(self.root, self.config, self.eventbus.emit)
 		
 
-		self.core_events: MutableSequence[type[Event]] = [
+		self.core_events: MutableSequence[type[SapphireEvents.Event]] = [
 			SapphireEvents.ShutdownEvent
 		]
 
@@ -54,7 +53,7 @@ class SapphireCore():
 					module.handle(event)
 
 
-	def handle(self, event: Event):
+	def handle(self, event: SapphireEvents.Event):
 		match event:
 			case SapphireEvents.ShutdownEvent():
 				if event.emergency:
@@ -63,10 +62,11 @@ class SapphireCore():
 				self.shutdown_requested = True
 
 
-	def log(self, level: Literal["debug", "info", "warning", "critical"], msg: str):
+	def log(self, chain_id: int, level: Literal["debug", "info", "warning", "critical"], msg: str):
 		event = SapphireEvents.LogEvent(
 			"core",
 			SapphireEvents.make_timestamp(),
+			chain_id,
 			level,
 			msg
 		)

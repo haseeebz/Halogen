@@ -1,21 +1,21 @@
 
 import threading
-from .events import Event, SapphireEvents
+from .events import SapphireEvents
 from typing import Literal
 
 class EventBus():
 
 	def __init__(self) -> None:
-		self.events: list[Event] = []
+		self.events: list[SapphireEvents.Event] = []
 		self.lock = threading.Lock()
 
-	def emit(self, event: Event):
-		if not isinstance(event, Event):
+	def emit(self, event: SapphireEvents.Event):
+		if not isinstance(event, SapphireEvents.Event):
 			return
 		with self.lock:
 			self.events.append(event)
 
-	def receive(self) -> Event:
+	def receive(self) -> SapphireEvents.Event:
 		with self.lock:
 			event = self.events.pop(0)
 		return event
