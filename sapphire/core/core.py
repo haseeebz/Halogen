@@ -93,7 +93,14 @@ class SapphireCore():
 			"Request Sapphire to shutdown. Args: []"
 		)
 
-	def shutdown_command(self, args: list[str], chain: int):
+		self.command.define(
+			self.get_command,
+			"get",
+			"Get internal values from Sapphire. Use 'get help' to see the accessible terms."
+		)
+
+
+	def shutdown_command(self, args: list[str], chain: int) -> str:
 		
 		self.log(
 			chain,
@@ -111,3 +118,24 @@ class SapphireCore():
 		self.eventbus.emit(event)
 
 		return "Requested Sapphire to shutdown."
+	
+
+	_get_terms = {}
+	def get_command(self, args: list[str], chain: int) -> str:
+
+		if not self._get_terms:
+			self._get_terms = {
+				"chain" : SapphireEvents.chain,
+				"user" : lambda: self.config.get("user.name", "Unknown"),
+				"help" : lambda: f"Accessible terms: {[x for x in self._get_terms.keys()]}"
+			}
+
+
+		num_args = len(args)
+		if num_args != 1:
+			raise ValueError(f"get command only takes a single arg. Number of args given: {num_args}")
+		
+		item = args[0]
+		value = self._get_terms.get(item, "help")()
+		return value
+
