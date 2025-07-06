@@ -10,6 +10,7 @@ class SapphireConfig():
 
 		if isinstance(cfg, dict):
 			self.cfg: dict[str, Any] = cfg
+			return
 		
 		self.cfg_file = configfile
 		
@@ -23,14 +24,20 @@ class SapphireConfig():
 		
 		self.cfg = data
 
-	def get(self, path: str, default: T = None) -> Union[T, "SapphireConfig"]:
+	def get(self, path: str, default: Any = None) -> Any:
 		parts = path.split(".")
 		current = self.cfg
 		for part in parts:
 			if isinstance(current, dict):
 				current = current.get(part, default)
-		
-		if isinstance(current, dict):
-			return SapphireConfig(cfg=current)
+
 		return current
 			
+
+	def get_sub_config(self, path: str) -> "SapphireConfig":
+		cfg = self.get(path, {})
+		
+		if not isinstance(cfg, dict):
+			cfg = {}
+
+		return SapphireConfig(cfg=cfg)

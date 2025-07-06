@@ -32,6 +32,7 @@ class SapphireCore():
 		self.is_running: bool = True
 		self.shutdown_requested = False
 
+		self.log(0, "warning", f"Hello {self.config.get("user.name", "User")} :D")
 	
 	def run(self):
 

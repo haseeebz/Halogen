@@ -25,6 +25,7 @@ class Color:
 		"critical" : RED
 	}
 	
+LEVELS = {"debug":0, "info":1, "warning":2, "critical":3}
 
 class Logger(SapphireModule):
 
@@ -39,15 +40,28 @@ class Logger(SapphireModule):
 	
 
 	def start(self) -> None:
+		
 		path = self.config.get("logfile", "sapphire.log")
 		if isinstance(path, str):
 			self.log_file = path
-
 		self.log(
 			SapphireEvents.chain(),
 			"info", 
 			f"Now logging into file: {os.path.abspath(self.log_file)}"
 		)
+
+
+		self.log_level: str = self.config.get("level", "info")
+		if self.log_level not in LEVELS.keys():
+			self.log(
+				SapphireEvents.chain(),
+				"warning",
+				f"Invalid log level specified in config.toml '{self.log_level}'. Defaulting to 'info'"
+			)
+			self.log_level = "info"
+
+
+		self.to_terminal: bool = self.config.get("terminal", True)
 
 
 	def handled_events(self) -> list[type[SapphireEvents.Event]]:
@@ -59,9 +73,12 @@ class Logger(SapphireModule):
 
 	def handle(self, event: SapphireEvents.Event) -> None:
 		match event:
+
 			case SapphireEvents.LogEvent():
-				self.file_log(event)
-				self.terminal_log(event)
+				if LEVELS[event.level] >= LEVELS[self.log_level]:
+					self.file_log(event)
+					if self.to_terminal: self.terminal_log(event)
+
 			case SapphireEvents.InputEvent():
 				pass
 

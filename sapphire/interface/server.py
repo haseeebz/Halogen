@@ -28,6 +28,7 @@ class SapphireServer(SapphireModule):
 		self.is_running = True
 
 		try:
+			self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 			self.socket.bind((SapphireServer.HOST, SapphireServer.PORT))
 		except Exception as e:
 			raise Exception("Critical: Could not start sapphire server.") from e

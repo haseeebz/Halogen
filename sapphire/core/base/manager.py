@@ -19,9 +19,8 @@ class SapphireModuleManager():
 
 		module = module_class(
 			self.emit_event,
-			self.config.get(module_class.name(), SapphireConfig(cfg={}))
+			self.config.get_sub_config(module_class.name())
 			)
-		
 		self.modules.append(module)
 
 		handled_events = module.handled_events()

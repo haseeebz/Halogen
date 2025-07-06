@@ -4,6 +4,17 @@ app = "Sapphire"
 [user]
 name = "Haseeb"
 
-[logger]
-logfile = "sapphire.log"
 
+
+
+[logger]
+#configurations for the built-in logger module
+
+logfile = "sapphire.log"
+#relative to root directory
+
+level = "debug" 
+# valid values: debug, info, warning, critical 
+
+terminal = true
+#whether to log into the terminal or not

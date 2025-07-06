@@ -8,13 +8,4 @@ def main():
 	core = SapphireCore(__file__)
 	core.manager.register_module(Logger)
 	core.manager.register_module(SapphireServer)
-	core.eventbus.emit(
-		SapphireEvents.LogEvent(
-			"test",
-			SapphireEvents.make_timestamp(),
-			SapphireEvents.chain(),
-			"info",
-			"Hello World"
-		)
-	)
 	core.run()
