@@ -63,7 +63,7 @@ class Logger(SapphireModule):
 				self.file_log(event)
 				self.terminal_log(event)
 			case SapphireEvents.InputEvent():
-				self.log(0, "debug", str(asdict(event)))
+				pass
 
 
 	def terminal_log(self, event: SapphireEvents.LogEvent) -> None:

@@ -43,21 +43,15 @@ class SapphireEvents():
 
 	@dataclass
 	class InputEvent(Event):
-		category: Literal["user", "confirmation"]
+		category: Literal["user", "confirmation", "command"]
 		message: str
 
 
 	@dataclass
 	class OutputEvent(Event):
-		category: Literal["user", "confirmation", "error", "command", "greeting"]
+		category: Literal["user", "confirmation", "command", "error"]
 		message: str
 		final: bool
-
-
-	@dataclass
-	class CommandEvent(Event):
-		cmd: str
-		args: list[str]
 
 
 	@dataclass

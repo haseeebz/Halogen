@@ -1,5 +1,6 @@
-from sapphire.core.base import SapphireModule, SapphireConfig, SapphireEvents
+from sapphire.core.base import SapphireEvents
 from .client import SapphireClient
+import socket
 
 class SapphireInterface():
 
@@ -8,26 +9,22 @@ class SapphireInterface():
 		self.client.start()
 		self.name = name
 
-	def send_command(self, cmd: str, args: list[str]):
-		"Shorthand for creating a command event and sending it."
-		event = SapphireEvents.CommandEvent(
-			self.name,
-			SapphireEvents.make_timestamp(),
-			0,
-			cmd,
-			args
-		)
-		self.client.out_buffer.put(event)
-
-	def send_message(self, msg: str):
-		"Shorthand for creating a command event and sending it. This is for user input only."
+	def send_message(self, msg: str, chain_id: int = 0):
+		"Shorthand for creating a input event and sending it. This is for user input only."
 		event = SapphireEvents.InputEvent(
 			self.name, 
 			SapphireEvents.make_timestamp(),
-			0, 
+			chain_id, 
 			"user",
 			msg
 		)
 		self.client.out_buffer.put(event)
 
-	def send_event(self, event: SapphireEvents.InputEvent |)
+	def send_event(self, event: SapphireEvents.InputEvent):
+		self.client.out_buffer.put(event)
+
+	def receive_event(self, timeout : float | None = None) -> SapphireEvents.OutputEvent | None:
+		try:
+			return self.client.in_buffer.get(True, timeout)	
+		except socket.timeout:
+			return None

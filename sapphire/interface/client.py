@@ -20,18 +20,22 @@ class SapphireClient():
 		self.read_thread = threading.Thread(target= self.read)
 		self.write_thread = threading.Thread(target = self.write)
 
-		#output from the pov of the server, the string is the error in case something goes wrong
-		self.in_buffer: queue.Queue[SapphireEvents.OutputEvent|str] = queue.Queue()
+		self.is_running = True
 
-		self.out_buffer: queue.Queue[
-			SapphireEvents.CommandEvent|
-			SapphireEvents.InputEvent
-			] = queue.Queue()
+		#output from the pov of the server, the string is the error in case something goes wrong
+		self.in_buffer: queue.Queue[SapphireEvents.OutputEvent] = queue.Queue()
+
+		self.out_buffer: queue.Queue[SapphireEvents.InputEvent] = queue.Queue()
 		
 
 	def start(self):
 		self.socket.settimeout(1)
-		self.socket.bind((self.HOST, self.PORT))
+		
+		try:
+			self.socket.connect((self.HOST, self.PORT))
+		except ConnectionRefusedError as e:
+			raise e
+		
 		self.read_thread.start()
 		self.write_thread.start()
 
@@ -44,6 +48,8 @@ class SapphireClient():
 		read_alive = self.read_thread.is_alive()
 		write_alive = self.write_thread.is_alive()
 
+		self.socket.shutdown(socket.SHUT_WR)
+		
 		if read_alive or write_alive:
 			return (
 				False,
@@ -55,30 +61,25 @@ class SapphireClient():
 		return (True, "Success")
 	
 
-	def to_output_event(self, parsed_json: dict) -> SapphireEvents.OutputEvent | str:
+	def to_output_event(self, parsed_json: dict) -> SapphireEvents.OutputEvent | None:
 		try:
-			output_event = SapphireEvents.OutputEvent(**parsed_json["payload"])
+			output_event = SapphireEvents.OutputEvent(**parsed_json)
 			return output_event
-		except KeyError:
-			error_msg = "Server send a invalid json schema."
-			return error_msg
+		except KeyError as e:
+			self.add_error_event(
+				"Server send a invalid json schema. " \
+				f"Encountered Error = {e.__class__.__name__}: {e.__str__()}."
+			)
 
 
-	def parse_json(self, json_str: str) -> dict | str:
+	def parse_json(self, json_str: str) -> dict | None:
 		try:
 			return(json.loads(json_str))
-		except json.JSONDecodeError:
-			error_msg = "Client could not parse the json string sent by the server."
-			return error_msg
-
-
-	def from_event(self, event: SapphireEvents.Event) -> str | None:
-
-		match event:
-			case SapphireEvents.CommandEvent():
-				return self.from_command_event(event)
-			case SapphireEvents.InputEvent():
-				return self.from_input_event(event)
+		except json.JSONDecodeError as e:
+			self.add_error_event(
+				"Client could not parse the json string sent by the server. " \
+				f"Encountered Error= {e.__class__.__name__}: {e.__str__()}."
+			)
 
 
 	def from_input_event(self, event: SapphireEvents.InputEvent) ->  str:
@@ -86,12 +87,16 @@ class SapphireClient():
 		string = json.dumps(dict_form)
 		return string
 
-
-	def from_command_event(self,  event: SapphireEvents.CommandEvent) ->  str:
-		dict_form = asdict(event)
-		string = json.dumps(dict_form)
-		return string
-
+	def add_error_event(self, msg):
+		event = SapphireEvents.OutputEvent(
+			"sapphire-client",
+			SapphireEvents.make_timestamp(),
+			0,
+			"error",
+			msg,
+			False
+		)
+		self.in_buffer.put(event)
 
 	def read(self):
 		
@@ -101,15 +106,21 @@ class SapphireClient():
 				data = self.socket.recv(1024)
 			except socket.timeout:
 				continue
-
+			except ConnectionRefusedError:
+				data = None
+			
+			if not data:
+				self.add_error_event(
+					"Could not communicate with server. Perhaps it was shutdown?"
+				)
+				continue
+				
 			parsed_json = self.parse_json(data.decode())
 
-			if isinstance(parsed_json, str):
-				self.in_buffer.put(parsed_json)
-				continue
+			if parsed_json is None: continue
 
 			event = self.to_output_event(parsed_json)
-			self.in_buffer.put(event)
+			if event: self.in_buffer.put(event)
 			
 			
 	def write(self):
@@ -121,16 +132,15 @@ class SapphireClient():
 			except queue.Empty:
 				continue
 
-			payload = self.from_event(event)
+			payload = self.from_input_event(event)
 			
 			if payload is None: continue
 
 			try:
 				self.socket.sendall(payload.encode())
 			except (BrokenPipeError, ConnectionResetError, OSError) as e:
-				error_msg = "Could not send output event to client. " \
-				f"Encountered Error= {e.__class__.__name__}: {e.__str__}. "
-				self.in_buffer.put(error_msg)
+				self.add_error_event("Could not send output event to client. " \
+				f"Encountered Error= {e.__class__.__name__}: {e.__str__()}. ")
 				
 				
 

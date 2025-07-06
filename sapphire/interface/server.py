@@ -56,6 +56,8 @@ class SapphireServer(SapphireModule):
 
 		read_alive = self.read_thread.is_alive()
 		write_alive = self.write_thread.is_alive()
+		
+		self.socket.shutdown(socket.SHUT_WR)
 
 		if read_alive or write_alive:
 			return (
@@ -89,8 +91,9 @@ class SapphireServer(SapphireModule):
 	def parse_json(self, json_str: str) -> dict | None:
 		try:
 			return(json.loads(json_str))
-		except json.JSONDecodeError:
-			error_msg = "Server could not parse the json string sent by a client."
+		except json.JSONDecodeError as e:
+			error_msg = "Server could not parse the json string sent by a client." \
+			f"Encountered Error= {e.__class__.__name__}: {e.__str__()}."
 
 		self.log(
 			SapphireEvents.chain(),
@@ -98,23 +101,14 @@ class SapphireServer(SapphireModule):
 			error_msg
 		)
 
-
-	def to_event(self, parsed_json) -> SapphireEvents.Event | None:
-
-		msg_type = parsed_json.get("type", None)
-
-		match msg_type:
-			case "command": return self.to_command_event(parsed_json)
-			case "user" : return self.to_input_event(parsed_json)
-
-
 	def to_input_event(self, parsed_json: dict) -> SapphireEvents.InputEvent | None:
 
 		try:
-			input_event = SapphireEvents.InputEvent(**parsed_json["payload"])
+			input_event = SapphireEvents.InputEvent(**parsed_json)
 			return input_event
-		except KeyError:
-			error_msg = "Server encountered a key error in the input event sent by a client."
+		except KeyError as e:
+			error_msg = "Server encountered a key error in the input event sent by a client. " \
+			f"Encountered Error= {e.__class__.__name__}: {e.__str__()}."
 
 		self.log(
 			SapphireEvents.chain(),
@@ -122,21 +116,6 @@ class SapphireServer(SapphireModule):
 			error_msg
 		)
 		
-
-	def to_command_event(self, parsed_json: dict) -> SapphireEvents.CommandEvent | None:
-
-		try:
-			cmd_event = SapphireEvents.CommandEvent(**parsed_json["payload"])
-			return cmd_event
-		except KeyError:
-			error_msg = "Server encountered a key error in command event sent by a client."
-
-		self.log(
-			SapphireEvents.chain(),
-			"critical",
-			error_msg
-		)
-
 		
 	def handle_client(self, client: socket.socket):
 		try:
@@ -153,8 +132,9 @@ class SapphireServer(SapphireModule):
 
 			if parsed_json is None: return
 
-			event = self.to_event(parsed_json)
+			event = self.to_input_event(parsed_json)
 			if event:
+				self.clients[client].add(event.chain_id)
 				self.emit_event(event)
 
 
@@ -198,7 +178,6 @@ class SapphireServer(SapphireModule):
 			if rq_client is None: continue
 			
 			payload = self.from_output_event(event)
-
 			try:
 				rq_client.sendall(payload.encode())
 			except (BrokenPipeError, ConnectionResetError, OSError) as e:
@@ -206,7 +185,7 @@ class SapphireServer(SapphireModule):
 					event.chain_id,
 					"warning",
 					"Could not send output event to client. " \
-					f"Encountered Error= {e.__class__.__name__}: {e.__str__}. " \
+					f"Encountered Error= {e.__class__.__name__}: {e.__str__()}. " \
 					f"Client had chain ids: {self.clients[rq_client]}" 
 				)
 				self.cleanup_client(rq_client)
