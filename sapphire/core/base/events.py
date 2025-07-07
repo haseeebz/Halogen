@@ -86,13 +86,12 @@ class SapphireEvents():
 
 
 	@dataclass
-	class UserPromptEvent(Event):
+	class PromptEvent(Event):
 		prompt: str
-
 
 	@dataclass
 	class AIResponseEvent(Event):
-		message: str
+		message: dict[str, str]
 		tasks: list[tuple[str, dict[str, str]]]
 
 

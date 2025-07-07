@@ -18,3 +18,8 @@ level = "debug"
 
 terminal = true
 #whether to log into the terminal or not
+
+
+[model]
+#configurations for the model manager module
+name = "gemini"
