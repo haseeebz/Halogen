@@ -95,9 +95,9 @@ class SapphireCommands():
 
 		self.log(
 			SapphireEvents.chain(event),
-			"warning" if category == "error" else "info",
+			"warning" if category == "error" else "debug",
 			f"Client with chain id '{event.chain}' requested command '{cmd}'. " \
-			f"Returned Output: {msg if cmd != "help" else 'help-message'}"  #to not clutter logs
+			f"Returned Output: {msg if cmd != "help" else '*help-message*'}"  #to not clutter logs
 		)
 		
 

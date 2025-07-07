@@ -29,3 +29,5 @@ class EventBus():
 	def count(self) -> int:
 		return len(self.events)
 	
+	def get_all_queued(self) -> list[SapphireEvents.Event]:
+		return self.events

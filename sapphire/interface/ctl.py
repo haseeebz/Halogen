@@ -37,15 +37,15 @@ def main():
 		"Enter '/quit' to exit the interface."
 	)
 
-	while True:
+	run = True
+	while run:
 		user_input = input(">> ")
 
 		if user_input.startswith("/"):
 			cmd = user_input.strip().removeprefix("/")
 
-			if cmd == "quit":
-				interface.end()
-				break
+			if cmd in ("quit", "shutdown"):
+				run = False
 
 			interface.send_command(cmd)
 		else:
@@ -53,4 +53,5 @@ def main():
 		output = interface.receive_event()
 		print_event(output)
 
+	interface.end()
 	

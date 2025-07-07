@@ -20,6 +20,7 @@ class SapphireCore():
 		
 		self.eventbus: EventBus = EventBus()
 		self.manager = SapphireModuleManager(self.root, self.config, self.eventbus.emit)
+		self.manager.load_modules()
 
 		self.command = SapphireCommands(self.eventbus.emit)
 		self.define_core_commands()
@@ -37,9 +38,11 @@ class SapphireCore():
 			"info", 
 			f"Hello {self.config.get("user.name", "User")} :D"
 		)
+
+		
 	
 	def run(self):
-
+		
 		self.manager.start_modules()
 		
 		while self.is_running:
@@ -57,9 +60,19 @@ class SapphireCore():
 			if event_type in self.core_events:
 				self.handle(event)
 
-			if event_type in self.manager.defined_events():
-				for module in self.manager.get_module_list(event_type):
+			if event_type not in self.manager.defined_events():
+				continue
+
+			for module in self.manager.get_module_list(event_type):
+				try:
 					module.handle(event)
+				except Exception as e:
+					self.log(
+						SapphireEvents.chain(),
+						"critical",
+						f"Module '{module.name()}' could not handle an event! " \
+						f"Event = {event}. Encountered Error = {e.__class__.__name__}:{e}"
+					)
 
 
 	def handle(self, event: SapphireEvents.Event):
@@ -87,7 +100,24 @@ class SapphireCore():
 
 	def shutdown(self):
 		self.is_running = False
-		self.manager.end_modules()
+		logger = self.manager.end_modules()
+		
+		if not logger: return
+
+		for event in self.eventbus.get_all_queued():
+			if isinstance(event, SapphireEvents.LogEvent):
+				logger.handle(event)
+
+		event = SapphireEvents.LogEvent(
+			"core",
+			SapphireEvents.make_timestamp(),
+			SapphireEvents.chain(),
+			"info",
+			"Sapphire is now shutting down."
+		)
+
+		logger.handle(event)
+		logger.end()
 
 
 	def define_core_commands(self):
@@ -109,7 +139,7 @@ class SapphireCore():
 		self.log(
 			chain,
 			"info",
-			f"Client with chain id {chain} requested sapphire to shutdown. Shutting down."
+			f"Client with chain id {chain} requested sapphire to shutdown."
 		)
 
 		event = SapphireEvents.ShutdownEvent(

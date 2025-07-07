@@ -1,6 +1,10 @@
 
 app = "Sapphire"
 
+modules = [
+	"filesystem"
+]
+
 [user]
 name = "Haseeb"
 
@@ -11,7 +15,7 @@ name = "Haseeb"
 #configurations for the built-in logger module
 
 logfile = "sapphire.log"
-#relative to root directory
+#relative to root directory, can use absolute paths.
 
 level = "debug" 
 # valid values: debug, info, warning, critical 
