@@ -125,16 +125,17 @@ class SapphireCommands():
 		)
 		self.emit_event(event)
 
-
+	_help_str = ""
 	def help_command(self, args: list[str], chain: SapphireEvents.Chain) -> str:
+		if self._help_str:
+			return self._help_str
 		
-		help_str = "< Sapphire >\n"
-		help_str += intro
+		self._help_str = intro
 		for item in self.defined_commands:
 			cmd_str = f"{item[0]:<10} : {item[1]}\n"
-			help_str += cmd_str
+			self._help_str += cmd_str
 			
-		return help_str
+		return self._help_str
 
 	
 

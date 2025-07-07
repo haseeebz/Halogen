@@ -19,6 +19,13 @@ class SapphireCore():
 		self.config: SapphireConfig = SapphireConfig()
 		
 		self.eventbus: EventBus = EventBus()
+		
+		self.log(
+			SapphireEvents.chain(), 
+			"info", 
+			f"Hello {self.config.get("user.name", "User")} :D"
+		)
+
 		self.manager = SapphireModuleManager(self.root, self.config, self.eventbus.emit)
 		self.manager.load_modules()
 
@@ -33,14 +40,9 @@ class SapphireCore():
 		self.is_running: bool = True
 		self.shutdown_requested = False
 
-		self.log(
-			SapphireEvents.chain(), 
-			"info", 
-			f"Hello {self.config.get("user.name", "User")} :D"
-		)
+		
 
 		
-	
 	def run(self):
 		
 		self.manager.start_modules()
