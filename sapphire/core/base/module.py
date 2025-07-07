@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Tuple, Literal
+from typing import Tuple, Literal, Union
 from .config import SapphireConfig
 from collections.abc import Callable
 from sapphire.core.base import SapphireEvents
@@ -67,14 +67,19 @@ class SapphireModule(ABC):
 		raise NotImplementedError(f"handle method of class {self.__class__} not implemented.")
 
 
-	def log(self, chain_id: int, level: Literal["debug", "info", "warning", "critical"], msg: str):
+	def log(
+		self, 
+		chain: SapphireEvents.Chain,
+		level: Literal["debug", "info", "warning", "critical"],
+		msg: str
+	):
 		"""
 		Shorthand for creating a log event and emitting it to the bus.
 		"""
 		event = SapphireEvents.LogEvent(
 			self.name(),
 			SapphireEvents.make_timestamp(),
-			chain_id,
+			chain,
 			level,
 			msg
 		)

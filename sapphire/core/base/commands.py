@@ -8,7 +8,8 @@ class SapphireCommands():
 
 	def __init__(self, emit_event: Callable):
 		self.emit_event = emit_event
-		self.command_map: dict[str, Callable[[list[str], int], str]] = {}
+		self.command_map: dict[str, Callable[[list[str], SapphireEvents.Chain], str]] = {}
+		#callable(args: list[str], chain: Chain) -> str
 
 		#first item in the tuple is the name, second is the info
 		self.defined_commands: list[tuple[str, str]] = []
@@ -24,11 +25,13 @@ class SapphireCommands():
 		# splitting the command and its args in shell style
 		try:
 			command = shlex.split(event.message)
-		except ValueError as e:
+			cmd = command[0]
+			args = command[1:]
+		except (ValueError, IndexError) as e:
 			self.log(
 				SapphireEvents.chain(event),
 				"warning",
-				f"Client with chain id {event.chain_id} requested a command but encountered error: " \
+				f"Client with chain id '{event.chain}' requested a command but encountered error: " \
 				f"({e.__class__.__name__}:{e.__str__()})"
 			)
 
@@ -37,27 +40,24 @@ class SapphireCommands():
 				SapphireEvents.make_timestamp(),
 				SapphireEvents.chain(event),
 				"error",
-				f"Invalid Command format. {e.__class__.__name__}:{e.__str__()}",
-				False
+				f"Invalid Command format. {e.__class__.__name__}:{e.__str__()}"
 			)
 
 			self.emit_event(output_event)
 			return
+		
+
 
 		# getting the command
 
-		cmd = command[0]
-		args = command[1:]
-
 		func = self.command_map.get(cmd, None)
-
 
 		if func is None:
 			
 			self.log(
 				SapphireEvents.chain(event),
 				"warning",
-				f"Client with chain id {event.chain_id} tried to execute invalid command '{cmd}'"
+				f"Client with chain id '{event.chain}' tried to execute invalid command '{cmd}'"
 				)
 			
 			output_event = SapphireEvents.OutputEvent(
@@ -65,8 +65,7 @@ class SapphireCommands():
 				SapphireEvents.make_timestamp(),
 				SapphireEvents.chain(event),
 				"error",
-				f"Undefined Command: {cmd}",
-				False
+				f"Undefined Command: {cmd}"
 			)
 
 			self.emit_event(output_event)
@@ -76,7 +75,7 @@ class SapphireCommands():
 		# executing 
 
 		try:
-			msg = func(args, event.chain_id)
+			msg = func(args, event.chain)
 			category = "command"
 		except Exception as e:
 			msg = f"Failed to execute command. Encountered {e.__class__.__name__}: {e.__str__()}"
@@ -89,8 +88,7 @@ class SapphireCommands():
 			SapphireEvents.make_timestamp(),
 			SapphireEvents.chain(event),
 			category,
-			msg,
-			False
+			msg
 		)
 
 		self.emit_event(output_event)
@@ -98,12 +96,18 @@ class SapphireCommands():
 		self.log(
 			SapphireEvents.chain(event),
 			"warning" if category == "error" else "info",
-			f"Client with chain id {event.chain_id} requested command '{cmd}'. " \
-			f"Return Output: {msg if cmd != "help" else 'help-message'}"  #to not clutter logs
+			f"Client with chain id '{event.chain}' requested command '{cmd}'. " \
+			f"Returned Output: {msg if cmd != "help" else 'help-message'}"  #to not clutter logs
 		)
 		
 
-	def define(self, func: Callable[[list[str], int], str], cmd: str, info: str):
+	def define(
+		self, 
+		func: Callable[[list[str], SapphireEvents.Chain], str], 
+		cmd: str, 
+		info: str
+		):
+
 		if cmd in self.command_map.keys():
 			raise ValueError(f"Command with name '{cmd}' already defined elsewhere.")
 		
@@ -111,7 +115,7 @@ class SapphireCommands():
 		self.defined_commands.append((cmd, info))
 
 
-	def log(self, chain_id: int, level: Literal["debug", "info", "warning", "critical"], msg: str):
+	def log(self, chain_id: SapphireEvents.Chain, level: Literal["debug", "info", "warning", "critical"], msg: str):
 		event = SapphireEvents.LogEvent(
 			"command",
 			SapphireEvents.make_timestamp(),
@@ -122,7 +126,7 @@ class SapphireCommands():
 		self.emit_event(event)
 
 
-	def help_command(self, args: list[str], chain: int) -> str:
+	def help_command(self, args: list[str], chain: SapphireEvents.Chain) -> str:
 		
 		help_str = "< Sapphire >\n"
 		help_str += intro

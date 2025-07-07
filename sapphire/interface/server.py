@@ -1,5 +1,5 @@
 
-import socket, threading, queue, json, select
+import socket, threading, queue, json, select, math
 from dataclasses import asdict
 from collections.abc import Callable
 from typing import Tuple
@@ -22,8 +22,8 @@ class SapphireServer(SapphireModule):
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
-		# map of clients to set of chain ids it started
-		self.clients: dict[socket.socket, set[int]] = {}
+		# map of chain id to client
+		self.clients: dict[int, socket.socket] = {}
 
 		self.is_running = True
 
@@ -102,10 +102,17 @@ class SapphireServer(SapphireModule):
 			error_msg
 		)
 
-	def to_input_event(self, parsed_json: dict) -> SapphireEvents.InputEvent | None:
 
+	def to_input_event(self, parsed_json: dict) -> SapphireEvents.InputEvent | None:
+		d = parsed_json
 		try:
-			input_event = SapphireEvents.InputEvent(**parsed_json)
+			input_event = SapphireEvents.InputEvent(
+				d["sender"],
+				d["timestamp"],
+				SapphireEvents.Chain(**d["chain"]),
+				d["category"],
+				d["message"]
+				)
 			return input_event
 		except KeyError as e:
 			error_msg = "Server encountered a key error in the input event sent by a client. " \
@@ -135,14 +142,35 @@ class SapphireServer(SapphireModule):
 
 			event = self.to_input_event(parsed_json)
 			if event:
-				self.clients[client].add(event.chain_id)
 				self.emit_event(event)
+
+
+	def greet_client(self, client: socket.socket):
+
+		chain_id = SapphireEvents.new_context_chain()
+
+		event = SapphireEvents.OutputEvent(
+			self.name(),
+			SapphireEvents.make_timestamp(),
+			chain_id,
+			"greeting",
+			f"Client successfully registered to the server with Chain ID: {chain_id}"
+		)
+
+		with self.lock:
+			self.clients[chain_id.context] = client #type: ignore
+			#flooring to get the client chain from the event
+
+		self.emit_event(event)
 
 
 	def cleanup_client(self, client: socket.socket):
 		client.close()
-		with self.lock:
-			self.clients.pop(client, None)
+		for items in self.clients.items():
+			if client is items[1]:
+				with self.lock: 
+					self.clients.pop(items[0])
+				break
 
 
 	def read(self):
@@ -151,11 +179,11 @@ class SapphireServer(SapphireModule):
 
 			try:
 				conn, _ = self.socket.accept()
-				self.clients.setdefault(conn, set())
+				self.greet_client(conn)
 			except socket.timeout:
 				pass
 
-			readable: list[socket.socket] = select.select(self.clients.keys(), [], [], 0.5)[0]
+			readable: list[socket.socket] = select.select(self.clients.values(), [], [], 0.5)[0]
 
 			for client in readable:
 				self.handle_client(client)
@@ -170,26 +198,24 @@ class SapphireServer(SapphireModule):
 			except queue.Empty:
 				continue
 
-			rq_client = None
 
-			for client, chain_ids in self.clients.items():
-				if event.chain_id in chain_ids:
-					rq_client = client
+			client = self.clients.get(event.chain.context, None)
 
-			if rq_client is None: continue
+			if client is None: continue
 			
 			payload = self.from_output_event(event)
+
 			try:
-				rq_client.sendall(payload.encode())
+				client.sendall(payload.encode())
 			except (BrokenPipeError, ConnectionResetError, OSError) as e:
 				self.log(
-					event.chain_id,
+					event.chain,
 					"warning",
 					"Could not send output event to client. " \
 					f"Encountered Error= {e.__class__.__name__}: {e.__str__()}. " \
-					f"Client had chain ids: {self.clients[rq_client]}" 
+					f"Client has chain id: {event.chain}" 
 				)
-				self.cleanup_client(rq_client)
+				self.cleanup_client(client)
 
 
 			

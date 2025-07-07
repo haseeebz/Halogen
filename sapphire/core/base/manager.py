@@ -54,7 +54,7 @@ class SapphireModuleManager():
 			log_event = SapphireEvents.LogEvent(
 				sender = "SapphireCore",
 				timestamp = SapphireEvents.make_timestamp(),
-				chain_id = SapphireEvents.chain(),
+				chain = SapphireEvents.chain(),
 				level = "warning",
 				message = msg
 			) 

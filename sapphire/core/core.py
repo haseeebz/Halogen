@@ -32,7 +32,11 @@ class SapphireCore():
 		self.is_running: bool = True
 		self.shutdown_requested = False
 
-		self.log(0, "warning", f"Hello {self.config.get("user.name", "User")} :D")
+		self.log(
+			SapphireEvents.chain(), 
+			"info", 
+			f"Hello {self.config.get("user.name", "User")} :D"
+		)
 	
 	def run(self):
 
@@ -70,11 +74,11 @@ class SapphireCore():
 					self.command.interpret(event)
 
 
-	def log(self, chain_id: int, level: Literal["debug", "info", "warning", "critical"], msg: str):
+	def log(self, chain: SapphireEvents.Chain, level: Literal["debug", "info", "warning", "critical"], msg: str):
 		event = SapphireEvents.LogEvent(
 			"core",
 			SapphireEvents.make_timestamp(),
-			chain_id,
+			chain,
 			level,
 			msg
 		)
@@ -100,7 +104,7 @@ class SapphireCore():
 		)
 
 
-	def shutdown_command(self, args: list[str], chain: int) -> str:
+	def shutdown_command(self, args: list[str], chain: SapphireEvents.Chain) -> str:
 		
 		self.log(
 			chain,
@@ -121,11 +125,11 @@ class SapphireCore():
 	
 
 	_get_terms = {}
-	def get_command(self, args: list[str], chain: int) -> str:
+	def get_command(self, args: list[str], chain: SapphireEvents.Chain) -> str:
 
 		if not self._get_terms:
 			self._get_terms = {
-				"chain" : SapphireEvents.chain,
+				"chain" : lambda: SapphireEvents._intern_chain.__str__(),
 				"user" : lambda: self.config.get("user.name", "Unknown"),
 				"help" : lambda: f"Accessible terms: {[x for x in self._get_terms.keys()]}"
 			}
@@ -133,7 +137,8 @@ class SapphireCore():
 
 		num_args = len(args)
 		if num_args != 1:
-			raise ValueError(f"get command only takes a single arg. Number of args given: {num_args}")
+			value = self._get_terms["help"]()
+			return value
 		
 		item = args[0]
 		value = self._get_terms.get(item, "help")()
