@@ -17,7 +17,17 @@ class BaseModelProvider(ABC):
 		return cls.__name__
 	
 
-	def ask(self, prompt: SapphireEvents.PromptEvent) -> SapphireEvents.AIResponseEvent | None:
+	def load(self) -> bool:
+		"Setup to load the model. Not needed if model needs no loading."
+		return True
+
+
+	def unload(self) -> bool:
+		"Setup to unload the model. Not needed if model needs no unloading."
+		return True
+		
+
+	def generate(self, prompt: SapphireEvents.PromptEvent) -> SapphireEvents.AIResponseEvent | None:
 		"""
 		Take a prompt event and emit a AI response event.
 		
@@ -34,7 +44,7 @@ class BaseModelProvider(ABC):
 
 	def load_api_key(self) -> str:
 		"""
-		Load the API key from the config.
+		Load the API key from the config for non-local models.
 
 		The API key should be "model_name.api_key" in the config, which translates to the overall 
 		config path of "model.model_name.api_key".
@@ -65,5 +75,6 @@ class BaseModelProvider(ABC):
 
 		return key
 
+	
 
 

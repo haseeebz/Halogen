@@ -1,10 +1,9 @@
 
 from sapphire.core.base import SapphireEvents, SapphireConfig
 from sapphire.model.base import BaseModelProvider
-import tomllib
+import json
 
 
-# TODO : make api_key loading fail safe
 
 class Gemini(BaseModelProvider):
 
@@ -16,8 +15,6 @@ class Gemini(BaseModelProvider):
 		
 		self.api_key = self.load_api_key()
 
-		
-
 		self.client = genai.Client(
 			api_key = self.api_key
 		)
@@ -26,25 +23,28 @@ class Gemini(BaseModelProvider):
 			thinking_config = types.ThinkingConfig(thinking_budget=0)
 		)
 		
+
 	@classmethod
 	def name(cls) -> str:
 		return "gemini"
 	
-	def ask(self, prompt: SapphireEvents.PromptEvent) -> SapphireEvents.AIResponseEvent | None:
+
+	def generate(self, prompt: SapphireEvents.PromptEvent) -> SapphireEvents.AIResponseEvent | None:
 		
 		response = self.send_request(prompt.content)
 
 		if response.text is None: 
 			return None
 
-		fmt_res = tomllib.loads(response.text)
+		fmt_res = json.loads(response.text)
 
 		event = SapphireEvents.AIResponseEvent(
 			self.name(),
 			SapphireEvents.make_timestamp(),
 			SapphireEvents.chain(prompt),
-			fmt_res.get("message", {}),
-			fmt_res.get("tasks", [])
+			fmt_res.get("message", ""),
+			fmt_res.get("tasks", []),
+			fmt_res.get("extras", {})
 		)
 
 		return event

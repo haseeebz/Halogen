@@ -7,7 +7,6 @@ from sapphire.core.base import (
 )
 
 from .base import BaseModelProvider
-
 from .models import Gemini
 
 core_models = [
@@ -43,19 +42,9 @@ class ModelManager(SapphireModule):
 		match event:
 
 			case SapphireEvents.PromptEvent():
-				response_event = self.current_model.ask(event)
+				response_event = self.current_model.generate(event)
 				if response_event:
 					self.emit_event(response_event)
-
-					out_event = SapphireEvents.OutputEvent(
-						"model",
-						SapphireEvents.make_timestamp(),
-						SapphireEvents.chain(event),
-						"user",
-						response_event.message["user"]
-					)
-
-					self.emit_event(out_event)
 
 
 	def handled_events(self) -> list[type[SapphireEvents.Event]]:
