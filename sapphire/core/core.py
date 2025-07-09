@@ -34,7 +34,7 @@ class SapphireCore():
 
 		self.core_events: MutableSequence[type[SapphireEvents.Event]] = [
 			SapphireEvents.ShutdownEvent,
-			SapphireEvents.InputEvent
+			SapphireEvents.CommandEvent
 		]
 
 		self.is_running: bool = True
@@ -47,19 +47,21 @@ class SapphireCore():
 		
 		self.manager.start_modules()
 		
-		while self.is_running:
+		while self.is_running: #main loop
 
 			if self.eventbus.is_empty():
-				if self.shutdown_requested:
+				if self.shutdown_requested: #shutdown once the bus is empty
 					self.shutdown()
 					break
 				time.sleep(0.05)
 				continue
 			
-			event = self.eventbus.receive()
+			event = self.eventbus.receive() #non-blocking but we checked for bus' payload above
 			event_type = type(event)
 
-			if event_type in self.core_events:
+			# passing events
+
+			if event_type in self.core_events: 
 				self.handle(event)
 
 			if event_type not in self.manager.defined_events():
@@ -67,7 +69,7 @@ class SapphireCore():
 
 			for module in self.manager.get_module_list(event_type):
 				try:
-					module.handle(event)
+					module.handle(event) 
 				except Exception as e:
 					self.log(
 						SapphireEvents.chain(),
@@ -84,9 +86,8 @@ class SapphireCore():
 					self.shutdown() 
 					return
 				self.shutdown_requested = True
-			case SapphireEvents.InputEvent():
-				if event.category == "command":
-					self.command.interpret(event)
+			case SapphireEvents.CommandEvent():
+				self.command.interpret(event)
 
 
 	def log(self, chain: SapphireEvents.Chain, level: Literal["debug", "info", "warning", "critical"], msg: str):

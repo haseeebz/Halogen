@@ -26,4 +26,16 @@ terminal = true
 
 [model]
 #configurations for the model manager module
+
 name = "gemini"
+#see how the name corresponds to the sub-field down below.
+
+[model.gemini]
+
+api_key = "load:secrets.txt"
+
+# all model classes follow this scheme. 
+# The api_key value can either be the literal api _key OR
+# you can use 'load:' prefix to load the key from a file. 
+
+# api_key = "123abc" will also work

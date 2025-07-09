@@ -10,10 +10,14 @@ import importlib
 # loading the core modules
 from sapphire.logger import Logger
 from sapphire.interface import SapphireServer
+from sapphire.prompt import PromptManager
+from sapphire.model import ModelManager
 
 core_modules = [
 	Logger, 
-	SapphireServer
+	SapphireServer,
+	PromptManager,
+	ModelManager
 ]
 
 

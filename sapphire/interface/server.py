@@ -34,7 +34,7 @@ class SapphireServer(SapphireModule):
 			raise Exception("Critical: Could not start sapphire server.") from e
 		
 
-		self.out_buffer: queue.Queue[SapphireEvents.OutputEvent] = queue.Queue()
+		self.out_buffer: queue.Queue[SapphireEvents.Event] = queue.Queue()
 
 		self.lock = threading.Lock()
 		self.read_thread = threading.Thread(target = self.read)
@@ -73,20 +73,27 @@ class SapphireServer(SapphireModule):
 
 	def handled_events(self) -> list[type[SapphireEvents.Event]]:
 		return [
-			SapphireEvents.OutputEvent
+			SapphireEvents.AIResponseEvent,
+			SapphireEvents.CommandExecutedEvent,
+			SapphireEvents.ConfirmationEvent,
+			SapphireEvents.ErrorEvent
 		]
 	
 
 	def handle(self, event: SapphireEvents.Event) -> None:
 		match event:
-			case SapphireEvents.OutputEvent():
+			case SapphireEvents.Event():
 				self.out_buffer.put(event)
 	
 
-	def from_output_event(self, event: SapphireEvents.OutputEvent) -> str:
-		dict_form = asdict(event)
-		string = json.dumps(dict_form)
-		return string
+	def serialize_event(self, event: SapphireEvents.Event) -> str:
+		dict_form = {}
+
+		dict_form["type"] = event.__class__.__name__
+		dict_form["payload"] = asdict(event)
+
+		string_form = json.dumps(dict_form)
+		return string_form
 
 
 	def parse_json(self, json_str: str) -> dict | None:
@@ -103,20 +110,19 @@ class SapphireServer(SapphireModule):
 		)
 
 
-	def to_input_event(self, parsed_json: dict) -> SapphireEvents.InputEvent | None:
-		d = parsed_json
+	def deserialize_event(self, msg: str) -> SapphireEvents.Event | None:
+		d = self.parse_json(msg)
+
+		if not d:
+			return None
+		
 		try:
-			input_event = SapphireEvents.InputEvent(
-				d["sender"],
-				d["timestamp"],
-				SapphireEvents.Chain(**d["chain"]),
-				d["category"],
-				d["message"]
-				)
-			return input_event
+			event_type = SapphireEvents.serialize(d["type"])
+			event = event_type(**d["payload"])
+			return event
 		except KeyError as e:
 			error_msg = "Server encountered a key error in the input event sent by a client. " \
-			f"Encountered Error= {e.__class__.__name__}: {e.__str__()}."
+			f"Encountered Error= {e.__class__.__name__} : {e.__str__()}."
 
 		self.log(
 			SapphireEvents.chain(),
@@ -136,11 +142,7 @@ class SapphireServer(SapphireModule):
 			return
 		
 		for msg in data.decode().splitlines():
-			parsed_json = self.parse_json(msg)
-
-			if parsed_json is None: return
-
-			event = self.to_input_event(parsed_json)
+			event = self.deserialize_event(msg)
 			if event:
 				self.emit_event(event)
 
@@ -149,17 +151,15 @@ class SapphireServer(SapphireModule):
 
 		chain_id = SapphireEvents.new_context_chain()
 
-		event = SapphireEvents.OutputEvent(
+		event = SapphireEvents.ClientActivationEvent(
 			self.name(),
 			SapphireEvents.make_timestamp(),
 			chain_id,
-			"greeting",
 			f"Client successfully registered to the server with Chain ID: {chain_id}"
 		)
 
 		with self.lock:
-			self.clients[chain_id.context] = client #type: ignore
-			#flooring to get the client chain from the event
+			self.clients[chain_id.context] = client 
 
 		self.emit_event(event)
 
@@ -203,7 +203,7 @@ class SapphireServer(SapphireModule):
 
 			if client is None: continue
 			
-			payload = self.from_output_event(event)
+			payload = self.serialize_event(event)
 
 			try:
 				client.sendall(payload.encode())

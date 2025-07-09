@@ -1,7 +1,6 @@
 import tomllib, os
-from typing import Any, Union, TypeVar
+from typing import Any, Union
 
-T = TypeVar("T")
 
 
 class SapphireConfig():
@@ -33,7 +32,6 @@ class SapphireConfig():
 
 		return current
 			
-
 	def get_sub_config(self, path: str) -> "SapphireConfig":
 		cfg = self.get(path, {})
 		
@@ -41,3 +39,5 @@ class SapphireConfig():
 			cfg = {}
 
 		return SapphireConfig(cfg=cfg)
+
+	

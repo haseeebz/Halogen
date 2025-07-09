@@ -6,3 +6,4 @@ __pycache__/
 sapphire.log
 test.py
 todo
+secrets.txt

@@ -1,16 +1,16 @@
 
 ## Json Schema
-
+Only for reference.
 ### Input
 
 ```json
 {
-	"payload" : {
-		"sender" : "str",
-		"timestamp" : "str",
-		"chain_id" : 0,
+	{
+		"sender" : "client",
+		"timestamp" : "22:12:19",
+		"chain" : { "context" : 1, "flow" : 3 },
 		"category" : "user" or "confirmation" or "command",
-		"message" : "str"
+		"message" : ""
 	}
 }
 ```
@@ -19,13 +19,13 @@
 
 ```json
 {
-	"payload" : {
-		"sender" : "str",
+	{
+		"sender" : "core",
 		"timestamp" : "str",
-		"chain_id" : 0,
+		"chain" : { "context" : 1, "flow" : 3 },
 		"category" : "normal" or "confirmation" or "error" or "command",
-		"message" : "str",
-		"final" : true or false
+		"message" : "",
+		"final" : false
 	}
 }
 ```
