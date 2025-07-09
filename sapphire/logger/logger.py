@@ -67,7 +67,7 @@ class Logger(SapphireModule):
 	def handled_events(self) -> list[type[SapphireEvents.Event]]:
 		return [
 			SapphireEvents.LogEvent,
-			SapphireEvents.InputEvent
+			SapphireEvents.UserInputEvent
 		]
 	
 
@@ -79,7 +79,7 @@ class Logger(SapphireModule):
 					self.file_log(event)
 					if self.to_terminal: self.terminal_log(event)
 
-			case SapphireEvents.InputEvent():
+			case SapphireEvents.UserInputEvent():
 				pass
 
 

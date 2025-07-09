@@ -20,52 +20,27 @@ class SapphireCommands():
 			"Print all available commands."
 		)
 
-	def interpret(self, event: SapphireEvents.InputEvent):
+	def interpret(self, event: SapphireEvents.CommandEvent):
 
-		# splitting the command and its args in shell style
-		try:
-			command = shlex.split(event.message)
-			cmd = command[0]
-			args = command[1:]
-		except (ValueError, IndexError) as e:
-			self.log(
-				SapphireEvents.chain(event),
-				"warning",
-				f"Client with chain id '{event.chain}' requested a command but encountered error: " \
-				f"({e.__class__.__name__}:{e.__str__()})"
-			)
-
-			output_event = SapphireEvents.OutputEvent(
-				"command",
-				SapphireEvents.make_timestamp(),
-				SapphireEvents.chain(event),
-				"error",
-				f"Invalid Command format. {e.__class__.__name__}:{e.__str__()}"
-			)
-
-			self.emit_event(output_event)
-			return
 		
-
-
-		# getting the command
-
-		func = self.command_map.get(cmd, None)
+		func = self.command_map.get(event.cmd, None)
 
 		if func is None:
 			
 			self.log(
 				SapphireEvents.chain(event),
 				"warning",
-				f"Client with chain id '{event.chain}' tried to execute invalid command '{cmd}'"
+				f"Client with chain id '{event.chain}' tried to execute invalid command '{event.cmd}'"
 				)
 			
-			output_event = SapphireEvents.OutputEvent(
-				"command",
+		
+			output_event = SapphireEvents.CommandExecutedEvent(
+				"commands",
 				SapphireEvents.make_timestamp(),
 				SapphireEvents.chain(event),
-				"error",
-				f"Undefined Command: {cmd}"
+				(event.cmd, event.args),
+				False,
+				f"Undefined Command: {event.cmd}"
 			)
 
 			self.emit_event(output_event)
@@ -75,29 +50,30 @@ class SapphireCommands():
 		# executing 
 
 		try:
-			msg = func(args, event.chain)
-			category = "command"
+			msg = func(event.args, event.chain)
+			success = True
 		except Exception as e:
 			msg = f"Failed to execute command. Encountered {e.__class__.__name__}: {e.__str__()}"
-			category = "error"
+			success = False
 
 		# output in case of both success and failure
 
-		output_event = SapphireEvents.OutputEvent(
-			"command",
+		execution_event = SapphireEvents.CommandExecutedEvent(
+			"commands",
 			SapphireEvents.make_timestamp(),
 			SapphireEvents.chain(event),
-			category,
+			(event.cmd, event.args),
+			success,
 			msg
 		)
 
-		self.emit_event(output_event)
+		self.emit_event(execution_event)
 
 		self.log(
 			SapphireEvents.chain(event),
-			"warning" if category == "error" else "debug",
-			f"Client with chain id '{event.chain}' requested command '{cmd}'. " \
-			f"Returned Output: {msg if cmd != "help" else '*help-message*'}"  #to not clutter logs
+			"warning" if not success  else "debug",
+			f"Client with chain id '{event.chain}' requested command '{event.cmd}'. " \
+			f"Returned Output: {msg if event.cmd != "help" else '*help-message*'}"  #to not clutter logs
 		)
 		
 

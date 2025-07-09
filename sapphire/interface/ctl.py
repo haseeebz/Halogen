@@ -17,14 +17,13 @@ class Color:
 		return f"{color}{text}{Color.RESET}"
 	
 
-def print_event(event: SapphireEvents.OutputEvent):
-	match event.category:
-		case "user" | "confirmation":
+
+def print_event(event: SapphireEvents.Event):
+	match event:
+		case SapphireEvents.AIResponseEvent():
 			print(event.message)
-		case "command":
-			print(Color.colorify(event.message, Color.CYAN))
-		case "error":
-			print(Color.colorify(event.message, Color.RED))
+		case SapphireEvents.CommandExecutedEvent():
+			print(Color.colorify(event.output, Color.CYAN))
 		
 	
 def main():

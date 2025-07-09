@@ -15,9 +15,7 @@ from sapphire.model import ModelManager
 
 core_modules = [
 	Logger, 
-	SapphireServer,
-	PromptManager,
-	ModelManager
+	SapphireServer
 ]
 
 

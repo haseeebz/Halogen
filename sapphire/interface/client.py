@@ -22,10 +22,9 @@ class SapphireClient():
 		self.write_thread = threading.Thread(target = self.write)
 
 		self.is_running = True
-		#output from the pov of the server
-		self.in_buffer: queue.Queue[SapphireEvents.OutputEvent] = queue.Queue()
 
-		self.out_buffer: queue.Queue[SapphireEvents.InputEvent] = queue.Queue()
+		self.in_buffer: queue.Queue[SapphireEvents.Event] = queue.Queue()
+		self.out_buffer: queue.Queue[SapphireEvents.Event] = queue.Queue()
 		
 
 	def start(self):
@@ -44,7 +43,7 @@ class SapphireClient():
 
 		event = self.in_buffer.get()
 
-		if event.category == "greeting":
+		if isinstance(event, SapphireEvents.ClientActivationEvent):
 			self.client_chain = event.chain
 		else:
 			self.add_error_event("No greeting sent by the server :(")
@@ -60,7 +59,7 @@ class SapphireClient():
 		except (BrokenPipeError, ConnectionResetError, OSError) as e:
 			self.add_error_event(
 				f"Could not shutdown the client properly! Encountered Error = "\
-				f"{e.__class__.__name__}({e.__str__()})"
+				f"{e.__class__.__name__}({e})"
 			)
 	
 
@@ -76,46 +75,52 @@ class SapphireClient():
 			return chain
 			
 
-	def to_output_event(self, parsed_json: dict) -> SapphireEvents.OutputEvent | None:
-		d = parsed_json
-		try:
-			output_event = SapphireEvents.OutputEvent(
-				d["sender"],
-				d["timestamp"],
-				SapphireEvents.Chain(**d["chain"]),
-				d["category"],
-				d["message"]
-				)
-			return output_event
-		except KeyError as e:
-			self.add_error_event(
-				"Server send a invalid json schema. " \
-				f"Encountered Error = {e.__class__.__name__}({e.__str__()})"
-			)
+	def serialize_event(self, event: SapphireEvents.Event) -> str:
+		dict_form = {}
+
+		dict_form["type"] = event.__class__.__name__
+		dict_form["payload"] = asdict(event)
+
+		string_form = json.dumps(dict_form)
+		return string_form
 
 
 	def parse_json(self, json_str: str) -> dict | None:
 		try:
 			return(json.loads(json_str))
 		except json.JSONDecodeError as e:
-			self.add_error_event(
-				"Client could not parse the json string sent by the server. " \
-				f"Encountered Error= {e.__class__.__name__}({e.__str__()})."
-			)
+			error_msg = "Client could not parse the json string sent by the server." \
+			f"Encountered Error= {e.__class__.__name__}: {e.__str__()}."
+
+		self.add_error_event(error_msg)
 
 
-	def from_input_event(self, event: SapphireEvents.InputEvent) ->  str:
-		dict_form = asdict(event)
-		string = json.dumps(dict_form)
-		return string
-	
+	def deserialize_event(self, msg: str) -> SapphireEvents.Event | None:
+		d = self.parse_json(msg)
+
+		if not d:
+			return None
+		
+		chain = d["payload"].pop("chain")
+		
+		try:
+			event_type = SapphireEvents.serialize(d["type"])
+			event = event_type(
+				**d["payload"], chain=SapphireEvents.Chain(chain["context"], chain["flow"])
+				)
+			return event
+		except KeyError as e:
+			error_msg = "Client encountered a key error in the input event sent by the server. " \
+			f"Encountered Error= {e.__class__.__name__} : {e.__str__()}."
+
+		self.add_error_event(error_msg)
+		
 
 	def add_error_event(self, msg):
-		event = SapphireEvents.OutputEvent(
+		event = SapphireEvents.ErrorEvent(
 			"sapphire-client",
 			SapphireEvents.make_timestamp(),
 			self.chain(),
-			"error",
 			msg
 		)
 		self.in_buffer.put(event)
@@ -138,12 +143,9 @@ class SapphireClient():
 				)
 				continue
 				
-			parsed_json = self.parse_json(data.decode())
-
-			if parsed_json is None: continue
-
-			event = self.to_output_event(parsed_json)
-			if event: self.in_buffer.put(event)
+			event = self.deserialize_event(data.decode())
+			if event: 
+				self.in_buffer.put(event)
 			
 			
 	def write(self):
@@ -155,10 +157,9 @@ class SapphireClient():
 			except queue.Empty:
 				continue
 
-			payload = self.from_input_event(event)
+			payload = self.serialize_event(event)
 			
 			if payload is None: continue
-
 			try:
 				self.socket.sendall(payload.encode())
 			except (BrokenPipeError, ConnectionResetError, OSError) as e:

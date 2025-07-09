@@ -15,7 +15,7 @@ name = "Haseeb"
 #configurations for the built-in logger module
 
 logfile = "sapphire.log"
-#relative to root directory, can use absolute paths.
+#can use absolute paths.
 
 level = "debug" 
 # valid values: debug, info, warning, critical 
@@ -28,14 +28,16 @@ terminal = true
 #configurations for the model manager module
 
 name = "gemini"
-#see how the name corresponds to the sub-field down below.
+
+#dev note: see how the name corresponds to the sub-field down below.
+#this is essential for proper config transfer
 
 [model.gemini]
 
 api_key = "load:secrets.txt"
 
 # all model classes follow this scheme. 
-# The api_key value can either be the literal api _key OR
+# The api_key value can either be the literal api key OR
 # you can use 'load:' prefix to load the key from a file. 
 
 # api_key = "123abc" will also work

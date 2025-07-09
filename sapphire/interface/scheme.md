@@ -1,31 +1,14 @@
 
-## Json Schema
+## Json Scheme
 Only for reference.
-### Input
+### For all events:
 
 ```json
 {
-	{
-		"sender" : "client",
-		"timestamp" : "22:12:19",
-		"chain" : { "context" : 1, "flow" : 3 },
-		"category" : "user" or "confirmation" or "command",
-		"message" : ""
+	"type" : "EventType",
+	"payload" : {
+		//contents of the event in json form.
 	}
 }
 ```
 
-### Output
-
-```json
-{
-	{
-		"sender" : "core",
-		"timestamp" : "str",
-		"chain" : { "context" : 1, "flow" : 3 },
-		"category" : "normal" or "confirmation" or "error" or "command",
-		"message" : "",
-		"final" : false
-	}
-}
-```

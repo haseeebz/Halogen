@@ -1,6 +1,6 @@
 from sapphire.core.base import SapphireEvents
 from .client import SapphireClient
-import socket
+import socket, shlex
 
 class SapphireInterface():
 	"""
@@ -15,16 +15,16 @@ class SapphireInterface():
 		self.client = SapphireClient()
 		self.client.start()
 
-	def send_event(self, event: SapphireEvents.InputEvent):
+	def send_event(self, event: SapphireEvents.Event):
 		self.client.out_buffer.put(event)
 
 
-	def receive_event(self) -> SapphireEvents.OutputEvent:
+	def receive_event(self) -> SapphireEvents.Event:
 		"Blocks and waits for and event from the server."
 		return self.client.in_buffer.get()	
 
 
-	def check_event(self, timeout : float | None = None) -> SapphireEvents.OutputEvent | None:
+	def check_event(self, timeout : float | None = None) -> SapphireEvents.Event | None:
 		"""
 		Checks whether there is an event within the duration of the timeout and returns it, else None.
 		If timeout is not specified, it does not block and returns an 
@@ -45,44 +45,54 @@ class SapphireInterface():
 		"""
 
 		chain = self.client.chain()
-		event = SapphireEvents.InputEvent(
+		event = SapphireEvents.UserInputEvent(
 			self.name, 
 			SapphireEvents.make_timestamp(),
 			chain, 
-			"user",
 			msg
 		)
 		self.send_event(event)
 
 		return chain
 
-	def send_command(self, cmd: str) -> SapphireEvents.Chain:
+	def send_command(self, msg: str) -> SapphireEvents.Chain | None:
 		"Shorthand for creating a command input event and dispatching it. Blocks for output"
 
+		try:
+			command = shlex.split(msg)
+			cmd = command[0]
+			args = command[1:]
+		except (ValueError, IndexError) as e:
+			self.client.add_error_event(
+				f"Client requested a command but encountered error: " \
+				f"({e.__class__.__name__}:{e.__str__()})"
+			)
+			return None
+		
 		chain = self.client.chain()
-		event = SapphireEvents.InputEvent(
+		event = SapphireEvents.CommandEvent(
 			self.name, 
 			SapphireEvents.make_timestamp(),
 			chain,
-			"command",
-			cmd
+			cmd,
+			args
 		)
-		self.send_event(event)
 
+		self.send_event(event)
 		return chain
 
 
-	def send_confirmation(self, msg: str, chain: SapphireEvents.Chain) -> None:
-		"Send confirmation event and wait for output"
-
-		event = SapphireEvents.InputEvent(
-			self.name, 
-			SapphireEvents.make_timestamp(),
-			chain, 
-			"confirmation",
-			msg
-		)
-		self.send_event(event) 
+	#def send_confirmation(self, msg: str, chain: SapphireEvents.Chain) -> None:
+	#	"Send confirmation event and wait for output"
+#
+#		event = SapphireEvents.ConfirmationEvent(
+#			self.name, 
+#			SapphireEvents.make_timestamp(),
+#			chain, 
+#			"confirmation",
+#			msg
+#		)
+#		self.send_event(event) 
 	
 	
 	def end(self):

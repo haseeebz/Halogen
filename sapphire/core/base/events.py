@@ -61,6 +61,9 @@ class SapphireEvents():
 
 		if not cls._intern_map:
 			for name, attr in SapphireEvents.__dict__.items():
+
+				if not isinstance(attr, type): continue
+
 				if issubclass(attr, SapphireEvents.Event):
 					cls._intern_map[name] = attr
 

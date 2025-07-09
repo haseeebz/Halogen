@@ -60,7 +60,6 @@ class SapphireCore():
 			event_type = type(event)
 
 			# passing events
-
 			if event_type in self.core_events: 
 				self.handle(event)
 

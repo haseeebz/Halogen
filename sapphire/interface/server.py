@@ -76,7 +76,8 @@ class SapphireServer(SapphireModule):
 			SapphireEvents.AIResponseEvent,
 			SapphireEvents.CommandExecutedEvent,
 			SapphireEvents.ConfirmationEvent,
-			SapphireEvents.ErrorEvent
+			SapphireEvents.ErrorEvent,
+			SapphireEvents.ClientActivationEvent
 		]
 	
 
@@ -116,9 +117,12 @@ class SapphireServer(SapphireModule):
 		if not d:
 			return None
 		
+		chain = d["payload"].pop("chain")
 		try:
 			event_type = SapphireEvents.serialize(d["type"])
-			event = event_type(**d["payload"])
+			event = event_type(
+				**d["payload"], chain=SapphireEvents.Chain(chain["context"], chain["flow"])
+				)
 			return event
 		except KeyError as e:
 			error_msg = "Server encountered a key error in the input event sent by a client. " \
