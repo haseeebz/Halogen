@@ -21,7 +21,7 @@ class ModelManager(SapphireModule):
 		config: SapphireConfig
 	) -> None:
 		super().__init__(emit_event, config)
-		self.current_model: BaseModelProvider 
+		self.current_model: BaseModelProvider = None #type:ignore / will be assigned
 		self.registered_providers: dict[str, BaseModelProvider] = {}
 
 	@classmethod
@@ -39,8 +39,8 @@ class ModelManager(SapphireModule):
 
 
 	def handle(self, event: SapphireEvents.Event) -> None:
-		match event:
 
+		match event:
 			case SapphireEvents.PromptEvent():
 				response_event = self.current_model.generate(event)
 				if response_event:
@@ -54,10 +54,15 @@ class ModelManager(SapphireModule):
 
 
 	def end(self) -> Tuple[bool, str]:
-		return (True, "")
+		if self.current_model:
+			self.current_model.unload()
+		return (True, "Success")
 	
 
 	def load_model(self, model: str) -> None:
+
+		if self.current_model: 
+			self.current_model.unload()
 
 		if model not in self.registered_providers.keys():
 
@@ -78,7 +83,8 @@ class ModelManager(SapphireModule):
 			)
 
 		self.current_model = self.registered_providers[model]
-		
+		self.current_model.load()
+
 		self.log(
 			SapphireEvents.chain(),
 			"info",

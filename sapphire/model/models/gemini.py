@@ -1,6 +1,6 @@
 
 from sapphire.core.base import SapphireEvents, SapphireConfig
-from sapphire.model.base import BaseModelProvider
+from sapphire.model.base import BaseModelProvider, BaseModelResponse
 import json
 
 
@@ -20,8 +20,11 @@ class Gemini(BaseModelProvider):
 		)
 
 		self.content_config = types.GenerateContentConfig(
-			thinking_config = types.ThinkingConfig(thinking_budget=0)
+			thinking_config = types.ThinkingConfig(thinking_budget=0),
+			response_schema = BaseModelResponse
 		)
+
+
 		
 
 	@classmethod
@@ -32,19 +35,20 @@ class Gemini(BaseModelProvider):
 	def generate(self, prompt: SapphireEvents.PromptEvent) -> SapphireEvents.AIResponseEvent | None:
 		
 		response = self.send_request(prompt.content)
-
-		if response.text is None: 
+		
+		print(response.text)
+		if response.parsed is None: 
 			return None
 
-		fmt_res = json.loads(response.text)
+		res: BaseModelReponse = response.parsed #type:ignore
 
 		event = SapphireEvents.AIResponseEvent(
 			self.name(),
 			SapphireEvents.make_timestamp(),
 			SapphireEvents.chain(prompt),
-			fmt_res.get("message", ""),
-			fmt_res.get("tasks", []),
-			fmt_res.get("extras", {})
+			res.message,
+			res.tasks,
+			res.extras
 		)
 
 		return event

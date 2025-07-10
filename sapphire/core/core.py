@@ -76,6 +76,8 @@ class SapphireCore():
 						f"Module '{module.name()}' could not handle an event! " \
 						f"Event = {event}. Encountered Error = {e.__class__.__name__}:{e}"
 					)
+					self.shutdown()
+					raise e
 
 
 	def handle(self, event: SapphireEvents.Event):

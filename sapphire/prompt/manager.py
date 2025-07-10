@@ -19,13 +19,13 @@ class PromptManager(SapphireModule):
 		self.memory: list[str] = []
 
 		self.parts_dir = Path(__file__).resolve().parent / "parts"
-		#literally just gets the parts/ dir right next to this file
-		#relative path won't work here obviously
 	
+
 	@classmethod
 	def name(cls) -> str:
 		return "prompt"
 	
+
 	def	start(self) -> None:
 		self.assemble_parts()
 		
@@ -34,10 +34,9 @@ class PromptManager(SapphireModule):
 		match event:
 
 			case SapphireEvents.AIResponseEvent():
-				self.memory.append(f"you: {event.message["user"]}")
+				self.add_memory("you", event.message)
 
-			case SapphireEvents.InputEvent():
-				if event.category != "user": return
+			case SapphireEvents.UserInputEvent():
 				
 				prompt = self.make_prompt(event.message)
 
@@ -50,11 +49,17 @@ class PromptManager(SapphireModule):
 
 				self.emit_event(prompt_event)
 
+				self.log(
+					SapphireEvents.chain(event),
+					"debug",
+					f"Received user input and constructed a prompt"
+				)
+
 
 	def handled_events(self) -> list[type[SapphireEvents.Event]]:
 		return [
 			SapphireEvents.AIResponseEvent,
-			SapphireEvents.InputEvent
+			SapphireEvents.UserInputEvent
 		]
 
 	
@@ -76,7 +81,7 @@ class PromptManager(SapphireModule):
 			if not part_content:
 				continue
 
-			part_text = f"\n[{part.upper()}]\n{part_content}"
+			part_text = f"\n[{part.removesuffix(".txt").upper()}]\n{part_content}"
 			
 			self.sys_parts.append(part_text)
 			
@@ -88,13 +93,19 @@ class PromptManager(SapphireModule):
 
 		memory_prompt = f"\n[MEMORY]\n{"\n".join(self.memory)}"
 		parts.append(memory_prompt)
-		self.memory.append(f"user: {user_msg}")
 
 		user_prompt = f"\n[USER-INPUT]\n{user_msg}"
 		parts.append(user_prompt)
 
 		final_prompt = "".join(parts)
 
+		self.add_memory("user", user_msg)
+
 		return final_prompt
 
 
+	def add_memory(self, subject: str, msg: str) -> None:
+		if len(self.memory) > self.config.get("memory_length", 30):
+			self.memory.pop(0)
+			
+		self.memory.append(f"{subject.capitalize()}: {msg}")

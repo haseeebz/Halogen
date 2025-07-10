@@ -6,6 +6,7 @@ modules = [
 ]
 
 [user]
+
 name = "Haseeb"
 
 
@@ -26,14 +27,12 @@ terminal = true
 
 [model]
 #configurations for the model manager module
-
 name = "gemini"
 
 #dev note: see how the name corresponds to the sub-field down below.
 #this is essential for proper config transfer
 
 [model.gemini]
-
 api_key = "load:secrets.txt"
 
 # all model classes follow this scheme. 
@@ -41,3 +40,11 @@ api_key = "load:secrets.txt"
 # you can use 'load:' prefix to load the key from a file. 
 
 # api_key = "123abc" will also work
+
+
+[prompt]
+#configurations for the prompt manager
+memory_length = 30
+#amount of interactions between the AI and the user to keep. Each individual message takes 1 memory slot.
+
+

@@ -2,6 +2,17 @@ from abc import ABC
 from sapphire.core.base import SapphireEvents, SapphireConfig
 from pathlib import Path
 import os
+from typing import Tuple, Dict, List
+from pydantic import BaseModel
+
+
+class BaseModelResponse(BaseModel):
+	"Use this class if the model can be configured using schema directly."
+	message: str
+	tasks: list[list[str]]
+	extras: list[tuple[str, str]]	
+
+
 
 
 class BaseModelProvider(ABC):
