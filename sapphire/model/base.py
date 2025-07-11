@@ -2,17 +2,24 @@ from abc import ABC
 from sapphire.core.base import SapphireEvents, SapphireConfig
 from pathlib import Path
 import os
-from typing import Tuple, Dict, List
+from typing import Any
 from pydantic import BaseModel
 
 
-class BaseModelResponse(BaseModel):
+
+class ModelTask(BaseModel):
+	func: str
+	args: list[str]
+
+class ModelExtras(BaseModel):
+	key: str
+	value: Any
+
+class ModelResponse(BaseModel):
 	"Use this class if the model can be configured using schema directly."
 	message: str
-	tasks: list[list[str]]
-	extras: list[tuple[str, str]]	
-
-
+	tasks: list[ModelTask] 
+	extras: list[ModelExtras]
 
 
 class BaseModelProvider(ABC):

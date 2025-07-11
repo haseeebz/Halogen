@@ -1,6 +1,6 @@
 
 from sapphire.core.base import SapphireEvents, SapphireConfig
-from sapphire.model.base import BaseModelProvider, BaseModelResponse
+from sapphire.model.base import BaseModelProvider, ModelResponse
 import json
 
 
@@ -21,9 +21,9 @@ class Gemini(BaseModelProvider):
 
 		self.content_config = types.GenerateContentConfig(
 			thinking_config = types.ThinkingConfig(thinking_budget=0),
-			response_schema = BaseModelResponse
+			response_schema = ModelResponse,
+			response_mime_type = "application/json"
 		)
-
 
 		
 
@@ -36,7 +36,6 @@ class Gemini(BaseModelProvider):
 		
 		response = self.send_request(prompt.content)
 		
-		print(response.text)
 		if response.parsed is None: 
 			return None
 

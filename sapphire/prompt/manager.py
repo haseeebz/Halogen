@@ -4,7 +4,6 @@ from sapphire.core.base import SapphireModule, SapphireEvents, SapphireConfig
 from pathlib import Path
 import os
 
-# TODO : improve
 
 class PromptManager(SapphireModule):
 
@@ -52,7 +51,7 @@ class PromptManager(SapphireModule):
 				self.log(
 					SapphireEvents.chain(event),
 					"debug",
-					f"Received user input and constructed a prompt"
+					f"Received user input: '{event.message}'"
 				)
 
 
@@ -68,7 +67,7 @@ class PromptManager(SapphireModule):
 	
 
 	def assemble_parts(self):
-		#assemble all core parts
+
 		for part in os.listdir(self.parts_dir):
 			part_path = self.parts_dir / part
 
