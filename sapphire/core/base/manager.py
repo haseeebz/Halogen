@@ -83,7 +83,7 @@ class SapphireModuleManager():
 	def get_module(self, name: str) -> type[SapphireModule] | None:
 
 		try:
-			py_module = importlib.import_module(f"sapphire.modules.{name}")
+			py_module = importlib.import_module(f"modules.{name}")
 		except ModuleNotFoundError as e:
 			self.log(
 				SapphireEvents.chain(),
