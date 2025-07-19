@@ -1,29 +1,37 @@
-from .events import SapphireEvents
+from sapphire.core.base import SapphireEvents, SapphireModule, SapphireConfig
 from typing import Callable, Literal
 import shlex
 
+from .deco import command_registry, defined_commands, command
 
-class SapphireCommands():
-	"Class for handling cli commands"
+class CommandHandler(SapphireModule):
+	"Class for handling commands which change the state of sapphire"
 
-	def __init__(self, emit_event: Callable):
-		self.emit_event = emit_event
-		self.command_map: dict[str, Callable[[list[str], SapphireEvents.Chain], str]] = {}
-		#callable(args: list[str], chain: Chain) -> str
+	def __init__(self, emit_event: Callable[[SapphireEvents.Event], None], config: SapphireConfig):
+		super().__init__(emit_event, config)
+		self.command_registry = command_registry
+		self.defined_commands = defined_commands
 
-		#first item in the tuple is the name, second is the info
-		self.defined_commands: list[tuple[str, str]] = []
+	
+	def start(self) -> None:
+		pass
 
-		self.define(
-			self.help_command,
-			"help",
-			"Print all available commands."
-		)
+
+	def handled_events(self) -> list[type[SapphireEvents.Event]]:
+		return [
+			SapphireEvents.CommandEvent
+		]
+		
+
+	def handle(self, event: SapphireEvents.Event) -> None:
+		match event:
+			case SapphireEvents.CommandEvent():
+				self.interpret(event)
+
 
 	def interpret(self, event: SapphireEvents.CommandEvent):
 
-		
-		func = self.command_map.get(event.cmd, None)
+		func = self.command_registry.get(event.cmd, None)
 
 		if func is None:
 			
@@ -77,31 +85,9 @@ class SapphireCommands():
 		)
 		
 
-	def define(
-		self, 
-		func: Callable[[list[str], SapphireEvents.Chain], str], 
-		cmd: str, 
-		info: str
-		):
-
-		if cmd in self.command_map.keys():
-			raise ValueError(f"Command with name '{cmd}' already defined elsewhere.")
-		
-		self.command_map[cmd] = func
-		self.defined_commands.append((cmd, info))
-
-
-	def log(self, chain_id: SapphireEvents.Chain, level: Literal["debug", "info", "warning", "critical"], msg: str):
-		event = SapphireEvents.LogEvent(
-			"command",
-			SapphireEvents.make_timestamp(),
-			chain_id,
-			level,
-			msg
-		)
-		self.emit_event(event)
 
 	_help_str = ""
+	@command("help", "Info about all defined commands")
 	def help_command(self, args: list[str], chain: SapphireEvents.Chain) -> str:
 		if self._help_str:
 			return self._help_str

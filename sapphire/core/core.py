@@ -6,9 +6,7 @@ from .base import (
 	SapphireModule, 
 	SapphireConfig, 
 	SapphireEvents,
-	SapphireModuleManager,
-	SapphireCommands
-)
+	SapphireModuleManager)
 
 
 class SapphireCore():
@@ -29,7 +27,6 @@ class SapphireCore():
 		self.manager = SapphireModuleManager(self.root, self.config, self.eventbus.emit)
 		self.manager.load_modules()
 
-		self.command = SapphireCommands(self.eventbus.emit)
 		self.define_core_commands()
 
 		self.core_events: MutableSequence[type[SapphireEvents.Event]] = [

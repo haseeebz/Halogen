@@ -3,25 +3,25 @@ from datetime import datetime
 from typing import Literal, Union
 import threading
 
+@dataclass(frozen = True)
+class Chain():
+	context: int
+	flow: int
 
+	def __str__(self) -> str:
+		return f"({self.context}:{self.flow})"
+	
+	def __eq__(self, other) -> bool:
+		return (self.context, self.flow) == (other.context, other.flow)
+	
 
 class SapphireEvents():
 
-	@dataclass(frozen = True)
-	class Chain():
-		context: int
-		flow: int
-
-		def __str__(self) -> str:
-			return f"({self.context}:{self.flow})"
-		
-		def __eq__(self, other) -> bool:
-			return (self.context, self.flow) == (other.context, other.flow)
-		
-
+	Chain = Chain
 	_lock = threading.Lock()
 	_intern_chain = Chain(0, 0)
 	_current_context = 0
+	_intern_map: dict[str, type["Event"]] = {}
 
 	@classmethod
 	def chain(cls, event: Union["Event", None] = None) -> Chain:
@@ -31,7 +31,7 @@ class SapphireEvents():
 		else:
 			chain = cls._intern_chain
 			with cls._lock: 
-				cls._intern_chain = SapphireEvents.Chain(
+				cls._intern_chain = Chain(
 					0,
 					chain.flow + 1
 				)
@@ -42,7 +42,7 @@ class SapphireEvents():
 	def new_context_chain(cls) -> Chain:
 		"Method for getting a chain with a new context."
 		with cls._lock: cls._current_context += 1
-		chain = SapphireEvents.Chain(
+		chain = Chain(
 			cls._current_context, 0
 		)
 		return chain
@@ -54,7 +54,7 @@ class SapphireEvents():
 		return datetime.now().strftime("%H:%M:%S")
 			
 
-	_intern_map: dict[str, type["Event"]] = {}
+	
 	@classmethod
 	def serialize(cls, event: str) -> type["Event"]:
 		"Method for getting an event class using its name. Will raise an exception on invalid values."
@@ -78,7 +78,8 @@ class SapphireEvents():
 		"Base event class."
 		sender: str
 		timestamp: str
-		chain: "SapphireEvents.Chain"
+		chain: Chain
+
 
 
 	@dataclass(frozen = True)
@@ -88,11 +89,13 @@ class SapphireEvents():
 		message: str
 
 
+
 	@dataclass(frozen = True)
 	class ShutdownEvent(Event):
 		"Sent to core to intiate a shutdown."
 		emergency: bool
 		situation: Literal["request", "failure", "critical", "user"]
+
 
 
 	@dataclass(frozen = True)
@@ -101,11 +104,13 @@ class SapphireEvents():
 		message: str
 
 
+
 	@dataclass(frozen = True)
 	class CommandEvent(Event):
 		"Command that the core can execute."
 		cmd: str
 		args: list[str]
+
 
 
 	@dataclass(frozen = True)
@@ -116,12 +121,14 @@ class SapphireEvents():
 		output: str
 
 
+
 	@dataclass(frozen = True)
 	class ConfirmationEvent(Event):
 		"Used for confirmation with the user."
 		message: str
 		options: list[str]
 		selected: str | None
+
 
 
 	@dataclass(frozen = True)
@@ -131,10 +138,12 @@ class SapphireEvents():
 		message = str 
 
 
+
 	@dataclass(frozen = True)
 	class PromptEvent(Event):
 		"Event passed by the prompt manager after it assembles the prompt"
 		content: str
+
 
 
 	@dataclass(frozen = True)
@@ -145,6 +154,7 @@ class SapphireEvents():
 		extras: dict[str, str]
 
 	
+
 	@dataclass(frozen = True)
 	class ClientActivationEvent(Event):
 		"The first event passed by the server to the client so it can initialize its chain."
