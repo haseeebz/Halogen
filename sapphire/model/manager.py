@@ -76,7 +76,6 @@ class ModelManager(SapphireModule):
 
 
 
-
 	def handled_events(self) -> list[type[SapphireEvents.Event]]:
 		return [
 			SapphireEvents.PromptEvent
