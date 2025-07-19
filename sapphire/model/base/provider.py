@@ -2,25 +2,8 @@ from abc import ABC
 from sapphire.core.base import SapphireEvents, SapphireConfig
 from pathlib import Path
 import os
-from typing import Any
-from pydantic import BaseModel
 
-
-
-class ModelTask(BaseModel):
-	func: str
-	args: list[str]
-
-class ModelExtras(BaseModel):
-	key: str
-	value: Any
-
-class ModelResponse(BaseModel):
-	"Use this class if the model can be configured using schema directly."
-	message: str
-	tasks: list[ModelTask] 
-	extras: list[ModelExtras]
-
+from .response import ModelResponse
 
 class BaseModelProvider(ABC):
 
@@ -45,7 +28,7 @@ class BaseModelProvider(ABC):
 		return True
 		
 
-	def generate(self, prompt: SapphireEvents.PromptEvent) -> SapphireEvents.AIResponseEvent | None:
+	def generate(self, prompt: SapphireEvents.PromptEvent) -> ModelResponse | None:
 		"""
 		Take a prompt event and emit a AI response event.
 		

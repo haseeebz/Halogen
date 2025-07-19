@@ -32,7 +32,7 @@ class Gemini(BaseModelProvider):
 		return "gemini"
 	
 
-	def generate(self, prompt: SapphireEvents.PromptEvent) -> SapphireEvents.AIResponseEvent | None:
+	def generate(self, prompt: SapphireEvents.PromptEvent) -> ModelResponse | None:
 		
 		response = self.send_request(prompt.content)
 		
@@ -41,17 +41,8 @@ class Gemini(BaseModelProvider):
 
 		res: BaseModelReponse = response.parsed #type:ignore
 
-		event = SapphireEvents.AIResponseEvent(
-			self.name(),
-			SapphireEvents.make_timestamp(),
-			SapphireEvents.chain(prompt),
-			res.message,
-			res.tasks,
-			res.extras
-		)
-
-		return event
-
+		return res
+	
 		
 	def send_request(self, content: str):
 

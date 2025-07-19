@@ -7,6 +7,7 @@ from sapphire.core.base import (
 )
 
 from .base import BaseModelProvider
+
 from .models import Gemini
 
 core_models = [
@@ -24,9 +25,11 @@ class ModelManager(SapphireModule):
 		self.current_model: BaseModelProvider = None #type:ignore / will be assigned
 		self.registered_providers: dict[str, BaseModelProvider] = {}
 
+
 	@classmethod
 	def name(cls) -> str:
 		return "model"
+	
 	
 	def start(self) -> None:
 
@@ -42,9 +45,36 @@ class ModelManager(SapphireModule):
 
 		match event:
 			case SapphireEvents.PromptEvent():
-				response_event = self.current_model.generate(event)
-				if response_event:
-					self.emit_event(response_event)
+				self.generate_response(event)
+
+
+	def generate_response(self, event: SapphireEvents.PromptEvent):
+		response = self.current_model.generate(event)
+
+		if response is not None:
+			
+			extras = {}
+			for ex in response.extras:
+				extras[ex.key] = ex.value
+			
+			ai_msg = SapphireEvents.AIResponseEvent(
+				self.name(),
+				SapphireEvents.make_timestamp(),
+				SapphireEvents.chain(event),
+				response.message,
+				extras
+			)
+
+			self.emit_event(ai_msg)
+
+
+		self.log(
+				SapphireEvents.chain(event),
+				"critical",
+				f"Could not get response from model '{self.current_model.name()}'"
+			)
+
+
 
 
 	def handled_events(self) -> list[type[SapphireEvents.Event]]:
