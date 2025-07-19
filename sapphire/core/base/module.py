@@ -105,7 +105,6 @@ class SapphireModule(ABC):
 		)
 
 
-
 	def end(self) -> Tuple[bool, str]:
 		"""
 		Function called by SapphireCore to end the module. 

@@ -39,6 +39,12 @@ class SapphireServer(SapphireModule):
 		self.lock = threading.Lock()
 		self.read_thread = threading.Thread(target = self.read)
 		self.write_thread = threading.Thread(target = self.write)
+
+		self.define_command(
+			"address",
+			lambda _, __: f"{SapphireServer.HOST} : {SapphireServer.PORT}",
+			"Get the socket adress of the server."
+		)
 	
 	@classmethod
 	def name(cls):
