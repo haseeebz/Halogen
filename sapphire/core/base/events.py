@@ -1,3 +1,4 @@
+from typing import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal, Union
@@ -104,10 +105,17 @@ class SapphireEvents():
 		message: str
 
 
+	@dataclass(frozen = True)
+	class CommandRegisterEvent(Event):
+		"Sent to command handler to register a command"
+		cmd: str
+		info: str
+		func: Callable[[list[str], "SapphireEvents.Chain"], str]
+
 
 	@dataclass(frozen = True)
 	class CommandEvent(Event):
-		"Command that the core can execute."
+		"Command that the command handler can execute."
 		cmd: str
 		args: list[str]
 

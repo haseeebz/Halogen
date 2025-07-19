@@ -1,4 +1,5 @@
 from abc import ABC
+from types import MethodType
 from typing import Tuple, Literal, Union
 from .config import SapphireConfig
 from collections.abc import Callable
@@ -84,6 +85,25 @@ class SapphireModule(ABC):
 			msg
 		)
 		self.emit_event(event)
+
+
+	def define_command(
+		self, 
+		cmd: str, 
+		func: Callable[[list[str], SapphireEvents.Chain], str], 
+		info: str = ""
+		):
+		self.emit_event(
+			SapphireEvents.CommandRegisterEvent(
+				self.name(),
+				SapphireEvents.make_timestamp(),
+				SapphireEvents.chain(),
+				cmd,
+				info,
+				func
+			)
+		)
+
 
 
 	def end(self) -> Tuple[bool, str]:

@@ -1,12 +1,14 @@
 import time, shlex
 from pathlib import Path
 from typing import Callable, MutableSequence, Literal
+
 from .base import (
 	EventBus, 
 	SapphireModule, 
 	SapphireConfig, 
 	SapphireEvents,
-	SapphireModuleManager)
+	SapphireModuleManager
+)
 
 
 class SapphireCore():
@@ -27,17 +29,29 @@ class SapphireCore():
 		self.manager = SapphireModuleManager(self.root, self.config, self.eventbus.emit)
 		self.manager.load_modules()
 
-		self.define_core_commands()
 
 		self.core_events: MutableSequence[type[SapphireEvents.Event]] = [
 			SapphireEvents.ShutdownEvent,
-			SapphireEvents.CommandEvent
 		]
 
 		self.is_running: bool = True
 		self.shutdown_requested = False
+		self.define_core_commands()
 
-		
+
+	def define_core_commands(self):
+
+		self.define_command(
+			"shutdown",
+			self.shutdown_command,
+			"Request Sapphire to shutdown."
+		)
+
+		self.define_command(
+			"get",
+			self.get_command,
+			"Get internal values from Sapphire. See 'get help'"
+		)
 
 		
 	def run(self):
@@ -53,7 +67,7 @@ class SapphireCore():
 				time.sleep(0.05)
 				continue
 			
-			event = self.eventbus.receive() #non-blocking but we checked for bus' payload above
+			event = self.eventbus.receive() #non-blocking since we checked for bus' payload above
 			event_type = type(event)
 
 			# passing events
@@ -84,8 +98,7 @@ class SapphireCore():
 					self.shutdown() 
 					return
 				self.shutdown_requested = True
-			case SapphireEvents.CommandEvent():
-				self.command.interpret(event)
+
 
 
 	def log(self, chain: SapphireEvents.Chain, level: Literal["debug", "info", "warning", "critical"], msg: str):
@@ -121,17 +134,21 @@ class SapphireCore():
 		logger.end()
 
 
-	def define_core_commands(self):
-		self.command.define(
-			self.shutdown_command,
-			"shutdown",
-			"Request Sapphire to shutdown. Args: []"
-		)
-
-		self.command.define(
-			self.get_command,
-			"get",
-			"Get internal values from Sapphire. Use 'get help' to see the accessible terms."
+	def define_command(
+		self, 
+		cmd: str, 
+		func: Callable[[list[str], SapphireEvents.Chain], str], 
+		info: str = ""
+		):
+		self.eventbus.emit(
+			SapphireEvents.CommandRegisterEvent(
+				"core",
+				SapphireEvents.make_timestamp(),
+				SapphireEvents.chain(),
+				cmd,
+				info,
+				func
+			)
 		)
 
 
@@ -165,7 +182,6 @@ class SapphireCore():
 				"help" : lambda: f"Accessible terms: {[x for x in self._get_terms.keys()]}"
 			}
 
-
 		num_args = len(args)
 		if num_args != 1:
 			value = self._get_terms["help"]()
@@ -174,4 +190,5 @@ class SapphireCore():
 		item = args[0]
 		value = self._get_terms.get(item, "help")()
 		return value
+
 

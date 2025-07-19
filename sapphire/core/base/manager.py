@@ -1,3 +1,4 @@
+from types import MethodType
 from .module import SapphireModule
 from .config import SapphireConfig
 from .events import SapphireEvents
@@ -12,12 +13,14 @@ from sapphire.logger import Logger
 from sapphire.interface import SapphireServer
 from sapphire.prompt import PromptManager
 from sapphire.model import ModelManager
+from sapphire.command import CommandHandler
 
 core_modules = [
 	Logger, 
 	SapphireServer,
 	PromptManager,
-	ModelManager
+	ModelManager,
+	CommandHandler
 ]
 
 
