@@ -5,6 +5,8 @@ modules = [
 	"filesystem"
 ]
 
+
+
 [user]
 
 name = "Haseeb"
@@ -12,8 +14,7 @@ name = "Haseeb"
 
 
 
-[logger]
-#configurations for the built-in logger module
+[logger] #configurations for the built-in logger module
 
 logfile = "sapphire.log"
 #can use absolute paths.

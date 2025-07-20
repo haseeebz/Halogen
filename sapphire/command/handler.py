@@ -41,6 +41,10 @@ class CommandHandler(SapphireModule):
 			SapphireEvents.CommandEvent,
 			SapphireEvents.CommandRegisterEvent
 		]
+
+	@classmethod
+	def name(cls):
+		return "commands"
 		
 
 	def handle(self, event: SapphireEvents.Event) -> None:
