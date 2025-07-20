@@ -13,6 +13,7 @@ from .models import Gemini
 core_models = [
 	Gemini
 ]
+# TODO make model loading dynamic instead of static
 
 class ModelManager(SapphireModule):
 
@@ -20,7 +21,7 @@ class ModelManager(SapphireModule):
 		self, 
 		emit_event: Callable[[SapphireEvents.Event], None], 
 		config: SapphireConfig
-	) -> None:
+		):
 		super().__init__(emit_event, config)
 		self.current_model: BaseModelProvider = None #type:ignore / will be assigned
 		self.registered_providers: dict[str, BaseModelProvider] = {}

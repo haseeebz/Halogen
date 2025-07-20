@@ -1,8 +1,13 @@
+
+# heavy/useless stuff
+
 .venv/
 .vscode/
 __pycache__/
 **/__pycache__/
 *.pyc
+
+# dev stuff
 sapphire.log
 test.py
 todo
