@@ -35,9 +35,27 @@ class SapphireModuleManager():
 
 		self.modules: MutableSequence[SapphireModule] = []
 		self.dispatch_map: dict[type[SapphireEvents.Event], MutableSequence[SapphireModule]] = {}
+		
+
+	def load_modules(self) -> None:
+		"Loading all modules and passing them to registration."
+
+		for core_module in core_modules:
+			self.register_module(core_module)
+
+		module_names: list[str] = self.config.get("modules", [])
+
+		for module_name in module_names:
+			module = self.get_module(module_name)
+
+			if module is None: continue
+
+			self.register_module(module)
+			
 
 
 	def register_module(self, module_class: type[SapphireModule]) -> None:
+		"Get the module class and intialize it."
 
 		valid = isinstance(module_class, type) and issubclass(module_class, SapphireModule)
 
@@ -57,6 +75,7 @@ class SapphireModuleManager():
 		self.modules.append(module)
 
 		handled_events = module.handled_events()
+
 		for event in handled_events:
 			self.dispatch_map.setdefault(event, []).append(module)
 
@@ -67,26 +86,15 @@ class SapphireModuleManager():
 			f"It handles events: {[e.__name__ for e in handled_events]}"
 		)
 
-
-	def load_modules(self) -> None:
-
-		for core_module in core_modules:
-			self.register_module(core_module)
-
-		module_names: list[str] = self.config.get("modules", [])
-
-		for module_name in module_names:
-			module = self.get_module(module_name)
-
-			if module is None: continue
-
-			self.register_module(module)
-			
 	
 	def get_module(self, name: str) -> type[SapphireModule] | None:
+		"Dynamically getting a module."
+
+		#looking for python module that defines a get_module
 
 		try:
 			py_module = importlib.import_module(f"modules.{name}")
+			
 		except ModuleNotFoundError as e:
 			self.log(
 				SapphireEvents.chain(),
@@ -111,6 +119,8 @@ class SapphireModuleManager():
 		
 
 	def start_modules(self):
+		"Calls .start() on all registered modules."
+
 		for module in self.modules:
 			try:
 				module.start()
@@ -136,6 +146,8 @@ class SapphireModuleManager():
 
 
 	def end_modules(self) -> Logger | None:
+		"Calls .end() on all modules."
+
 		logger = None
 		for module in self.modules:
 
@@ -147,23 +159,19 @@ class SapphireModuleManager():
 				success, err = module.end()
 			except Exception as e:
 				success = False
-				err = f"{type(e).__name__} : {str(e)}"
+				err = f"{type(e).__name__}({str(e)})"
 
 			if success:
 				continue
 
 			msg = f"Could not properly end module '{module.name()}'. Error: {err}" 
 
-			log_event = SapphireEvents.LogEvent(
-				sender = "module",
-				timestamp = SapphireEvents.make_timestamp(),
-				chain = SapphireEvents.chain(),
-				level = "warning",
-				message = msg
+			self.log(
+				SapphireEvents.chain(),
+				"warning",
+				msg
 			) 
 			
-			self.emit_event(log_event)
-
 		return logger
 
 	
@@ -175,7 +183,13 @@ class SapphireModuleManager():
 		return self.dispatch_map[event]
 	
 
-	def log(self, chain: SapphireEvents.Chain, level: Literal["debug", "info", "warning", "critical"], msg: str):
+	def log(
+		self, 
+		chain: SapphireEvents.Chain, 
+		level: Literal["debug", "info", "warning", "critical"], 
+		msg: str
+		):
+
 		event = SapphireEvents.LogEvent(
 			"module",
 			SapphireEvents.make_timestamp(),
