@@ -1,4 +1,4 @@
-from sapphire.core.base import SapphireEvents, SapphireModule, SapphireConfig
+from sapphire.core.base import SapphireEvents, SapphireModule, SapphireConfig, SapphireCommand
 from typing import Callable, Literal, Tuple
 import shlex
 
@@ -12,7 +12,14 @@ import shlex
 
 
 class CommandHandler(SapphireModule):
-	"Class for handling commands which change the state of sapphire"
+	"""
+	Class for handling commands which change the state of sapphire.
+
+	Commands registered by the Core and command handler itself are 
+	scoped globally while commands by all other modules are namespaced.
+
+	"""
+	
 
 	def __init__(self, emit_event: Callable[[SapphireEvents.Event], None], config: SapphireConfig):
 		super().__init__(emit_event, config)
@@ -21,11 +28,7 @@ class CommandHandler(SapphireModule):
 		#first item in the tuple is the name, second is the info
 		self.defined_commands: list[tuple[str, str]] = []
 
-		self.define_command(
-			"help",
-			self.help_command,
-			"Info for all defined commands."
-		)
+		self.has_commands = True # yeah ironic
 
 	
 	def start(self) -> None:
@@ -35,7 +38,7 @@ class CommandHandler(SapphireModule):
 	def end(self) -> Tuple[bool, str]:
 		return (True, "")
 
-
+	
 	def handled_events(self) -> list[type[SapphireEvents.Event]]:
 		return [
 			SapphireEvents.CommandEvent,
@@ -59,10 +62,17 @@ class CommandHandler(SapphireModule):
 		if event.cmd in self.command_registry.keys():
 			raise ValueError()
 		
+		self.log(
+			SapphireEvents.chain(event),
+			"info",
+			f"Registered command: {event.cmd}"
+		)
+
 		self.command_registry[event.cmd] = event.func
 		self.defined_commands.append((event.cmd, event.info)) 
 
-	# TODO implement command to module map so commands can be deprecated once a module is removed
+	# TODO implement "module to command" map so commands can be deprecated once a module is removed
+	# TODO namespace commands
 
 
 	def interpret(self, event: SapphireEvents.CommandEvent):
@@ -121,9 +131,10 @@ class CommandHandler(SapphireModule):
 		)
 		
 
-
 	_help_str = ""
+	@SapphireCommand("help", "Get info about commands")
 	def help_command(self, args: list[str], chain: SapphireEvents.Chain) -> str:
+		
 		if self._help_str:
 			return self._help_str
 		
@@ -133,6 +144,8 @@ class CommandHandler(SapphireModule):
 			self._help_str += cmd_str
 			
 		return self._help_str
+	
+	
 
 	
 

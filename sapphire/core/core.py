@@ -40,7 +40,9 @@ class SapphireCore():
 
 
 	def define_core_commands(self):
-
+		# module manager cannot inspect the core itself
+		# so we have to resort to manual registration
+		
 		self.define_command(
 			"shutdown",
 			self.shutdown_command,
@@ -69,6 +71,7 @@ class SapphireCore():
 			
 			event = self.eventbus.receive() #non-blocking since we checked for bus' payload above
 			event_type = type(event)
+			print(event)
 
 			# passing events
 			if event_type in self.core_events: 

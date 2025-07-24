@@ -6,6 +6,7 @@ from .events import SapphireEvents
 from typing import Callable, MutableSequence, Type, Literal
 from pathlib import Path
 import importlib
+import inspect
 
 
 # loading the core modules
@@ -19,7 +20,7 @@ core_modules = [
 	Logger, 
 	SapphireServer,
 	PromptManager,
-	ModelManager,
+	#ModelManager,
 	CommandHandler
 ]
 
@@ -35,7 +36,7 @@ class SapphireModuleManager():
 
 		self.modules: MutableSequence[SapphireModule] = []
 		self.dispatch_map: dict[type[SapphireEvents.Event], MutableSequence[SapphireModule]] = {}
-		
+
 
 	def load_modules(self) -> None:
 		"Loading all modules and passing them to registration."
@@ -72,12 +73,15 @@ class SapphireModuleManager():
 			self.emit_event,
 			self.config.get_sub_config(module_class.name())
 			)
+		
 		self.modules.append(module)
 
 		handled_events = module.handled_events()
-
 		for event in handled_events:
 			self.dispatch_map.setdefault(event, []).append(module)
+
+		if module.has_commands:
+			self.handle_module_commands(module)
 
 		self.log(
 			SapphireEvents.chain(),
@@ -173,6 +177,23 @@ class SapphireModuleManager():
 			) 
 			
 		return logger
+
+
+	def handle_module_commands(self, module: SapphireModule):
+			
+		for name, mem in inspect.getmembers(module, inspect.ismethod):
+			print(name, mem.__dict__)
+			if hasattr(mem, "_is_command"):
+				ev = SapphireEvents.CommandRegisterEvent(
+					module.name(),
+					SapphireEvents.make_timestamp(),
+					SapphireEvents.chain(),
+					mem._name, #type: ignore
+					mem._info, #type: ignore // These SHOULD exist if _is_command exists
+					mem
+				)
+				self.emit_event(ev)
+
 
 	
 	def defined_events(self):

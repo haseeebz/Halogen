@@ -12,6 +12,7 @@ class SapphireModule(ABC):
 		super().__init__()
 		self.eventbus_emit = emit_event
 		self.config = config 
+		self.has_commands = False
 
 
 	@classmethod
