@@ -15,9 +15,8 @@ class CommandHandler(SapphireModule):
 	"""
 	Class for handling commands which change the state of sapphire.
 
-	Commands registered by the Core and command handler itself are 
-	scoped globally while commands by all other modules are namespaced.
-
+	All commands are namespaced using module names.
+	
 	"""
 	
 

@@ -1,4 +1,4 @@
-import time, shlex
+import time, os
 from pathlib import Path
 from typing import Callable, MutableSequence, Literal
 
@@ -15,8 +15,21 @@ class SapphireCore():
 
 	def __init__(self, root: str) -> None:
 
-		self.root = Path(root).resolve().parent
+		self.root = Path(root).resolve().parents[1]
+		# The directory where sapphire resides
+		
 		self.config: SapphireConfig = SapphireConfig()
+
+		self.is_running: bool = True
+		self.shutdown_requested = False
+		self.is_dev = self.config.get("user.dev", False)
+
+		self.event_logs = self.root / "events.log"
+
+
+		self.core_events: MutableSequence[type[SapphireEvents.Event]] = [
+			SapphireEvents.ShutdownEvent,
+		]
 		
 		self.eventbus: EventBus = EventBus()
 		
@@ -29,13 +42,6 @@ class SapphireCore():
 		self.manager = SapphireModuleManager(self.root, self.config, self.eventbus.emit)
 		self.manager.load_modules()
 
-
-		self.core_events: MutableSequence[type[SapphireEvents.Event]] = [
-			SapphireEvents.ShutdownEvent,
-		]
-
-		self.is_running: bool = True
-		self.shutdown_requested = False
 		self.define_core_commands()
 
 
@@ -60,38 +66,51 @@ class SapphireCore():
 		
 		self.manager.start_modules()
 		
-		while self.is_running: #main loop
+		while self.is_running: 
 
 			if self.eventbus.is_empty():
-				if self.shutdown_requested: #shutdown once the bus is empty
+				if self.shutdown_requested:
 					self.shutdown()
 					break
 				time.sleep(0.05)
 				continue
 			
-			event = self.eventbus.receive() #non-blocking since we checked for bus' payload above
-			event_type = type(event)
-			print(event)
+			event = self.eventbus.receive() 
+			
+			self.pass_events(event)
 
-			# passing events
-			if event_type in self.core_events: 
-				self.handle(event)
 
-			if event_type not in self.manager.defined_events():
-				continue
+	def pass_events(self, event: SapphireEvents.Event):
 
-			for module in self.manager.get_module_list(event_type):
-				try:
-					module.handle(event) 
-				except Exception as e:
-					self.log(
-						SapphireEvents.chain(),
-						"critical",
-						f"Module '{module.name()}' could not handle an event! " \
-						f"Event = {event}. Encountered Error = {e.__class__.__name__}:{e}"
-					)
-					self.shutdown()
-					raise e
+		if self.is_dev:
+			self.log_events(event)
+		event_type = type(event)
+
+		if event_type in self.core_events: 
+			self.handle(event)
+
+		if event_type not in self.manager.defined_events():
+			return
+
+		for module in self.manager.get_module_list(event_type):
+			try:
+				module.handle(event) 
+			except Exception as e:
+				self.catch_error(module, event, e)
+
+				
+	def catch_error(self, mod: SapphireModule, event: SapphireEvents.Event, e: Exception):
+
+		self.log(
+			SapphireEvents.chain(),
+			"critical",
+			f"Module '{mod.name()}' could not handle an event! " \
+			f"Event = {event}. Encountered Error = {e.__class__.__name__}:{e}"
+		)
+
+		if self.is_dev: 
+			self.shutdown()
+			raise e
 
 
 	def handle(self, event: SapphireEvents.Event):
@@ -103,7 +122,6 @@ class SapphireCore():
 				self.shutdown_requested = True
 
 
-
 	def log(self, chain: SapphireEvents.Chain, level: Literal["debug", "info", "warning", "critical"], msg: str):
 		event = SapphireEvents.LogEvent(
 			"core",
@@ -113,6 +131,13 @@ class SapphireCore():
 			msg
 		)
 		self.eventbus.emit(event)
+
+
+	def log_events(self, event: SapphireEvents.Event):
+		"Logs event to a event.log file. Only works when dev mode is on."
+
+		with open(self.event_logs, "a+") as file:
+			file.write(f"{event.__str__()}\n")
 
 
 	def shutdown(self):

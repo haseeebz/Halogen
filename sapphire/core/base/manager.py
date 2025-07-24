@@ -182,7 +182,6 @@ class SapphireModuleManager():
 	def handle_module_commands(self, module: SapphireModule):
 			
 		for name, mem in inspect.getmembers(module, inspect.ismethod):
-			print(name, mem.__dict__)
 			if hasattr(mem, "_is_command"):
 				ev = SapphireEvents.CommandRegisterEvent(
 					module.name(),

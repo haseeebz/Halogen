@@ -187,3 +187,4 @@ class SapphireEvents():
 		
 
 
+print(SapphireEvents.ClientActivationEvent.__match_args__)
