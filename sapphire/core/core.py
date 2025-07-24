@@ -173,6 +173,7 @@ class SapphireCore():
 				"core",
 				SapphireEvents.make_timestamp(),
 				SapphireEvents.chain(),
+				"core",
 				cmd,
 				info,
 				func

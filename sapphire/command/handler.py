@@ -1,6 +1,9 @@
 from sapphire.core.base import SapphireEvents, SapphireModule, SapphireConfig, SapphireCommand
+from .meta import CommandData, CommandNamespace
+
 from typing import Callable, Literal, Tuple
 import shlex
+
 
 
 # Callable[[list[str], SapphireEvents.Chain], str]
@@ -22,10 +25,8 @@ class CommandHandler(SapphireModule):
 
 	def __init__(self, emit_event: Callable[[SapphireEvents.Event], None], config: SapphireConfig):
 		super().__init__(emit_event, config)
-		self.command_registry: dict[str, Callable[[list[str], SapphireEvents.Chain], str]]= {}
-
-		#first item in the tuple is the name, second is the info
-		self.defined_commands: list[tuple[str, str]] = []
+		self.namespaces: dict[str, CommandNamespace] = {}
+		
 
 		self.has_commands = True # yeah ironic
 
@@ -46,7 +47,7 @@ class CommandHandler(SapphireModule):
 
 	@classmethod
 	def name(cls):
-		return "commands"
+		return "command"
 		
 
 	def handle(self, event: SapphireEvents.Event) -> None:
@@ -57,43 +58,63 @@ class CommandHandler(SapphireModule):
 				self.define(event)
 
 
-	def define(self, event: SapphireEvents.CommandRegisterEvent):
-		if event.cmd in self.command_registry.keys():
+	def define(self, ev: SapphireEvents.CommandRegisterEvent):
+
+		namespace = self.namespaces.setdefault(
+			ev.module,
+			CommandNamespace(ev.module)
+		)
+
+		if ev.cmd in namespace.defined:
 			raise ValueError()
 		
 		self.log(
-			SapphireEvents.chain(event),
+			SapphireEvents.chain(ev),
 			"info",
-			f"Registered command: {event.cmd}"
+			f"Registered command: {ev.module}::{ev.cmd}"
 		)
 
-		self.command_registry[event.cmd] = event.func
-		self.defined_commands.append((event.cmd, event.info)) 
+		command = CommandData(
+			ev.cmd,
+			ev.info,
+			ev.func
+		)
+
+		namespace.commands[ev.cmd] = command
+		namespace.defined.add(ev.cmd)
+
 
 	# TODO implement "module to command" map so commands can be deprecated once a module is removed
 	# TODO namespace commands
 
 
-	def interpret(self, event: SapphireEvents.CommandEvent):
+	def interpret(self, ev: SapphireEvents.CommandEvent):
 
-		func = self.command_registry.get(event.cmd, None)
+		namespace = self.namespaces.get(ev.module, None)
 
-		if func is None:
+		if namespace:
+			cmd_data = namespace.commands.get(ev.cmd, None)
+		else:
+			cmd_data = None
+
+		# TODO make it clear whether the command is not defined or the module namespace.
+		
+		if cmd_data is None:
 			
 			self.log(
-				SapphireEvents.chain(event),
+				SapphireEvents.chain(ev),
 				"warning",
-				f"Client with chain id '{event.chain}' tried to execute invalid command '{event.cmd}'"
+				f"Client with chain id '{ev.chain}' tried to execute invalid command {ev.module}::{ev.cmd}"
 				)
 			
 		
 			output_event = SapphireEvents.CommandExecutedEvent(
 				"commands",
 				SapphireEvents.make_timestamp(),
-				SapphireEvents.chain(event),
-				(event.cmd, event.args),
+				SapphireEvents.chain(ev),
+				(ev.module, ev.cmd, ev.args),
 				False,
-				f"Undefined Command: {event.cmd}"
+				f"Undefined Command: {ev.module}::{ev.cmd}"
 			)
 
 			self.emit_event(output_event)
@@ -103,7 +124,7 @@ class CommandHandler(SapphireModule):
 		# executing 
 
 		try:
-			msg = func(event.args, event.chain)
+			msg = cmd_data.func(ev.args, ev.chain)
 			success = True
 		except Exception as e:
 			msg = f"Failed to execute command. Encountered {e.__class__.__name__}: {e.__str__()}"
@@ -114,8 +135,8 @@ class CommandHandler(SapphireModule):
 		execution_event = SapphireEvents.CommandExecutedEvent(
 			"commands",
 			SapphireEvents.make_timestamp(),
-			SapphireEvents.chain(event),
-			(event.cmd, event.args),
+			SapphireEvents.chain(ev),
+			(ev.module, ev.cmd, ev.args),
 			success,
 			msg
 		)
@@ -123,10 +144,10 @@ class CommandHandler(SapphireModule):
 		self.emit_event(execution_event)
 
 		self.log(
-			SapphireEvents.chain(event),
+			SapphireEvents.chain(ev),
 			"warning" if not success  else "debug",
-			f"Client with chain id '{event.chain}' requested command '{event.cmd}'. " \
-			f"Returned Output: {msg if event.cmd != "help" else '*help-message*'}"  #to not clutter logs
+			f"Client with chain id '{ev.chain}' requested command '{ev.module}::{ev.cmd}'. " \
+			f"Returned Output: {msg if ev.cmd != "help" else '*help-message*'}"  #to not clutter logs
 		)
 		
 
@@ -137,11 +158,16 @@ class CommandHandler(SapphireModule):
 		if self._help_str:
 			return self._help_str
 		
+		temp = []
+		
 		self._help_str = intro
-		for item in self.defined_commands:
-			cmd_str = f"{item[0]:<10} : {item[1]}\n"
-			self._help_str += cmd_str
-			
+		for name, namespace in self.namespaces.items():
+			for cmd_data in namespace.commands.values():
+				temp.append(f"{name:<8}::{cmd_data.cmd:<10} : {cmd_data.info[1]}\n")
+			temp.append("\n")
+				
+		self._help_str += "".join(temp)
+
 		return self._help_str
 	
 	

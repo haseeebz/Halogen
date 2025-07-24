@@ -27,7 +27,6 @@ class SapphireServer(SapphireModule):
 		self.has_commands = True
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-
 		# map of chain id to client
 		self.clients: dict[int, socket.socket] = {}
 
@@ -49,7 +48,7 @@ class SapphireServer(SapphireModule):
 	
 	@classmethod
 	def name(cls):
-		return "sapphire-server"
+		return "server"
 	
 	def start(self):
 

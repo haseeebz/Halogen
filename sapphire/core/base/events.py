@@ -128,6 +128,7 @@ class SapphireEvents():
 	@dataclass(frozen = True)
 	class CommandRegisterEvent(Event):
 		"Sent to command handler to register a command"
+		module: str
 		cmd: str
 		info: str
 		func: Callable[[list[str], "SapphireEvents.Chain"], str]
@@ -136,6 +137,7 @@ class SapphireEvents():
 	@dataclass(frozen = True)
 	class CommandEvent(Event):
 		"Command that the command handler can execute."
+		module: str
 		cmd: str
 		args: list[str]
 
@@ -144,7 +146,7 @@ class SapphireEvents():
 	@dataclass(frozen = True)
 	class CommandExecutedEvent(Event):
 		"The output of an executed command."
-		cmd: tuple[str, list[str]]
+		cmd: tuple[str, str, list[str]]
 		success: bool
 		output: str
 

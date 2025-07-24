@@ -180,13 +180,14 @@ class SapphireModuleManager():
 
 
 	def handle_module_commands(self, module: SapphireModule):
-			
+		mod_name = module.name()
 		for name, mem in inspect.getmembers(module, inspect.ismethod):
 			if hasattr(mem, "_is_command"):
 				ev = SapphireEvents.CommandRegisterEvent(
 					module.name(),
 					SapphireEvents.make_timestamp(),
 					SapphireEvents.chain(),
+					mod_name,
 					mem._name, #type: ignore
 					mem._info, #type: ignore // These SHOULD exist if _is_command exists
 					mem

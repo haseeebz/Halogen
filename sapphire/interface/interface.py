@@ -60,7 +60,7 @@ class SapphireInterface():
 
 		try:
 			command = shlex.split(msg)
-			cmd = command[0]
+			module, cmd = command[0].split("::")
 			args = command[1:]
 		except (ValueError, IndexError) as e:
 			self.client.add_error_event(
@@ -74,6 +74,7 @@ class SapphireInterface():
 			self.name, 
 			SapphireEvents.make_timestamp(),
 			chain,
+			module,
 			cmd,
 			args
 		)
