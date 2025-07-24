@@ -3,7 +3,13 @@ import socket, threading, queue, json, select, math
 from dataclasses import asdict
 from collections.abc import Callable
 from typing import Tuple
-from sapphire.core.base import SapphireModule, SapphireConfig, SapphireEvents
+
+from sapphire.core.base import (
+	SapphireModule, 
+	SapphireConfig, 
+	SapphireEvents, 
+	SapphireCommand
+)
 
 
 class SapphireServer(SapphireModule):
@@ -18,7 +24,7 @@ class SapphireServer(SapphireModule):
 		) -> None:
 
 		super().__init__(emit_event, config)
-
+		self.has_commands = True
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
@@ -40,23 +46,21 @@ class SapphireServer(SapphireModule):
 		self.read_thread = threading.Thread(target = self.read)
 		self.write_thread = threading.Thread(target = self.write)
 
-		self.define_command(
-			"address",
-			lambda _, __: f"{SapphireServer.HOST} : {SapphireServer.PORT}",
-			"Get the socket adress of the server."
-		)
 	
 	@classmethod
 	def name(cls):
 		return "sapphire-server"
 	
 	def start(self):
+
 		self.socket.settimeout(0.5)
 		self.socket.listen()
 		self.read_thread.start()
 		self.write_thread.start()
 
+
 	def end(self) -> Tuple[bool, str]:
+
 		self.is_running = False
 		self.read_thread.join(8)
 		self.write_thread.join(8)
@@ -93,6 +97,11 @@ class SapphireServer(SapphireModule):
 				self.out_buffer.put(event)
 	
 
+	@SapphireCommand("address", "Get the socket address of the sapphire server.")
+	def get_address(self, args: list[str], chain: SapphireEvents.Chain) -> str:
+		return f"{self.HOST}:{self.PORT}"
+
+
 	def serialize_event(self, event: SapphireEvents.Event) -> str:
 		dict_form = {}
 
@@ -124,6 +133,11 @@ class SapphireServer(SapphireModule):
 			return None
 		
 		chain = d["payload"].pop("chain")
+
+		# for some reason dataclasses module doesnt recursively intialize
+		# objects from nested dicts so I had to use this primitive method
+		# TODO: improve
+
 		try:
 			event_type = SapphireEvents.serialize(d["type"])
 			event = event_type(

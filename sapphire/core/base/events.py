@@ -26,6 +26,9 @@ class Chain():
 	def __str__(self) -> str:
 		return f"({self.context}:{self.flow})"
 	
+	def __repr__(self) -> str:
+		return self.__str__()
+	
 	def __eq__(self, other) -> bool:
 		return (self.context, self.flow) == (other.context, other.flow)
 	
@@ -187,4 +190,3 @@ class SapphireEvents():
 		
 
 
-print(SapphireEvents.ClientActivationEvent.__match_args__)
