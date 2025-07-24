@@ -1,7 +1,14 @@
 
+import json
 from sapphire.core.base import SapphireEvents, SapphireConfig
 from sapphire.model.base import BaseModelProvider, ModelResponse
-import json
+
+
+try:
+	from google import genai
+	from google.genai import types
+except ModuleNotFoundError:
+	raise ModuleNotFoundError("google module is neccessary for Gemini Model")
 
 
 
@@ -10,9 +17,6 @@ class Gemini(BaseModelProvider):
 	def __init__(self, config: SapphireConfig) -> None:
 		super().__init__(config)
 
-		from google import genai
-		from google.genai import types
-		
 		self.api_key = self.load_api_key()
 
 		self.client = genai.Client(

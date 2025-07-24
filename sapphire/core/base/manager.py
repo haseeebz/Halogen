@@ -20,7 +20,7 @@ core_modules = [
 	Logger, 
 	SapphireServer,
 	PromptManager,
-	#ModelManager,
+	ModelManager,
 	CommandHandler
 ]
 
@@ -122,7 +122,7 @@ class SapphireModuleManager():
 			return None
 		
 
-	def start_modules(self):
+	def start_modules(self, dev = False):
 		"Calls .start() on all registered modules."
 
 		for module in self.modules:
@@ -147,6 +147,10 @@ class SapphireModuleManager():
 				)
 				
 				self.emit_event(event)
+
+				if dev:
+					self.end_modules()
+					raise e
 
 
 	def end_modules(self) -> Logger | None:

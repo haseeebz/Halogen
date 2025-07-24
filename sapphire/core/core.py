@@ -64,8 +64,8 @@ class SapphireCore():
 		
 	def run(self):
 		
-		self.manager.start_modules()
-		
+		self.manager.start_modules(self.is_dev)
+
 		while self.is_running: 
 
 			if self.eventbus.is_empty():

@@ -36,23 +36,8 @@ class PromptManager(SapphireModule):
 				self.add_memory("you", event.message)
 
 			case SapphireEvents.UserInputEvent():
+				self.handle_user_input(event)
 				
-				prompt = self.make_prompt(event.message)
-
-				prompt_event = SapphireEvents.PromptEvent(
-					self.name(),
-					SapphireEvents.make_timestamp(),
-					SapphireEvents.chain(event),
-					prompt
-				)
-
-				self.emit_event(prompt_event)
-
-				self.log(
-					SapphireEvents.chain(event),
-					"debug",
-					f"Received user input: '{event.message}'"
-				)
 
 
 	def handled_events(self) -> list[type[SapphireEvents.Event]]:
@@ -83,7 +68,20 @@ class PromptManager(SapphireModule):
 			part_text = f"\n[{part.removesuffix(".txt").upper()}]\n{part_content}"
 			
 			self.sys_parts.append(part_text)
-			
+
+
+	def handle_user_input(self, event: SapphireEvents.UserInputEvent):	
+		prompt = self.make_prompt(event.message)
+
+		prompt_event = SapphireEvents.PromptEvent(
+			self.name(),
+			SapphireEvents.make_timestamp(),
+			SapphireEvents.chain(event),
+			prompt
+		)
+
+		self.emit_event(prompt_event)
+
 
 	def make_prompt(self, user_msg: str) -> str:
 		

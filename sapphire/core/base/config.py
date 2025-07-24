@@ -40,4 +40,11 @@ class SapphireConfig():
 
 		return SapphireConfig(cfg=cfg)
 
-	
+	def __setitem__(self, name: str, value: Any) -> None:
+		if name in self.cfg.keys():
+			raise KeyError(
+				f"Cannot override key:{name}. SapphireConfig is meant to be read only. " \
+				"So only new keys can be added."
+				)
+		
+		self.cfg[name] = value

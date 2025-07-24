@@ -3,8 +3,8 @@ import curses
 
 def app(scr: curses.window):
 
-	curses.curs_set(0)  # Hide cursor
-	scr.nodelay(True)  # Don't block on getch()
+	curses.curs_set(0)  
+	scr.nodelay(True)  
 	scr.timeout(100)
 
 	while True:
