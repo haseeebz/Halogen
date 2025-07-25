@@ -1,6 +1,8 @@
 #from sapphire.interface import SapphireInterface
 import curses
 
+# TODO make it lol
+
 def app(scr: curses.window):
 
 	curses.curs_set(0)  
