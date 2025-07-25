@@ -3,12 +3,14 @@ import importlib.util
 from pathlib import Path
 import os
 from types import ModuleType
-from typing import Tuple
+from typing import Tuple, Union
 import inspect, importlib
+
 from sapphire.core.base import (
 	SapphireEvents,
 	SapphireConfig,
-	SapphireModule
+	SapphireModule,
+	SapphireError
 )
 
 from .base import BaseModelProvider
@@ -24,7 +26,7 @@ class ModelManager(SapphireModule):
 		config: SapphireConfig
 		):
 		super().__init__(emit_event, config)
-		self.current_model: BaseModelProvider = None #type:ignore / will be assigned
+		self.current_model: Union[BaseModelProvider, None] = None 
 		self.registered_providers: dict[str, BaseModelProvider] = {}
 		self.model_directory = Path("models/")
 
@@ -47,16 +49,16 @@ class ModelManager(SapphireModule):
 				self.generate_response(event)
 
 
-	def end(self) -> Tuple[bool, str]:
-		if self.current_model:
-			self.current_model.unload()
-		return (True, "Success")
-	
-
 	def start(self) -> None:
 		self.init_models()
 		current_model = self.config.get("name", None)
 		self.load_model(current_model)
+
+
+	def end(self) -> Tuple[bool, str]:
+		if self.current_model:
+			self.current_model.unload()
+		return (True, "Success")
 
 
 	def init_models(self):
@@ -104,6 +106,7 @@ class ModelManager(SapphireModule):
 					"debug",
 					f"Ignoring {sub.absolute()}. Not a python module."
 				)
+				continue
 
 			mod_name = f"models.{sub.name}"
 
@@ -143,16 +146,19 @@ class ModelManager(SapphireModule):
 		name = model_cls.name()
 
 		if name in self.registered_providers.keys():
+
+			err = f"A python module found in model/: '{mod.__name__}' " \
+			"returned an invalid model provider." \
+			f"Model tried to register with name '{name}' but it already exists." \
+			"Could lead to security risks in case of API key transfers. Raising Error."
+
 			self.log(
 				SapphireEvents.chain(),
 				"critical",
-				f"A python module found in model/: '{mod.__name__}' returned an invalid model provider. " \
-				f"Model tried to register with name '{name}' but it already exists." \
-				"Could lead to security risks in case of API key transfers. Raising Error."
+				err
 			)
 
-
-			return None
+			raise SapphireError(err)
 		
 		return model_cls
 
@@ -166,21 +172,28 @@ class ModelManager(SapphireModule):
 
 		if model not in self.registered_providers.keys():
 
+			self.log(
+				SapphireEvents.chain(),
+				"critical",
+				f"Could not find model '{model}'. It was not registered."
+			)
+
+			if self.current_model:
+				return
+			
 			event = SapphireEvents.ShutdownEvent(
 				self.name(),
 				SapphireEvents.make_timestamp(),
 				SapphireEvents.chain(),
 				True,
-				"critical"
+				"critical",
+				f"Could not find model '{model}'. It was not registered."
 			)
 
 			self.emit_event(event)
 
-			self.log(
-				SapphireEvents.chain(event),
-				"critical",
-				f"Could not find model '{model}'. It was not registered."
-			)
+			return
+		
 
 		self.current_model = self.registered_providers[model]
 		self.current_model.load()
@@ -193,6 +206,10 @@ class ModelManager(SapphireModule):
 
 	
 	def generate_response(self, event: SapphireEvents.PromptEvent):
+
+		if not self.current_model:
+			return # TODO error?
+		
 		response = self.current_model.generate(event)
 
 		if response is not None:

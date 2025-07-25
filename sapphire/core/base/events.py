@@ -116,7 +116,7 @@ class SapphireEvents():
 		"Sent to core to intiate a shutdown."
 		emergency: bool
 		situation: Literal["request", "failure", "critical", "user"]
-
+		message: str
 
 
 	@dataclass(frozen = True)

@@ -1,7 +1,7 @@
 import functools
 
 def SapphireCommand(name: str, info: str):
-
+	
 	def decorator(func):
 		
 		def wrapper(*args, **kwargs):
