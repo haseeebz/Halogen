@@ -1,11 +1,24 @@
 
 # Sapphire
 
-Sapphire is a highly modular, event-driven system for integrating AI with your desktop. It acts as orchestrator capable of making actionable workers, executing command and automating tasks 
+Sapphire is a highly modular and extensible system for AI integration with desktop. It's main goal is to make a platform where any model can be connected and turned into a proper assistant using configurable modules.
 
-## Features
+## Goals
 
-+ **Modular Design** : Custom Modules can be integrated very easily to increase functionality.
-+ **Universal Interface** : Connect with the Sapphire daemon from almost anywhere using the built-in helper class.
-+ **Event-Driven Concurrency** : Tasks are executed concurrently thanks to the event system.
-+ **Model-Agnostic** : Connect any AI model, local or cloud, to the Sapphire system without changing the core logic.
++ Model Agnostic Architecture 
++ Modular system
++ Hot loading and changing models and providers at runtime.
++ Managing, orchestrating and executing tasks intiated by the AI
++ Add support for images and maybe live video streaming for models that support it
++ Make it platform-independant
++ Make it a hive mind daemon which can be connected to using clients
++ Config file based architecture
++ Allowing modules to implement their own user commands
++ Namespacing said commands
++ Allowing modules to implement tasks
++ Hot loading modules at runtime
++ Automate workflows
++ Execute multiple tasks at once
++ Maintain a proper history of chats and interactions
++ Implement persistent memories
++ Have a ton of functionality via tasks while also keeping the size of the prompt as short as possible
