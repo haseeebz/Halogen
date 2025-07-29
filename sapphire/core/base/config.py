@@ -18,7 +18,7 @@ class SapphireConfig():
 				data = tomllib.load(file)
 		except FileNotFoundError as e:
 			raise FileNotFoundError(
-				f"Config file '{os.path.abspath("config.toml")}' does not Exist"
+				f"Config file '{os.path.abspath('config.toml')}' does not Exist"
 			) from e
 		
 		self.cfg = data

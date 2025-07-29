@@ -65,7 +65,7 @@ class PromptManager(SapphireModule):
 			if not part_content:
 				continue
 
-			part_text = f"\n[{part.removesuffix(".txt").upper()}]\n{part_content}"
+			part_text = f"\n[{part.removesuffix('.txt').upper()}]\n{part_content}"
 			
 			self.sys_parts.append(part_text)
 
@@ -88,7 +88,7 @@ class PromptManager(SapphireModule):
 		parts = []
 		parts.append("".join(self.sys_parts))
 
-		memory_prompt = f"\n[MEMORY]\n{"\n".join(self.memory)}"
+		memory_prompt = "\n[MEMORY]\n" + "\n".join(self.memory)
 		parts.append(memory_prompt)
 
 		user_prompt = f"\n[USER-INPUT]\n{user_msg}"

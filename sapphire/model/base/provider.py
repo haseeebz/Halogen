@@ -30,7 +30,7 @@ class BaseModelProvider(ABC):
 
 	def generate(self, prompt: SapphireEvents.PromptEvent) -> ModelResponse | None:
 		"""
-		Take a prompt event and emit a AI response event.
+		Take a prompt event and return a ModelResponse.
 		
 		The "message" field of the response event should follow a fixed scheme.
 		By default, it MUST include a 'user' field. The model class should be implemented with custom

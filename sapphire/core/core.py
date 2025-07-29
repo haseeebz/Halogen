@@ -36,7 +36,7 @@ class SapphireCore():
 		self.log(
 			SapphireEvents.chain(), 
 			"info", 
-			f"Hello {self.config.get("user.name", "User")} :D"
+			f"Hello {self.config.get('user.name', 'User')} :D"
 		)
 
 		self.manager = SapphireModuleManager(self.root, self.config, self.eventbus.emit)

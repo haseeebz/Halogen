@@ -147,7 +147,7 @@ class CommandHandler(SapphireModule):
 			SapphireEvents.chain(ev),
 			"warning" if not success  else "debug",
 			f"Client with chain id '{ev.chain}' requested command '{ev.module}::{ev.cmd}'. " \
-			f"Returned Output: {msg if ev.cmd != "help" else '*help-message*'}"  #to not clutter logs
+			f"Returned Output: {msg if ev.cmd != 'help' else '*help-message*'}"  #to not clutter logs
 		)
 		
 
