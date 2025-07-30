@@ -19,8 +19,7 @@ def SapphireCommand(name: str, info: str):
 	return decorator
 
 
-def SapphireTask(name: str, info: str, args: str):
-
+def SapphireTask(name: str, info: str, args: list[str]):
 
 	def decorator(func):
 		

@@ -99,6 +99,7 @@ class SapphireModule(ABC):
 				self.name(),
 				SapphireEvents.make_timestamp(),
 				SapphireEvents.chain(),
+				self.name(),
 				cmd,
 				info,
 				func

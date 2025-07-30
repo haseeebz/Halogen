@@ -27,7 +27,6 @@ class CommandHandler(SapphireModule):
 		super().__init__(emit_event, config)
 		self.namespaces: dict[str, CommandNamespace] = {}
 		
-
 		self.has_commands = True # yeah ironic
 
 	

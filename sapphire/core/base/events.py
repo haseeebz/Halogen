@@ -188,7 +188,7 @@ class SapphireEvents():
 		module: str
 		name: str
 		args: list[str]
-		info: Optional[str]
+		info: str
 		func: Callable[[list[str], Chain], str]
 
 
