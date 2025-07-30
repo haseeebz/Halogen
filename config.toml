@@ -34,7 +34,7 @@ terminal = true
 #configurations for the model manager module
 name = "gemini"
 
-#dev note: see how the name corresponds to the sub-field down below.
+#see how the name corresponds to the sub-field down below.
 #this is essential for proper config transfer
 
 [model.gemini]

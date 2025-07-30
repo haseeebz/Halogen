@@ -82,5 +82,5 @@ class TaskManager(SapphireModule):
 		)
 	
 
-
-	
+	def exec_task(self):
+		pass

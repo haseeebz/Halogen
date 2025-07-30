@@ -46,7 +46,7 @@ class SapphireEvents():
 
 	@classmethod
 	def chain(cls, event: Union["Event", None] = None) -> Chain:
-		"Class Method to chain events. If empty, returns a new chain."
+		"Class Method to chain events. If None, returns a new chain."
 		if isinstance(event, cls.Event):
 			return event.chain
 		else:
@@ -101,6 +101,11 @@ class SapphireEvents():
 		timestamp: str 
 		chain: Chain
 
+
+	@dataclass(frozen = True)
+	class InitCompleteEvent(Event):
+		"An event passed just before the main loop starts."
+		pass
 
 
 	@dataclass(frozen = True)
@@ -210,7 +215,11 @@ class SapphireEvents():
 		success: bool
 		output: str
 
+	@dataclass(frozen = True)
+	class TaskMapUpdatedEvent(Event):
 
-		
+		active_mods: dict[str, list[tuple[str, str, list[str]]]]
+		# ke
+	
 
 
