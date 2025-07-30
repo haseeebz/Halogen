@@ -74,8 +74,11 @@ class ModelManager(SapphireModule):
 			model_class = self.get_model_from_module(mod)
 
 			if not model_class: continue
-
-			model: BaseModelProvider = model_class(self.config.get_sub_config(model_class.name()))
+			model: BaseModelProvider = model_class(
+				self.config.get_sub_config(model_class.name())
+				)
+			
+			
 			self.registered_providers[model.name()] = model
 
 			self.log(

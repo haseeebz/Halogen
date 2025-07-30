@@ -57,8 +57,8 @@ class BaseModelProvider(ABC):
 		In case anything goes wrong, this method will raise an exception. Ideally, this should be in the 
 		.__init__() of the subclass.
 		"""
-		
-		raw_value: str | None = self.config.get("api_key", None)
+
+		raw_value: str | None = self.config.get(f"api_key", None)
 
 		if raw_value is None:
 			raise ValueError(f"'model.{self.name()}.api_key' as not specified in the config.")
