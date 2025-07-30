@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal, Union
@@ -98,7 +98,7 @@ class SapphireEvents():
 	class Event():
 		"Base event class."
 		sender: str
-		timestamp: str
+		timestamp: str 
 		chain: Chain
 
 
@@ -108,7 +108,6 @@ class SapphireEvents():
 		"Event that the logger module listens for."
 		level: Literal["debug", "info", "warning", "critical"]
 		message: str
-
 
 
 	@dataclass(frozen = True)
@@ -142,14 +141,12 @@ class SapphireEvents():
 		args: list[str]
 
 
-
 	@dataclass(frozen = True)
 	class CommandExecutedEvent(Event):
 		"The output of an executed command."
 		cmd: tuple[str, str, list[str]]
 		success: bool
 		output: str
-
 
 
 	@dataclass(frozen = True)
@@ -160,7 +157,6 @@ class SapphireEvents():
 		selected: str | None
 
 
-
 	@dataclass(frozen = True)
 	class ErrorEvent(Event):
 		"In case something goes wrong."
@@ -168,12 +164,10 @@ class SapphireEvents():
 		message = str 
 
 
-
 	@dataclass(frozen = True)
 	class PromptEvent(Event):
 		"Event passed by the prompt manager after it assembles the prompt"
 		content: str
-
 
 
 	@dataclass(frozen = True)
@@ -183,11 +177,36 @@ class SapphireEvents():
 		extras: dict[str, Any]
 
 	
-
 	@dataclass(frozen = True)
 	class ClientActivationEvent(Event):
 		"The first event passed by the server to the client so it can initialize its chain."
 		message: str
+
+	
+	@dataclass(frozen= True)
+	class TaskRegisterEvent(Event):
+		module: str
+		name: str
+		args: list[str]
+		info: Optional[str]
+		func: Callable[[list[str], Chain], str]
+
+
+	@dataclass(frozen= True)
+	class TaskEvent(Event):
+		module: str
+		name: str
+		args: list[str]
+
+
+	@dataclass(frozen= True)
+	class TaskCompletionEvent(Event):
+		module: str
+		name: str
+		args: list[str]
+		success: bool
+		output: str
+		
 
 		
 

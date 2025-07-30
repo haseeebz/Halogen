@@ -17,7 +17,6 @@ from .base import BaseModelProvider
 
 
 
-
 class ModelManager(SapphireModule):
 
 	def __init__(
@@ -162,8 +161,7 @@ class ModelManager(SapphireModule):
 		
 		return model_cls
 
-
-			
+	
 
 	def load_model(self, model: str) -> None:
 
