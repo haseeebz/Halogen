@@ -46,6 +46,8 @@ class TaskManager(SapphireModule):
 		match event:
 			case SapphireEvents.TaskRegisterEvent():
 				self.register_task(event)
+			case SapphireEvents.TaskEvent():
+				pass
 
 
 	def register_task(self, ev: SapphireEvents.TaskRegisterEvent):

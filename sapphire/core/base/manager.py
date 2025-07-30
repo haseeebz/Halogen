@@ -15,13 +15,15 @@ from sapphire.interface import SapphireServer
 from sapphire.prompt import PromptManager
 from sapphire.model import ModelManager
 from sapphire.command import CommandHandler
+from sapphire.tasks import TaskManager
 
 core_modules = [
 	Logger, 
 	SapphireServer,
 	PromptManager,
 	ModelManager,
-	CommandHandler
+	CommandHandler,
+	TaskManager
 ]
 
 
@@ -82,6 +84,9 @@ class SapphireModuleManager():
 
 		if module.has_commands:
 			self.handle_module_commands(module)
+
+		if module.has_tasks:
+			self.handle_module_tasks(module)
 
 		self.log(
 			SapphireEvents.chain(),
@@ -193,6 +198,23 @@ class SapphireModuleManager():
 					SapphireEvents.chain(),
 					mod_name,
 					mem._name, #type: ignore
+					mem._info, #type: ignore // These SHOULD exist if _is_command exists
+					mem
+				)
+				self.emit_event(ev)
+
+
+	def handle_module_tasks(self, module: SapphireModule):
+		mod_name = module.name()
+		for name, mem in inspect.getmembers(module, inspect.ismethod):
+			if hasattr(mem, "_is_task"):
+				ev = SapphireEvents.TaskRegisterEvent(
+					module.name(),
+					SapphireEvents.make_timestamp(),
+					SapphireEvents.chain(),
+					mod_name,
+					mem._name, #type: ignore
+					mem._args,#type: ignore
 					mem._info, #type: ignore // These SHOULD exist if _is_command exists
 					mem
 				)

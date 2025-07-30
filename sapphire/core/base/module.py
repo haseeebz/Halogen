@@ -13,6 +13,7 @@ class SapphireModule(ABC):
 		self.eventbus_emit = emit_event
 		self.config = config 
 		self.has_commands = False
+		self.has_tasks = False
 
 
 	@classmethod

@@ -95,6 +95,11 @@ class ModelManager(SapphireModule):
 		for sub in self.model_directory.iterdir():
 
 			if not sub.is_dir():
+				self.log(
+					SapphireEvents.chain(),
+					"debug",
+					f"Ignoring {sub.absolute()}. Not a directory"
+				)
 				continue
 			 
 			mod_init = sub / "__init__.py"
@@ -229,9 +234,9 @@ class ModelManager(SapphireModule):
 			return
 
 		self.log(
-				SapphireEvents.chain(event),
-				"critical",
-				f"Could not get response from model '{self.current_model.name()}'"
+			SapphireEvents.chain(event),
+			"critical",
+			f"Could not get response from model '{self.current_model.name()}'"
 			)
 	
 
