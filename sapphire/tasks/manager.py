@@ -4,7 +4,8 @@ from sapphire.core.base import (
 	SapphireEvents,
 	SapphireConfig,
 	SapphireModule,
-	SapphireError
+	SapphireError,
+	SapphireCommand
 )
 
 from .meta import TaskNamespace, TaskData
@@ -79,3 +80,7 @@ class TaskManager(SapphireModule):
 			"info",
 			f"Registered task {ev.module}::{ev.name}"
 		)
+	
+
+
+	

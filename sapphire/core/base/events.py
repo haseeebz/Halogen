@@ -185,6 +185,7 @@ class SapphireEvents():
 	
 	@dataclass(frozen= True)
 	class TaskRegisterEvent(Event):
+		"Event passed to task manager to register an new task."
 		module: str
 		name: str
 		args: list[str]
@@ -194,6 +195,7 @@ class SapphireEvents():
 
 	@dataclass(frozen= True)
 	class TaskEvent(Event):
+		"Start a new task."
 		module: str
 		name: str
 		args: list[str]
@@ -201,12 +203,13 @@ class SapphireEvents():
 
 	@dataclass(frozen= True)
 	class TaskCompletionEvent(Event):
+		"The result of a task."
 		module: str
 		name: str
 		args: list[str]
 		success: bool
 		output: str
-		
+
 
 		
 
