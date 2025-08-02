@@ -54,3 +54,6 @@ def main():
 
 	interface.end()
 	
+
+if __name___ == "__main__":
+	main()

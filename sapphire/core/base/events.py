@@ -193,7 +193,7 @@ class SapphireEvents():
 		"Event passed to task manager to register an new task."
 		module: str
 		name: str
-		args: list[str]
+		args_info: list[str]
 		info: str
 		func: Callable[[list[str], Chain], str]
 
@@ -215,11 +215,18 @@ class SapphireEvents():
 		success: bool
 		output: str
 
-	@dataclass(frozen = True)
-	class TaskMapUpdatedEvent(Event):
+	@dataclass(frozen= True)
+	class TaskMapUpdateEvent(Event):
+		modules: list[str]
+		namespace: dict[str, dict[str, "TaskData"]]
 
-		active_mods: dict[str, list[tuple[str, str, list[str]]]]
-		# ke
+		@dataclass(frozen= True)
+		class TaskData():
+			name: str
+			info: str
+			arg_info: str
+
+
 	
 
 

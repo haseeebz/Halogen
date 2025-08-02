@@ -21,6 +21,7 @@ class TaskManager(SapphireModule):
 	
 		super().__init__(emit_event, config)
 		self.namespaces: dict[str, TaskNamespace] = {}
+		self.emit_event = lambda _: 1 #for testing
 		
 	
 	@classmethod
@@ -48,7 +49,7 @@ class TaskManager(SapphireModule):
 			case SapphireEvents.TaskRegisterEvent():
 				self.register_task(event)
 			case SapphireEvents.TaskEvent():
-				pass
+				self.exec_task(event)                                    
 
 
 	def register_task(self, ev: SapphireEvents.TaskRegisterEvent):
@@ -64,12 +65,15 @@ class TaskManager(SapphireModule):
 				"warning",
 				f"Task with name '{ev.name}' for module '{ev.module}' already registered"
 			)
+			print(
+				f"Task with name '{ev.name}' for module '{ev.module}' already registered"
+			)#testing
 			return
 		
 		task_data = TaskData(
 			ev.name,
 			ev.info,
-			ev.args,
+			ev.args_info,
 			ev.func
 		)
 
@@ -80,7 +84,36 @@ class TaskManager(SapphireModule):
 			"info",
 			f"Registered task {ev.module}::{ev.name}"
 		)
+
+		print(f"Registered task {ev.module}::{ev.name}")
 	
 
-	def exec_task(self):
-		pass
+	def exec_task(self, ev: SapphireEvents.TaskEvent):
+		
+		namespace = self.namespaces.setdefault(
+			ev.module,
+			TaskNamespace(ev.module)
+		)
+
+		if ev.name not in namespace.tasks.keys():
+			self.log(
+				SapphireEvents.chain(ev),
+				"warning",
+				f"Task with name '{ev.name}' for module '{ev.module}' not found."
+			)
+			print(f"Task with name '{ev.name}' for module '{ev.module}' not found.")#testing
+			return
+
+		func = namespace.tasks[ev.name].func
+
+		try:
+			output = func(ev.args, ev.chain)
+			success = True
+		except Exception as e:
+			output = f"{e.__class__.__name__}: {str(e)}"
+			success = False
+
+		print(f"{success} : {output}")
+
+	
+	
