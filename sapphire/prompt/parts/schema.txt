@@ -1,0 +1,6 @@
+Your response should include three parts:
+
+> message : Your actual response to the user. This is almost the only thing the user sees.
+> tasks : A list of Tasks that you want to execute. The collection of tasks and their namespaces available to you will be defined below. Think of that that section as your inventory. That is the arsenal of functions you can execute.
+> extras : This is to increase your functionality for the small stuff. Leave this empty UNLESS their is a statement in this prompt that requests you to add an extra with this key and these rules.
+

@@ -97,6 +97,12 @@ class TaskManager(SapphireModule):
 	
 
 	def exec_task(self, ev: SapphireEvents.TaskEvent):
+
+		self.log(
+			SapphireEvents.chain(ev),
+			"debug",
+			f"Executing task {ev.chain} {ev.namespace}::{ev.task_name} with args {ev.args}"
+		)
 		
 		namespace = self.namespaces.setdefault(
 			ev.namespace,
@@ -133,6 +139,19 @@ class TaskManager(SapphireModule):
 		)
 
 		self.emit_event(output_event)
+
+		self.log(
+			SapphireEvents.chain(ev),
+			"info",
+			f"Executed task {ev.chain} {ev.namespace}::{ev.task_name}. Success = {success}"
+		)
+
+		self.log(
+			SapphireEvents.chain(ev),
+			"debug" if success else "warning",
+			f"Executed task {ev.chain} {ev.namespace}::{ev.task_name} returned {output}"
+		)
+
 
 	
 	
