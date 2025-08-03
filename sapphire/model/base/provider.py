@@ -40,7 +40,7 @@ class BaseModelProvider(ABC):
 
 		Override this method and don't call super().ask
 		"""
-		raise NotImplementedError(f"ask method of model '{self.name()}'")
+		raise NotImplementedError(f"generate method of model '{self.name()}'")
 
 
 	def load_api_key(self) -> str:

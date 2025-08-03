@@ -3,7 +3,8 @@ from pydantic import BaseModel
 
 
 class ModelTask(BaseModel):
-	func: str
+	namespace: str
+	task_name: str
 	args: list[str]
 
 class ModelExtras(BaseModel):

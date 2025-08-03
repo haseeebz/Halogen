@@ -13,7 +13,7 @@ from sapphire.core.base import (
 	SapphireError
 )
 
-from .base import BaseModelProvider
+from .base import BaseModelProvider, ModelResponse
 
 
 
@@ -219,21 +219,7 @@ class ModelManager(SapphireModule):
 		response = self.current_model.generate(event)
 
 		if response is not None:
-			
-			extras = {}
-			for ex in response.extras:
-				extras[ex.key] = ex.value
-			
-			ai_msg = SapphireEvents.AIResponseEvent(
-				self.name(),
-				SapphireEvents.make_timestamp(),
-				SapphireEvents.chain(event),
-				response.message,
-				extras
-			)
-
-			self.emit_event(ai_msg)
-
+			self.eval_ai_response(response, SapphireEvents.chain(event))
 			return
 
 		self.log(
@@ -242,4 +228,32 @@ class ModelManager(SapphireModule):
 			f"Could not get response from model '{self.current_model.name()}'"
 			)
 	
+	
+	def eval_ai_response(self, response: ModelResponse, chain: SapphireEvents.Chain):
+
+		extras = {}
+		for ex in response.extras:
+			extras[ex.key] = ex.value
+		
+
+		ai_msg = SapphireEvents.AIResponseEvent(
+			self.name(),
+			SapphireEvents.make_timestamp(),
+			chain,
+			response.message,
+			extras
+		)
+		self.emit_event(ai_msg)
+
+
+		for task in response.tasks:
+			task_ev = SapphireEvents.TaskEvent(
+				self.name(),
+				SapphireEvents.make_timestamp(),
+				chain,
+				task.namespace,
+				task.task_name,
+				task.args
+			)
+			self.emit_event(task_ev)
 
