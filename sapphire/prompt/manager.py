@@ -4,6 +4,8 @@ from sapphire.core.base import SapphireModule, SapphireEvents, SapphireConfig
 from pathlib import Path
 import os
 
+# TODO Make prompt manager more robust and modular cuz the current approach is literal duct tape
+
 
 class PromptManager(SapphireModule):
 
@@ -41,6 +43,9 @@ class PromptManager(SapphireModule):
 
 			case SapphireEvents.TaskRegisteredEvent():
 				self.add_task(event)
+
+			case SapphireEvents.TaskCompletionEvent():
+				self.handle_task_completion(event)
 				
 
 
@@ -48,7 +53,8 @@ class PromptManager(SapphireModule):
 		return [
 			SapphireEvents.AIResponseEvent,
 			SapphireEvents.UserInputEvent,
-			SapphireEvents.TaskRegisteredEvent
+			SapphireEvents.TaskRegisteredEvent,
+			SapphireEvents.TaskCompletionEvent
 		]
 
 	
@@ -76,43 +82,62 @@ class PromptManager(SapphireModule):
 
 
 	def handle_user_input(self, event: SapphireEvents.UserInputEvent):	
-		prompt = self.make_prompt(event.message)
+		prompt = self.make_prompt()
+
+		prompt.append("\n[USER]\n")
+		prompt.append(event.message)
+
+		self.add_memory("user", event.message)
+
+		str_prompt = "".join(prompt)
 
 		prompt_event = SapphireEvents.PromptEvent(
 			self.name(),
 			SapphireEvents.make_timestamp(),
 			SapphireEvents.chain(event),
-			prompt
+			str_prompt
 		)
 
 		self.emit_event(prompt_event)
 
 
-	def make_prompt(self, user_msg: str) -> str:
+	def handle_task_completion(self, ev: SapphireEvents.TaskCompletionEvent):
+		prompt = self.make_prompt()
+
+		prompt.append("\n[SAPPHIRE]\n")
+
+		prompt.append(
+			f"Completed task '{ev.namespace}::{ev.task_name}'. " \
+			f"Success = {ev.success}. Output = {ev.output}"
+		)
+
+		str_prompt = "".join(prompt)
+
+		prompt_event = SapphireEvents.PromptEvent(
+			self.name(),
+			SapphireEvents.make_timestamp(),
+			SapphireEvents.chain(ev),
+			str_prompt
+		)
+
+		self.emit_event(prompt_event)
+
+
+	def make_prompt(self) -> list[str]:
 		
 		parts = []
-		parts.append("".join(self.sys_parts))
-
-		memory_prompt = "\n[MEMORY]\n" + "\n".join(self.memory)
-		parts.append(memory_prompt)
-
-		user_prompt = f"\n[USER-INPUT]\n{user_msg}"
-		parts.append(user_prompt)
-
+		parts.extend(self.sys_parts)
+		parts.append("\n[MEMORY]\n")
+		parts.extend(self.memory)
 		parts.extend(self.make_task_section())
-
-		final_prompt = "".join(parts)
-
-		self.add_memory("user", user_msg)
-
-		return final_prompt
+		return parts
 
 
 	def add_memory(self, subject: str, msg: str) -> None:
 		if len(self.memory) > self.config.get("memory_length", 30):
 			self.memory.pop(0)
 			
-		self.memory.append(f"{subject.capitalize()}: {msg}")
+		self.memory.append(f"{subject.capitalize()}: {msg}\n")
 
 
 	def add_task(self, ev: SapphireEvents.TaskRegisteredEvent):
@@ -124,9 +149,9 @@ class PromptManager(SapphireModule):
 
 	def make_task_section(self):
 		string = []
-		string.append("\n[TASKS AVAILABLE]")
+		string.append("\n[TASKS AVAILABLE]\nAll available tasks that you can do.\n")
 		for ns, taskslist in self.tasks_namespaces.items():
-			string.append(f"\nNamespace: '{ns}'\nDefined Tasks:")
+			string.append(f"\nNamespace: '{ns}'\nDefined Tasks:\n")
 			for n, i, a in taskslist:
 				string.append(f"{n}({a}) : {i}")
 			
