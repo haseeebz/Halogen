@@ -21,7 +21,6 @@ class TaskManager(SapphireModule):
 	
 		super().__init__(emit_event, config)
 		self.namespaces: dict[str, TaskNamespace] = {}
-		self.emit_event = lambda _: 1 #for testing
 		
 	
 	@classmethod
@@ -52,59 +51,67 @@ class TaskManager(SapphireModule):
 				self.exec_task(event)                                    
 
 
+
 	def register_task(self, ev: SapphireEvents.TaskRegisterEvent):
 
 		namespace = self.namespaces.setdefault(
-			ev.module,
-			TaskNamespace(ev.module)
+			ev.namespace,
+			TaskNamespace(ev.namespace)
 		)
 
-		if ev.name in namespace.tasks.keys():
+		if ev.task_name in namespace.tasks.keys():
 			self.log(
 				SapphireEvents.chain(ev),
 				"warning",
-				f"Task with name '{ev.name}' for module '{ev.module}' already registered"
+				f"Task with name '{ev.task_name}' for namespace '{ev.namespace}' already registered"
 			)
-			print(
-				f"Task with name '{ev.name}' for module '{ev.module}' already registered"
-			)#testing
 			return
 		
 		task_data = TaskData(
-			ev.name,
+			ev.task_name,
 			ev.info,
 			ev.args_info,
 			ev.func
 		)
 
-		namespace.tasks[ev.name] = task_data
+		namespace.tasks[ev.task_name] = task_data
 
 		self.log(
 			SapphireEvents.chain(ev),
 			"info",
-			f"Registered task {ev.module}::{ev.name}"
+			f"Registered task {ev.namespace}::{ev.task_name}"
 		)
 
-		print(f"Registered task {ev.module}::{ev.name}")
+		registered_ev = SapphireEvents.TaskRegisteredEvent(
+			self.name(),
+			SapphireEvents.make_timestamp(),
+			SapphireEvents.chain(ev),
+			ev.namespace,
+			ev.task_name,
+			ev.args_info,
+			ev.info
+		)
+
+		self.emit_event(registered_ev)
+
 	
 
 	def exec_task(self, ev: SapphireEvents.TaskEvent):
 		
 		namespace = self.namespaces.setdefault(
-			ev.module,
-			TaskNamespace(ev.module)
+			ev.namespace,
+			TaskNamespace(ev.namespace)
 		)
 
-		if ev.name not in namespace.tasks.keys():
+		if ev.task_name not in namespace.tasks.keys():
 			self.log(
 				SapphireEvents.chain(ev),
 				"warning",
-				f"Task with name '{ev.name}' for module '{ev.module}' not found."
+				f"Task with name '{ev.task_name}' for namespace '{ev.namespace}' not found."
 			)
-			print(f"Task with name '{ev.name}' for module '{ev.module}' not found.")#testing
 			return
 
-		func = namespace.tasks[ev.name].func
+		func = namespace.tasks[ev.task_name].func
 
 		try:
 			output = func(ev.args, ev.chain)
@@ -113,7 +120,19 @@ class TaskManager(SapphireModule):
 			output = f"{e.__class__.__name__}: {str(e)}"
 			success = False
 
-		print(f"{success} : {output}")
+
+		output_event = SapphireEvents.TaskCompletionEvent(
+			self.name(),
+			SapphireEvents.make_timestamp(),
+			SapphireEvents.chain(ev),
+			ev.namespace,
+			ev.task_name,
+			ev.args,
+			success,
+			output
+		)
+
+		self.emit_event(output_event)
 
 	
 	

@@ -16,6 +16,7 @@ class PromptManager(SapphireModule):
 		
 		self.sys_parts: list[str] = [] 
 		self.memory: list[str] = []
+		self.tasks_namespaces: dict[str, list[tuple[str, str, list[str]]]] = {}
 
 		self.parts_dir = Path(__file__).resolve().parent / "parts"
 	
@@ -37,13 +38,17 @@ class PromptManager(SapphireModule):
 
 			case SapphireEvents.UserInputEvent():
 				self.handle_user_input(event)
+
+			case SapphireEvents.TaskRegisteredEvent():
+				self.add_task(event)
 				
 
 
 	def handled_events(self) -> list[type[SapphireEvents.Event]]:
 		return [
 			SapphireEvents.AIResponseEvent,
-			SapphireEvents.UserInputEvent
+			SapphireEvents.UserInputEvent,
+			SapphireEvents.TaskRegisteredEvent
 		]
 
 	
@@ -94,6 +99,8 @@ class PromptManager(SapphireModule):
 		user_prompt = f"\n[USER-INPUT]\n{user_msg}"
 		parts.append(user_prompt)
 
+		parts.extend(self.make_task_section())
+
 		final_prompt = "".join(parts)
 
 		self.add_memory("user", user_msg)
@@ -106,3 +113,23 @@ class PromptManager(SapphireModule):
 			self.memory.pop(0)
 			
 		self.memory.append(f"{subject.capitalize()}: {msg}")
+
+
+	def add_task(self, ev: SapphireEvents.TaskRegisteredEvent):
+		
+		task_list = self.tasks_namespaces.setdefault(ev.namespace, [])
+		data = (ev.task_name, ev.info, ev.args_info)
+		task_list.append(data)
+
+
+	def make_task_section(self):
+		string = []
+		string.append("\n[TASKS AVAILABLE]")
+		for ns, taskslist in self.tasks_namespaces.items():
+			string.append(f"\nNamespace: '{ns}'\nDefined Tasks:")
+			for n, i, a in taskslist:
+				string.append(f"{n}({a}) : {i}")
+			
+		return string
+			
+		

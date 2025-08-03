@@ -191,42 +191,37 @@ class SapphireEvents():
 	@dataclass(frozen= True)
 	class TaskRegisterEvent(Event):
 		"Event passed to task manager to register an new task."
-		module: str
-		name: str
+		namespace: str
+		task_name: str
 		args_info: list[str]
 		info: str
 		func: Callable[[list[str], Chain], str]
 
 
 	@dataclass(frozen= True)
+	class TaskRegisteredEvent(Event):
+		namespace: str
+		task_name: str
+		args_info: list[str]
+		info: str
+
+
+	@dataclass(frozen= True)
 	class TaskEvent(Event):
 		"Start a new task."
-		module: str
-		name: str
+		namespace: str
+		task_name: str
 		args: list[str]
 
 
 	@dataclass(frozen= True)
 	class TaskCompletionEvent(Event):
 		"The result of a task."
-		module: str
-		name: str
+		namespace: str
+		task_name: str
 		args: list[str]
 		success: bool
 		output: str
 
-	@dataclass(frozen= True)
-	class TaskMapUpdateEvent(Event):
-		modules: list[str]
-		namespace: dict[str, dict[str, "TaskData"]]
-
-		@dataclass(frozen= True)
-		class TaskData():
-			name: str
-			info: str
-			arg_info: str
-
-
-	
 
 
