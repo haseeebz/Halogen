@@ -70,7 +70,7 @@ class CommandHandler(SapphireModule):
 		self.log(
 			SapphireEvents.chain(ev),
 			"info",
-			f"Registered command: {ev.module}::{ev.cmd}"
+			f"Registered command: {ev.module}::{ev.cmd} Info : {ev.info}"
 		)
 
 		command = CommandData(
@@ -162,7 +162,7 @@ class CommandHandler(SapphireModule):
 		self._help_str = intro
 		for name, namespace in self.namespaces.items():
 			for cmd_data in namespace.commands.values():
-				temp.append(f"{name:<8}::{cmd_data.cmd:<10} : {cmd_data.info[1]}\n")
+				temp.append(f"{name:<8}::{cmd_data.cmd:<10} : {cmd_data.info}\n")
 			temp.append("\n")
 				
 		self._help_str += "".join(temp)
