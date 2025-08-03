@@ -12,6 +12,8 @@ from sapphire.core.base import (
 )
 
 
+
+
 class SapphireServer(SapphireModule):
 
 	HOST = "127.0.0.1"
@@ -116,7 +118,7 @@ class SapphireServer(SapphireModule):
 			return(json.loads(json_str))
 		except json.JSONDecodeError as e:
 			error_msg = "Server could not parse the json string sent by a client." \
-			f"Encountered Error= {e.__class__.__name__}: {e.__str__()}."
+			f"Encountered Error= {e.__class__.__name__}: {e.__str__()}. JSON STRING: {json_str}"
 
 		self.log(
 			SapphireEvents.chain(),
@@ -145,7 +147,7 @@ class SapphireServer(SapphireModule):
 			return event
 		except KeyError as e:
 			error_msg = "Server encountered a key error in the input event sent by a client. " \
-			f"Encountered Error= {e.__class__.__name__} : {e.__str__()}."
+			f"Encountered Error= {e.__class__.__name__} : {e.__str__()}. JSON STRING: {msg}"
 
 		self.log(
 			SapphireEvents.chain(),
@@ -174,11 +176,19 @@ class SapphireServer(SapphireModule):
 
 		chain_id = SapphireEvents.new_context_chain()
 
+		msg = f"Client successfully registered to the server with Chain ID: {chain_id}"
+
 		event = SapphireEvents.ClientActivationEvent(
 			self.name(),
 			SapphireEvents.make_timestamp(),
 			chain_id,
-			f"Client successfully registered to the server with Chain ID: {chain_id}"
+			msg
+		)
+
+		self.log(
+			SapphireEvents.chain(event),
+			"info",
+			msg
 		)
 
 		with self.lock:

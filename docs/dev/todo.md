@@ -38,3 +38,10 @@ A list of all planned features (will add more to this list!)
 + Filesystem
 + Applications (opening apps etc)
 + System control (brightness, sound etc.), easy on linux but might need more effort on windows
+
+### IPC
+
++ Server/Client fails to parse json when repeated events are sent at the same time.
++ The above is likely due to the fact that the current ctl follows the "One output for a single input" philosphy which means that other events are just stuck in the queue. This includes other AI response events which causes the crash.
++ So fix the ctl to either be a tui which can display events without blocking for user input. This is easy because the client side already receives events in a non-blocking way.
++ Maybe make a GUI one day,
