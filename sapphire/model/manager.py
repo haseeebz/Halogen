@@ -10,7 +10,8 @@ from sapphire.core.base import (
 	SapphireEvents,
 	SapphireConfig,
 	SapphireModule,
-	SapphireError
+	SapphireError,
+	SapphireCommand
 )
 
 from .base import BaseModelProvider, ModelResponse
@@ -28,6 +29,7 @@ class ModelManager(SapphireModule):
 		self.current_model: Union[BaseModelProvider, None] = None 
 		self.registered_providers: dict[str, BaseModelProvider] = {}
 		self.model_directory = Path("models/")
+		self.has_commands = True
 
 
 	@classmethod
@@ -257,3 +259,7 @@ class ModelManager(SapphireModule):
 			)
 			self.emit_event(task_ev)
 
+
+	@SapphireCommand("current", "Get info about the current model")
+	def get_current_model_command(self, args: list[str], chain: SapphireEvents.Chain):
+		return f"Model: {self.current_model.name()}"
