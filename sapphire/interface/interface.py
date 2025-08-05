@@ -2,19 +2,23 @@ from sapphire.core.base import SapphireEvents
 from .client import SapphireClient
 import socket, shlex
 
+
 class SapphireInterface():
 	"""
-	Helper class for connecting with Sapphire. Abstracts away SapphireClient.
+	Helper class for connecting with Sapphire. 
+	This should be used instead of the raw Sapphire Client since it hides the socket and connection
+	messes.
 	"""
 
 	def __init__(self, name: str) -> None:
 		self.name = name
 
 
-	def start(self) -> None:
-		"Start the client and the interface."
+	def start(self) -> SapphireEvents.Chain:
+		"Start the client and the interface. Returns the first client chain (basically an ID)"
 		self.client = SapphireClient()
 		self.client.start()
+		return self.client.client_chain
 
 
 	def receive_event(self) -> SapphireEvents.Event:

@@ -1,30 +1,70 @@
 #from sapphire.interface import SapphireInterface
-import curses
+import curses, time, threading
 
 # TODO make it lol
 
-def app(scr: curses.window):
 
-	curses.curs_set(0)  
-	scr.nodelay(True)  
-	scr.timeout(100)
+class SapphireCtl():
 
-	while True:
+	def __init__(self):
+		self.lock = threading.Lock()
+
+	def init(self, scr: curses.window):
+
+		curses.noecho()
+		curses.curs_set(0)
 		curses.start_color()
 		curses.use_default_colors()
+
 		curses.init_pair(1, curses.COLOR_WHITE, -1)
-		curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_WHITE)
-		height, width = scr.getmaxyx()
+		curses.init_pair(2, curses.COLOR_WHITE, -1)
+
+		self.scr = scr
+		height, width = self.scr.getmaxyx()
+
+		self.window = curses.newwin(
+			height - 1,
+			width - 2,
+			1,
+			2
+		)
+
+		self.height, self.width = self.window.getmaxyx()
+
+		self.window.bkgd(" ", curses.color_pair(1))
+		self.window.box()
+
+		self.init_input_window()
+		self.run()
+
+
+	def init_input_window(self):
+
+		self.input_window = self.window.subwin(
+			3,
+			self.width - 4,
+			self.height - 3,
+			4
+		)
+		self.input_window.bkgd(" ", curses.color_pair(2))
+		self.input_window.box()
+
+		self.input_window.addstr(1,1,"hello World")
+
+
+	def run(self):
+		
+		while True:
+			self.input_window.refresh()
+			self.window.refresh()
+			time.sleep(0.1)
 		
 
-		win = curses.newwin(height-1, width-4, 1, 3)
-		win.bkgd(' ', curses.color_pair(1))
-		win.box()
-
-		win.refresh()
 
 
 def main():
-	curses.wrapper(app)
+	ctl = SapphireCtl()
+	curses.wrapper(ctl.init)
 
-main()
+if __name__ == "__main__":
+	main()
