@@ -8,15 +8,13 @@ class SapphireInterface():
 	"""
 
 	def __init__(self, name: str) -> None:
-		self.start()
 		self.name = name
 
+
 	def start(self) -> None:
+		"Start the client and the interface."
 		self.client = SapphireClient()
 		self.client.start()
-
-	def send_event(self, event: SapphireEvents.Event):
-		self.client.out_buffer.put(event)
 
 
 	def receive_event(self) -> SapphireEvents.Event:
@@ -27,7 +25,7 @@ class SapphireInterface():
 	def check_event(self, timeout : float | None = None) -> SapphireEvents.Event | None:
 		"""
 		Checks whether there is an event within the duration of the timeout and returns it, else None.
-		If timeout is not specified, it does not block and returns an 
+		If timeout is not specified, it does not block.
 		"""
 		try:
 			return self.client.in_buffer.get(
@@ -41,7 +39,7 @@ class SapphireInterface():
 	def send_message(self, msg: str) -> SapphireEvents.Chain:
 		"""
 		Shorthand for creating a user input event and sending it.
-		Returns sub-chain id of the message
+		Returns chain id of the message
 		"""
 
 		chain = self.client.chain()
@@ -55,26 +53,16 @@ class SapphireInterface():
 
 		return chain
 
-	def send_command(self, msg: str) -> SapphireEvents.Chain | None:
-		"Shorthand for creating a command input event and dispatching it. Blocks for output"
 
-		try:
-			command = shlex.split(msg)
-			module, cmd = command[0].split("::")
-			args = command[1:]
-		except (ValueError, IndexError) as e:
-			self.client.add_error_event(
-				f"Client requested a command but encountered error: " \
-				f"({e.__class__.__name__}:{e.__str__()})"
-			)
-			return None
-		
+	def send_command(self, namespace: str, cmd: str, args: list[str]) -> SapphireEvents.Chain:
+		"Shorthand for creating a command input event and dispatching it."
+
 		chain = self.client.chain()
 		event = SapphireEvents.CommandEvent(
 			self.name, 
 			SapphireEvents.make_timestamp(),
 			chain,
-			module,
+			namespace,
 			cmd,
 			args
 		)
@@ -83,23 +71,20 @@ class SapphireInterface():
 		return chain
 
 
-	#def send_confirmation(self, msg: str, chain: SapphireEvents.Chain) -> None:
-	#	"Send confirmation event and wait for output"
-#
-#		event = SapphireEvents.ConfirmationEvent(
-#			self.name, 
-#			SapphireEvents.make_timestamp(),
-#			chain, 
-#			"confirmation",
-#			msg
-#		)
-#		self.send_event(event) 
-	
-	
 	def end(self):
 		self.client.end()
 
-	
+
 	def restart(self):
+		self.client.end()
 		self.start()
+
+
+	def shutdown_sapphire(self):
+		"Shorthand for shutdown sapphire."
+		self.send_command("core", "shutdown", [])
+
+
+
+	
 	
