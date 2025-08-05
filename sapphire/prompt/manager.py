@@ -16,11 +16,12 @@ class PromptManager(SapphireModule):
 		) -> None:
 		super().__init__(emit_event, config)
 		
-		self.sys_parts: list[str] = [] 
-		self.memory: list[str] = []
+		self.core_sections: list[str] = []
+		self.memory_list: list[str] = []
 		self.tasks_namespaces: dict[str, list[tuple[str, str, list[str]]]] = {}
+		self.tasks_section_string = ""
 
-		self.parts_dir = Path(__file__).resolve().parent / "parts"
+		self.sections_dir = Path(__file__).resolve().parent / "sections"
 	
 
 	@classmethod
@@ -29,7 +30,7 @@ class PromptManager(SapphireModule):
 	
 
 	def	start(self) -> None:
-		self.assemble_parts()
+		self.load_core_sections()
 		
 
 	def handle(self, event: SapphireEvents.Event) -> None:
@@ -43,6 +44,7 @@ class PromptManager(SapphireModule):
 
 			case SapphireEvents.TaskRegisteredEvent():
 				self.add_task(event)
+				self.make_task_section()
 
 			case SapphireEvents.TaskCompletionEvent():
 				self.handle_task_completion(event)
@@ -62,34 +64,34 @@ class PromptManager(SapphireModule):
 		return (True, "")
 	
 
-	def assemble_parts(self):
+	def load_core_sections(self):
 
-		for part in os.listdir(self.parts_dir):
-			part_path = self.parts_dir / part
-
-			if not part_path.is_file():
-				continue
-
-			with open(part_path) as file:
-				part_content = file.read()
-
-			if not part_content:
-				continue
-
-			part_text = f"\n[{part.removesuffix('.txt').upper()}]\n{part_content}"
+		for section in self.sections_dir.iterdir():
 			
-			self.sys_parts.append(part_text)
+			if not section.is_file():
+				continue
+
+			with open(section) as file:
+				section_text = file.read()
+
+			self.core_sections.append(section_text)
+
+
+	def make_prompt_parts(self) -> list[str]:
+		parts = []
+		parts.extend(self.core_sections)
+		parts.append("[MEMORY]")
+		parts.extend(self.memory)
+		parts.extend(self.tasks_section_string)
+		return parts
 
 
 	def handle_user_input(self, event: SapphireEvents.UserInputEvent):	
-		prompt = self.make_prompt()
-
-		prompt.append("\n[USER]\n")
+		prompt = self.make_prompt_parts()
+		prompt.append("[USER]")
 		prompt.append(event.message)
 
-		self.add_memory("user", event.message)
-
-		str_prompt = "".join(prompt)
+		str_prompt = "\n".join(prompt)
 
 		prompt_event = SapphireEvents.PromptEvent(
 			self.name(),
@@ -100,18 +102,20 @@ class PromptManager(SapphireModule):
 
 		self.emit_event(prompt_event)
 
+		self.add_memory("user", event.message)
+
 
 	def handle_task_completion(self, ev: SapphireEvents.TaskCompletionEvent):
 		prompt = self.make_prompt()
 
-		prompt.append("\n[SAPPHIRE]\n")
+		prompt.append("[SAPPHIRE]")
 
 		prompt.append(
 			f"Completed task '{ev.namespace}::{ev.task_name}'. " \
 			f"Success = {ev.success}. Output = {ev.output}"
 		)
 
-		str_prompt = "".join(prompt)
+		str_prompt = "\n".join(prompt)
 
 		prompt_event = SapphireEvents.PromptEvent(
 			self.name(),
@@ -123,16 +127,6 @@ class PromptManager(SapphireModule):
 		self.emit_event(prompt_event)
 
 
-	def make_prompt(self) -> list[str]:
-		
-		parts = []
-		parts.extend(self.sys_parts)
-		parts.append("\n[MEMORY]\n")
-		parts.extend(self.memory)
-		parts.extend(self.make_task_section())
-		return parts
-
-
 	def add_memory(self, subject: str, msg: str) -> None:
 		if len(self.memory) > self.config.get("memory_length", 30):
 			self.memory.pop(0)
@@ -141,7 +135,6 @@ class PromptManager(SapphireModule):
 
 
 	def add_task(self, ev: SapphireEvents.TaskRegisteredEvent):
-		
 		task_list = self.tasks_namespaces.setdefault(ev.namespace, [])
 		data = (ev.task_name, ev.info, ev.args_info)
 		task_list.append(data)
@@ -155,6 +148,6 @@ class PromptManager(SapphireModule):
 			for n, i, a in taskslist:
 				string.append(f"{n}({a}) : {i}")
 			
-		return string
+		self.tasks_section_string = "".join(string)
 			
 		
