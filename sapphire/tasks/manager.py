@@ -78,7 +78,7 @@ class TaskManager(SapphireModule):
 
 		self.log(
 			SapphireEvents.chain(ev),
-			"info",
+			"debug",
 			f"Registered task {ev.namespace}::{ev.task_name}"
 		)
 

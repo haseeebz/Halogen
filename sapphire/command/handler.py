@@ -69,7 +69,7 @@ class CommandHandler(SapphireModule):
 		
 		self.log(
 			SapphireEvents.chain(ev),
-			"info",
+			"debug",
 			f"Registered command: {ev.module}::{ev.cmd} Info : {ev.info}"
 		)
 

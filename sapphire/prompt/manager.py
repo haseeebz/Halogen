@@ -81,7 +81,7 @@ class PromptManager(SapphireModule):
 		parts = []
 		parts.extend(self.core_sections)
 		parts.append("[MEMORY]")
-		parts.extend(self.memory)
+		parts.extend(self.memory_list)
 		parts.extend(self.tasks_section_string)
 		return parts
 
@@ -128,10 +128,10 @@ class PromptManager(SapphireModule):
 
 
 	def add_memory(self, subject: str, msg: str) -> None:
-		if len(self.memory) > self.config.get("memory_length", 30):
-			self.memory.pop(0)
+		if len(self.memory_list) > self.config.get("memory_length", 30):
+			self.memory_list.pop(0)
 			
-		self.memory.append(f"{subject.capitalize()}: {msg}\n")
+		self.memory_list.append(f"{subject.capitalize()}: {msg}\n")
 
 
 	def add_task(self, ev: SapphireEvents.TaskRegisteredEvent):
