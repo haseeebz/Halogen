@@ -1,6 +1,7 @@
 from sapphire.core.base import SapphireEvents
 from .client import SapphireClient
 import socket, shlex
+from queue import Empty
 
 
 class SapphireInterface():
@@ -33,10 +34,10 @@ class SapphireInterface():
 		"""
 		try:
 			return self.client.in_buffer.get(
-				True if timeout else False, 
+				False, 
 				timeout
 			)	
-		except socket.timeout:
+		except Empty:
 			return None
 		
 

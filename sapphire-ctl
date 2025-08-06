@@ -1,5 +1,7 @@
 from sapphire.interface import SapphireInterface
-import curses, time, threading
+from sapphire.core.base import SapphireEvents
+
+import curses, time, threading, shlex
 
 # TODO make it lol
 
@@ -29,32 +31,39 @@ class SapphireCtl():
 		curses.init_pair(2, curses.COLOR_WHITE, -1)
 
 		
-		height, width = self.scr.getmaxyx()
+		self.height, self.width = self.scr.getmaxyx()
 
+		self.init_main_window()
+		self.init_input_window()
+		self.run()
+
+
+	def init_main_window(self):
+		
 		self.window = curses.newwin(
-			height - 1,
-			width - 2,
+			self.height - 1,
+			self.width - 2,
 			1,
 			2
 		)
-
-		self.height, self.width = self.window.getmaxyx()
 
 		self.window.bkgd(" ", curses.color_pair(1))
 		self.window.box()
 
 		self.window.keypad(True)
-
-		self.init_input_window()
-		self.run()
+		self.window_event_buffer: list[str] = []
+		self.max_event_buffer_h, self.max_event_buffer_w = self.window.getmaxyx()
+		self.max_event_buffer_h -= 2
 
 
 	def init_input_window(self):
+		h, w = self.window.getmaxyx()
+
 
 		self.input_window = self.window.subwin(
 			3,
-			self.width - 4,
-			self.height - 3,
+			w - 4,
+			h - 3,
 			4
 		)
 		self.input_window.bkgd(" ", curses.color_pair(2))
@@ -62,56 +71,78 @@ class SapphireCtl():
 		self.input_window.keypad(True)
 
 		self.input_buffer: list[str] = []
-		_, self.max_buffer_displayable = self.input_window.getmaxyx()
-		self.max_buffer_displayable -= 4
+		_, self.max_input_buffer = self.input_window.getmaxyx()
+		self.max_input_buffer -= 4
 
 	
 	def run(self):
 
+		self.interface.start()
 		while self.is_running:
 			key = self.scr.getch()
 			self.handle_key(key)
 
+			event = self.interface.check_event(0.05)
+			if event:
+				pass
+
 			self.input_window.refresh()
 			self.window.refresh()
 			time.sleep(0.01)
+
+		self.interface.end()
 
 
 	def handle_key(self, key):
 		if key == curses.ERR:
 			return
 
-		if key >= ord("A") and key <= ord("z"):			
-			self.input_buffer.append(chr(key))
-		elif key == curses.KEY_BACKSPACE:
+		
+		if key == curses.KEY_BACKSPACE:
 			if len(self.input_buffer) > 0: self.input_buffer.pop()
 		elif key == curses.KEY_ENTER:
 			pass
+		else:			
+			self.input_buffer.append(chr(key))
 
 		self.show_input_buffer()
 
 	
 	def show_input_buffer(self):
 
-		self.input_window.addstr(1, 1, " "*self.max_buffer_displayable)
+		self.input_window.addstr(1, 1, " "*self.max_input_buffer)
 		length = len(self.input_buffer)
 
-		if length < self.max_buffer_displayable:
+		if length < self.max_input_buffer:
 			displayed_buffer = self.input_buffer
 		else:
-			displayed_buffer = self.input_buffer[length-self.max_buffer_displayable:]
+			displayed_buffer = self.input_buffer[length-self.max_input_buffer:]
 
 		self.input_window.addstr(1, 1, "".join(displayed_buffer))
 		
 
-	def parse_input(self, s: str):
+	def show_events_buffer(self):
 		pass
 
+	def parse_input(self, s: str):
+		for s_part in s.split(";"):
+			if s_part.startswith("/"):
+				self.parse_command(s_part)
+			else:
+				self.send_user_msg(s_part)
+		
+
 	def parse_command(self, s: str):
-		pass
+		cmd, *args = shlex.split(s)
+		namespace, name = cmd.split("::")
+
+		self.interface.send_command(namespace, name, args)
+
 
 	def send_user_msg(self, s: str):
 		pass
+
+
 
 
 	
