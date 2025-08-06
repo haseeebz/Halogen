@@ -11,15 +11,23 @@ class SapphireCtl():
 
 	def init(self, scr: curses.window):
 
+		self.scr: curses.window = scr
+
 		curses.noecho()
 		curses.curs_set(0)
+
+		self.scr.keypad(True)
+		self.scr.nodelay(True)
+
 		curses.start_color()
 		curses.use_default_colors()
+
 
 		curses.init_pair(1, curses.COLOR_WHITE, -1)
 		curses.init_pair(2, curses.COLOR_WHITE, -1)
 
-		self.scr = scr
+		
+
 		height, width = self.scr.getmaxyx()
 
 		self.window = curses.newwin(
@@ -33,6 +41,8 @@ class SapphireCtl():
 
 		self.window.bkgd(" ", curses.color_pair(1))
 		self.window.box()
+
+		self.window.keypad(True)
 
 		self.init_input_window()
 		self.run()
@@ -48,16 +58,53 @@ class SapphireCtl():
 		)
 		self.input_window.bkgd(" ", curses.color_pair(2))
 		self.input_window.box()
+		self.input_window.keypad(True)
 
-		self.input_window.addstr(1,1,"hello World")
+		self.input_buffer: list[str] = []
+		_, self.max_buffer_displayable = self.input_window.getmaxyx()
+		self.max_buffer_displayable -= 4
 
-
+	
 	def run(self):
-		
+
 		while True:
+			key = self.scr.getch()
+			self.handle_key(key)
+
 			self.input_window.refresh()
 			self.window.refresh()
 			time.sleep(0.1)
+
+
+	def handle_key(self, key):
+		if key == curses.ERR:
+			return
+
+		if key >= ord("A") and key <= ord("z"):			
+			self.input_buffer.append(chr(key))
+		elif key == curses.KEY_BACKSPACE:
+			if len(self.input_buffer) > 0: self.input_buffer.pop()
+		elif key == curses.KEY_ENTER:
+			pass
+
+		self.show_input_buffer()
+
+	
+	def show_input_buffer(self):
+
+		self.input_window.addstr(1, 1, " "*self.max_buffer_displayable)
+		length = len(self.input_buffer)
+
+		if length < self.max_buffer_displayable:
+			displayed_buffer = self.input_buffer
+		else:
+			displayed_buffer = self.input_buffer[length-self.max_buffer_displayable:]
+
+		self.input_window.addstr(1, 1, "".join(displayed_buffer))
+		
+
+
+		
 		
 
 
