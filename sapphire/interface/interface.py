@@ -40,6 +40,13 @@ class SapphireInterface():
 		except Empty:
 			return None
 		
+	
+	def send_event(self, ev: SapphireEvents.Event):
+		"""
+		Send an event to the sapphire server.
+		"""
+		self.client.out_buffer.put(ev)
+
 
 	def send_message(self, msg: str) -> SapphireEvents.Chain:
 		"""

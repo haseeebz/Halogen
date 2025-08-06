@@ -3,7 +3,9 @@ from sapphire.core.base import SapphireEvents
 
 import curses, time, threading, shlex
 
-# TODO make it lol
+# TODO 
+# maybe abstract the curses gui part into a seperate class?
+# make the event screen
 
 
 class SapphireCtl():
@@ -66,6 +68,7 @@ class SapphireCtl():
 			h - 3,
 			4
 		)
+
 		self.input_window.bkgd(" ", curses.color_pair(2))
 		self.input_window.box()
 		self.input_window.keypad(True)
@@ -84,7 +87,7 @@ class SapphireCtl():
 
 			event = self.interface.check_event(0.05)
 			if event:
-				pass
+				self.handle_event(event)
 
 			self.input_window.refresh()
 			self.window.refresh()
@@ -96,12 +99,13 @@ class SapphireCtl():
 	def handle_key(self, key):
 		if key == curses.ERR:
 			return
-
 		
 		if key == curses.KEY_BACKSPACE:
 			if len(self.input_buffer) > 0: self.input_buffer.pop()
-		elif key == curses.KEY_ENTER:
-			pass
+		elif key in (10, curses.KEY_ENTER): 
+			input_str = "".join(self.input_buffer)
+			self.parse_input(input_str)
+			self.input_buffer.clear()
 		else:			
 			self.input_buffer.append(chr(key))
 
@@ -121,9 +125,6 @@ class SapphireCtl():
 		self.input_window.addstr(1, 1, "".join(displayed_buffer))
 		
 
-	def show_events_buffer(self):
-		pass
-
 	def parse_input(self, s: str):
 		for s_part in s.split(";"):
 			if s_part.startswith("/"):
@@ -134,15 +135,30 @@ class SapphireCtl():
 
 	def parse_command(self, s: str):
 		cmd, *args = shlex.split(s)
-		namespace, name = cmd.split("::")
+		cmd_parts = cmd.removeprefix("/").split("::")
+		namespace = cmd_parts[0]
+		name = cmd_parts[1]
 
 		self.interface.send_command(namespace, name, args)
 
 
 	def send_user_msg(self, s: str):
-		pass
+		self.interface.send_message(s)
+		self.window_event_buffer.append(f"You: {s}")
+		self.show_events_buffer()
+
+	def handle_event(self, ev: SapphireEvents.Event):
+		match ev:
+			case SapphireEvents.AIResponseEvent:
+				self.window_event_buffer.append(f"AI: {s}")
+				self.show_events_buffer()
 
 
+	def show_events_buffer(self):
+		y = 1
+		for ev in self.window_event_buffer:
+			self.window.addstr(y, 1 ,ev)
+			y +=  1
 
 
 	
