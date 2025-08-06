@@ -1,4 +1,4 @@
-#from sapphire.interface import SapphireInterface
+from sapphire.interface import SapphireInterface
 import curses, time, threading
 
 # TODO make it lol
@@ -8,6 +8,8 @@ class SapphireCtl():
 
 	def __init__(self):
 		self.lock = threading.Lock()
+		self.interface = SapphireInterface("sapphire-ctl/tui")
+		self.is_running = True
 
 	def init(self, scr: curses.window):
 
@@ -27,7 +29,6 @@ class SapphireCtl():
 		curses.init_pair(2, curses.COLOR_WHITE, -1)
 
 		
-
 		height, width = self.scr.getmaxyx()
 
 		self.window = curses.newwin(
@@ -67,13 +68,13 @@ class SapphireCtl():
 	
 	def run(self):
 
-		while True:
+		while self.is_running:
 			key = self.scr.getch()
 			self.handle_key(key)
 
 			self.input_window.refresh()
 			self.window.refresh()
-			time.sleep(0.1)
+			time.sleep(0.01)
 
 
 	def handle_key(self, key):
@@ -102,6 +103,18 @@ class SapphireCtl():
 
 		self.input_window.addstr(1, 1, "".join(displayed_buffer))
 		
+
+	def parse_input(self, s: str):
+		pass
+
+	def parse_command(self, s: str):
+		pass
+
+	def send_user_msg(self, s: str):
+		pass
+
+
+	
 
 
 		
