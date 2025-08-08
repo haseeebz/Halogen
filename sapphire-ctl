@@ -149,8 +149,8 @@ class SapphireCtl():
 
 	def handle_event(self, ev: SapphireEvents.Event):
 		match ev:
-			case SapphireEvents.AIResponseEvent:
-				self.window_event_buffer.append(f"AI: {s}")
+			case SapphireEvents.AIResponseEvent():
+				self.window_event_buffer.append(f"AI: {ev.message}")
 				self.show_events_buffer()
 
 
