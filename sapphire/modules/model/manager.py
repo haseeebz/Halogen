@@ -6,12 +6,13 @@ from types import ModuleType
 from typing import Tuple, Union
 import inspect, importlib
 
-from sapphire.core.base import (
+from sapphire.base import (
 	SapphireEvents,
 	SapphireConfig,
 	SapphireModule,
 	SapphireError,
-	SapphireCommand
+	SapphireCommand,
+	Chain
 )
 
 from .base import BaseModelProvider, ModelResponse
@@ -231,7 +232,7 @@ class SapphireModelManager(SapphireModule):
 			)
 	
 	
-	def eval_ai_response(self, response: ModelResponse, chain: SapphireEvents.Chain):
+	def eval_ai_response(self, response: ModelResponse, chain: Chain):
 
 		extras = {}
 		for ex in response.extras:
@@ -261,5 +262,5 @@ class SapphireModelManager(SapphireModule):
 
 
 	@SapphireCommand("current", "Get info about the current model")
-	def get_current_model_command(self, args: list[str], chain: SapphireEvents.Chain):
+	def get_current_model_command(self, args: list[str], chain: Chain):
 		return f"Model: {self.current_model.name()}"

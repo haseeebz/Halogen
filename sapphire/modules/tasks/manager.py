@@ -1,11 +1,12 @@
 from collections.abc import Callable
 from typing import Tuple
-from sapphire.core.base import (
+from sapphire.base import (
 	SapphireEvents,
 	SapphireConfig,
 	SapphireModule,
 	SapphireError,
-	SapphireCommand
+	SapphireCommand,
+	Chain
 )
 
 from .meta import TaskNamespace, TaskData

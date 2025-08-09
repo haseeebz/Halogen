@@ -1,5 +1,5 @@
 from abc import ABC
-from sapphire.core.base import SapphireEvents, SapphireConfig
+from sapphire.base import SapphireEvents, SapphireConfig
 from pathlib import Path
 import os
 

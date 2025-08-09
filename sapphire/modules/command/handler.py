@@ -1,4 +1,4 @@
-from sapphire.core.base import SapphireEvents, SapphireModule, SapphireConfig, SapphireCommand
+from sapphire.base import SapphireEvents, SapphireModule, SapphireConfig, SapphireCommand, Chain
 from .meta import CommandData, CommandNamespace
 
 from typing import Callable, Literal, Tuple
@@ -152,7 +152,7 @@ class SapphireCommandHandler(SapphireModule):
 
 	_help_str = ""
 	@SapphireCommand("help", "Get info about commands")
-	def help_command(self, args: list[str], chain: SapphireEvents.Chain) -> str:
+	def help_command(self, args: list[str], chain: Chain) -> str:
 		
 		if self._help_str:
 			return self._help_str

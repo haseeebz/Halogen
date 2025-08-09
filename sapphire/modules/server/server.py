@@ -4,11 +4,12 @@ from dataclasses import asdict
 from collections.abc import Callable
 from typing import Tuple
 
-from sapphire.core.base import (
+from sapphire.base import (
 	SapphireModule, 
 	SapphireConfig, 
 	SapphireEvents, 
-	SapphireCommand
+	SapphireCommand,
+	Chain
 )
 
 
@@ -99,7 +100,7 @@ class SapphireServer(SapphireModule):
 	
 
 	@SapphireCommand("address", "Get the socket address of the sapphire server.")
-	def get_address(self, args: list[str], chain: SapphireEvents.Chain) -> str:
+	def get_address(self, args: list[str], chain: Chain) -> str:
 		return f"{self.HOST}:{self.PORT}"
 
 
@@ -121,7 +122,7 @@ class SapphireServer(SapphireModule):
 			f"Encountered Error= {e.__class__.__name__}: {e.__str__()}. JSON STRING: {json_str}"
 
 		self.log(
-			SapphireEvents.chain(),
+			Chain(),
 			"critical",
 			error_msg
 		)
@@ -142,7 +143,7 @@ class SapphireServer(SapphireModule):
 		try:
 			event_type = SapphireEvents.serialize(d["type"])
 			event = event_type(
-				**d["payload"], chain=SapphireEvents.Chain(chain["context"], chain["flow"])
+				**d["payload"], chain=Chain(chain["context"], chain["flow"])
 				)
 			return event
 		except KeyError as e:
@@ -150,7 +151,7 @@ class SapphireServer(SapphireModule):
 			f"Encountered Error= {e.__class__.__name__} : {e.__str__()}. JSON STRING: {msg}"
 
 		self.log(
-			SapphireEvents.chain(),
+			Chain(),
 			"critical",
 			error_msg
 		)
@@ -186,7 +187,7 @@ class SapphireServer(SapphireModule):
 		)
 
 		self.log(
-			SapphireEvents.chain(event),
+			Chain(event),
 			"info",
 			msg
 		)

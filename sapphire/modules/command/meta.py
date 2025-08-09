@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Callable
-from sapphire.core.base import SapphireEvents
+from sapphire.base import Chain
 
 @dataclass
 class CommandData:

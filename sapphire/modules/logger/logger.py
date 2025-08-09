@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from typing import Tuple
-from sapphire.core.base import SapphireModule, SapphireEvents, SapphireConfig
+from sapphire.base import SapphireModule, SapphireEvents, SapphireConfig
 import os
 from dataclasses import asdict
 
