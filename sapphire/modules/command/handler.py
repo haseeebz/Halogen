@@ -14,7 +14,7 @@ import shlex
 # 3) and returns a string
 
 
-class CommandHandler(SapphireModule):
+class SapphireCommandHandler(SapphireModule):
 	"""
 	Class for handling commands which change the state of sapphire.
 

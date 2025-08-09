@@ -11,7 +11,7 @@ from sapphire.core.base import (
 from .meta import TaskNamespace, TaskData
 
 
-class TaskManager(SapphireModule):
+class SapphireTaskManager(SapphireModule):
 
 	def __init__(
 		self, 

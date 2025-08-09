@@ -18,7 +18,7 @@ from .base import BaseModelProvider, ModelResponse
 
 
 
-class ModelManager(SapphireModule):
+class SapphireModelManager(SapphireModule):
 
 	def __init__(
 		self, 
