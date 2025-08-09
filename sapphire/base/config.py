@@ -37,7 +37,7 @@ class SapphireConfig():
 
 	def get(self, path: str, default: Any = None) -> Any:	
 		parts = path.split(".")
-		current = self.cfg
+		current = self._cfg
 		for part in parts:
 			if isinstance(current, dict):
 				current = current.get(part, default)
@@ -45,7 +45,7 @@ class SapphireConfig():
 		return current
 
 
-	def get_sub_config():
+	def get_sub_config(self, path: str):
 		cfg = self.get(path, {})
 		
 		if not isinstance(cfg, dict):
@@ -62,8 +62,8 @@ class SapphireConfigLoader():
 		self.os = platform.system().lower()
 		self.init_config()
 
-		self.file: str           = ""
-		self.directory: str		 = ""
+		self.file: Path         
+		self.directory: Path	 
 		self.cfg: dict[str, Any] = {}	
 
 
@@ -77,7 +77,7 @@ class SapphireConfigLoader():
 			raise SapphireError(f"Running in unsupported operating system: {OS}.")
 
 		if not self.directory.exists():
-			os.makedirs(CONFIG_DIR, exist_ok = True)
+			os.makedirs(self.directory, exist_ok = True)
 
 
 	def load(self):
@@ -87,7 +87,7 @@ class SapphireConfigLoader():
 		if not self.file.exists():
 			raise SapphireError(f"Config file '{self.file}' does not exist! Cannot start sapphire.")
 
-		with open(self.file) as file:
+		with open(self.file, 'rb') as file:
 			try:
 				data = tomllib.load(file)
 			except tomllib.TOMLDecodeError:

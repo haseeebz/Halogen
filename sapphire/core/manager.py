@@ -16,12 +16,12 @@ from sapphire.modules import SapphireLogger
 
 class SapphireModuleManager():
 
-	def __init__(self, root: Path, config: SapphireConfig, emit_event: Callable):
-		self.sapphire_root = root
-		self.modules_dir = self.sapphire_root / "modules"
+	def __init__(self, config: SapphireConfig, emit_event: Callable):
 
 		self.config = config
 		self.emit_event = emit_event
+		self.modules_dir = self.config.directory / "modules"
+
 
 		self.modules: MutableSequence[SapphireModule] = []
 		self.dispatch_map: dict[type[SapphireEvents.Event], MutableSequence[SapphireModule]] = {}

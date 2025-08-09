@@ -1,7 +1,7 @@
 
 import json
-from sapphire.core.base import SapphireEvents, SapphireConfig
-from sapphire.model.base import BaseModelProvider, ModelResponse
+from sapphire.base import SapphireEvents, SapphireConfig
+from sapphire.modules.model.base import BaseModelProvider, ModelResponse
 
 
 try:

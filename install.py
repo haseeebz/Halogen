@@ -120,13 +120,13 @@ color_print(GREEN, "Sapphire installed.")
 # Setting up
 #
 
-color_print(BLUE, f"Moving config.toml to {CONFIG_DIR}...")
-shutil.move("config.toml", CONFIG_DIR)
+color_print(BLUE, f"Copying config.toml to {CONFIG_DIR}...")
+shutil.copy("config.toml", CONFIG_DIR)
 
-color_print(BLUE, f"Moving modules/ to {CONFIG_DIR}...")
-shutil.move("modules", CONFIG_DIR)
+color_print(BLUE, f"Copying modules/ to {CONFIG_DIR/'modules'}...")
+shutil.copytree("modules", CONFIG_DIR/'modules')
 
-color_print(BLUE, f"Moving models/ to {CONFIG_DIR}...")
-shutil.move("models", CONFIG_DIR)
+color_print(BLUE, f"Copying models/ to {CONFIG_DIR/'models'}...")
+shutil.copytree("models", CONFIG_DIR/'models')
 
-color_print(GREEN, "Setup complete!")
+color_print(GREEN, "Setup complete! Sapphire can be ran now!")

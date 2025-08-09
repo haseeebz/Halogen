@@ -2,5 +2,5 @@
 from .core import SapphireCore
 
 def main():
-	core = SapphireCore(__file__)
+	core = SapphireCore()
 	core.run()

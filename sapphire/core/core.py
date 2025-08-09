@@ -17,11 +17,8 @@ from .manager import SapphireModuleManager
 
 class SapphireCore():
 
-	def __init__(self, root: str) -> None:
+	def __init__(self) -> None:
 
-		self.root = Path(root).resolve().parents[1]
-		print(self.root)
-		# The directory where sapphire resides
 		
 		self.config: SapphireConfig = SapphireConfigLoader().load()
 		
@@ -32,7 +29,7 @@ class SapphireCore():
 
 		self.is_dev = self.args.dev
 
-		self.event_logs = self.root / "events.log"
+		#self.event_logs = self.root / "events.log"
 
 
 		self.core_events: MutableSequence[type[SapphireEvents.Event]] = [
@@ -47,7 +44,7 @@ class SapphireCore():
 			f"Hello {self.config.get('user.name', 'User')} :D"
 		)
 
-		self.manager = SapphireModuleManager(self.root, self.config, self.eventbus.emit)
+		self.manager = SapphireModuleManager(self.config, self.eventbus.emit)
 		self.manager.load_modules()
 
 		self.define_core_commands()
@@ -90,8 +87,8 @@ class SapphireCore():
 
 	def pass_events(self, event: SapphireEvents.Event):
 
-		if self.is_dev:
-			self.log_events(event)
+		#if self.is_dev:
+		#	self.log_events(event)
 		event_type = type(event)
 
 		if event_type in self.core_events: 

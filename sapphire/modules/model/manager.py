@@ -29,7 +29,7 @@ class SapphireModelManager(SapphireModule):
 		super().__init__(emit_event, config)
 		self.current_model: Union[BaseModelProvider, None] = None 
 		self.registered_providers: dict[str, BaseModelProvider] = {}
-		self.model_directory = Path("models/")
+		self.model_directory = self.config.directory / "models"
 		self.has_commands = True
 
 
