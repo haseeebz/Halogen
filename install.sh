@@ -9,7 +9,6 @@ color_print() {
     echo -e "${1}${2}${RESET}"
 }
 
-
 color_print $BLUE "Creating virtual environment..."
 
 if ! python3 -m venv .venv ; then
@@ -29,7 +28,13 @@ if ! pip install -r requirements.txt ; then
 fi
 
 color_print $GREEN "Dependancies successfully installed."
-color_print $BLUE "Installing Sapphire..."
-pip install -e .
 
-color_print $GREEN "Sapphire should now be successfully installed."
+color_print $BLUE "Installing Sapphire..."
+
+if ! pip install -e . ; then
+    color_print $RED "Failed to install Sapphire."
+    exit 1
+fi
+
+color_print $GREEN "Sapphire successfully installed."
+
