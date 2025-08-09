@@ -1,7 +1,4 @@
 from types import MethodType
-from .module import SapphireModule
-from .config import SapphireConfig
-from .events import SapphireEvents
 
 from typing import Callable, MutableSequence, Type, Literal
 from pathlib import Path
@@ -9,22 +6,13 @@ import importlib
 import inspect
 
 
-# loading the core modules
-from sapphire.logger import Logger
-from sapphire.interface import SapphireServer
-from sapphire.prompt import PromptManager
-from sapphire.model import ModelManager
-from sapphire.command import CommandHandler
-from sapphire.tasks import TaskManager
+from .base import (
+	SapphireModule, 
+	SapphireConfig,
+	SapphireEvents
+)
 
-core_modules = [
-	Logger, 
-	SapphireServer,
-	PromptManager,
-	ModelManager,
-	CommandHandler,
-	TaskManager
-]
+from sapphire.modules import MODULES
 
 
 class SapphireModuleManager():
@@ -43,7 +31,7 @@ class SapphireModuleManager():
 	def load_modules(self) -> None:
 		"Loading all modules and passing them to registration."
 
-		for core_module in core_modules:
+		for core_module in MODULES:
 			self.register_module(core_module)
 
 		module_names: list[str] = self.config.get("modules", [])

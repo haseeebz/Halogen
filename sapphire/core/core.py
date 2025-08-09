@@ -3,13 +3,14 @@ from pathlib import Path
 from typing import Callable, MutableSequence, Literal
 
 from .base import (
-	EventBus, 
 	SapphireModule, 
 	SapphireConfig,
-	SapphireArgs,
-	SapphireEvents,
-	SapphireModuleManager
+	SapphireEvents
 )
+
+from .args import SapphireArgs
+from .eventbus import EventBus
+from .manager import SapphireModuleManager
 
 
 class SapphireCore():

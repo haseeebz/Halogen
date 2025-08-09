@@ -1,7 +1,8 @@
 
 import threading
-from .events import SapphireEvents
 from typing import Literal
+from sapphire.base import SapphireEvents
+
 
 class EventBus():
 
