@@ -2,7 +2,6 @@ import tomllib, os
 from typing import Any, Union
 
 
-
 class SapphireConfig():
 
 	def __init__(self, *, configfile: str = "config.toml", cfg: dict[str, Any] | None = None):

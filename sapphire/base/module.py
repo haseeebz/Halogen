@@ -1,9 +1,11 @@
 from abc import ABC
 from types import MethodType
 from typing import Tuple, Literal, Union
-from .config import SapphireConfig
 from collections.abc import Callable
-from sapphire.core.base import SapphireEvents
+
+from .events import SapphireEvents
+from .config import SapphireConfig
+from .chain import Chain
 
 
 class SapphireModule(ABC):
@@ -72,7 +74,7 @@ class SapphireModule(ABC):
 
 	def log(
 		self, 
-		chain: SapphireEvents.Chain,
+		chain: Chain,
 		level: Literal["debug", "info", "warning", "critical"],
 		msg: str
 	):
@@ -92,7 +94,7 @@ class SapphireModule(ABC):
 	def define_command(
 		self, 
 		cmd: str, 
-		func: Callable[[list[str], SapphireEvents.Chain], str], 
+		func: Callable[[list[str], Chain], str], 
 		info: str = ""
 		):
 		self.emit_event(

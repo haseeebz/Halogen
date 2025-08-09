@@ -7,7 +7,7 @@ import os
 # TODO Make prompt manager more robust and modular cuz the current approach is literal duct tape
 
 
-class PromptManager(SapphireModule):
+class SapphirePromptManager(SapphireModule):
 
 	def __init__(
 		self, 
