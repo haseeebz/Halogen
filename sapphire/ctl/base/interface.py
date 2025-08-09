@@ -1,4 +1,4 @@
-from sapphire.core.base import SapphireEvents
+from sapphire.base import SapphireEvents, Chain
 from .client import SapphireClient
 import socket, shlex
 from queue import Empty
@@ -15,7 +15,7 @@ class SapphireInterface():
 		self.name = name
 
 
-	def start(self) -> SapphireEvents.Chain:
+	def start(self) -> Chain:
 		"Start the client and the interface. Returns the first client chain (basically an ID)"
 		self.client = SapphireClient()
 		self.client.start()
@@ -48,7 +48,7 @@ class SapphireInterface():
 		self.client.out_buffer.put(ev)
 
 
-	def send_message(self, msg: str) -> SapphireEvents.Chain:
+	def send_message(self, msg: str) -> Chain:
 		"""
 		Shorthand for creating a user input event and sending it.
 		Returns chain id of the message
@@ -66,7 +66,7 @@ class SapphireInterface():
 		return chain
 
 
-	def send_command(self, namespace: str, cmd: str, args: list[str]) -> SapphireEvents.Chain:
+	def send_command(self, namespace: str, cmd: str, args: list[str]) -> Chain:
 		"Shorthand for creating a command input event and dispatching it."
 
 		chain = self.client.chain()

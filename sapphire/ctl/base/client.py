@@ -1,6 +1,6 @@
 
 import socket, json, threading, queue
-from sapphire.core.base import SapphireEvents
+from sapphire.core.base import SapphireEvents, Chain
 from typing import Tuple
 from dataclasses import asdict
 
@@ -15,7 +15,7 @@ class SapphireClient():
 
 	def __init__(self) -> None:
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.client_chain: SapphireEvents.Chain = SapphireEvents.Chain(0, 0) #placeholder
+		self.client_chain: Chain = Chain(0, 0) #placeholder
 
 		self.lock = threading.Lock()
 		self.read_thread = threading.Thread(target= self.read)
@@ -63,12 +63,12 @@ class SapphireClient():
 			)
 	
 
-	def chain(self, event: SapphireEvents.Event | None = None) -> SapphireEvents.Chain:
+	def chain(self, event: SapphireEvents.Event | None = None) -> Chain:
 		if isinstance(event, SapphireEvents.Event):
 			return event.chain
 		else:
 			chain = self.client_chain
-			self.client_chain = SapphireEvents.Chain(
+			self.client_chain = Chain(
 				self.client_chain.context, 
 				self.client_chain.flow + 1
 			)
@@ -106,7 +106,7 @@ class SapphireClient():
 		try:
 			event_type = SapphireEvents.serialize(d["type"])
 			event = event_type(
-				**d["payload"], chain=SapphireEvents.Chain(chain["context"], chain["flow"])
+				**d["payload"], chain=Chain(chain["context"], chain["flow"])
 				)
 			return event
 		except KeyError as e:
