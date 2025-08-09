@@ -5,6 +5,7 @@ from pathlib import Path
 RED   = '\033[0;31m'
 GREEN = '\033[0;32m'
 BLUE  = '\033[0;34m'
+YELLOW = '\033[33m'
 RESET = '\033[0m'  
 
 
@@ -55,7 +56,6 @@ if SAPPHIRE_DIR != WORKING_DIR:
     exit(1)
 
 
-
 # Creating the venv
 
 color_print(BLUE, "Creating virtual environment...")
@@ -63,7 +63,7 @@ color_print(BLUE, "Creating virtual environment...")
 try:
     venv.EnvBuilder(with_pip = True).create(VENV_DIR)
 except shutil.SameFileError:
-    color_print(RED, f"Virtual environment at {VENV_DIR} already exists? Using this one.")
+    color_print(YELLOW, f"Virtual environment at {VENV_DIR} already exists? Using this one.")
 
 
 color_print(GREEN, f"Virtual environment created at {VENV_DIR}")
