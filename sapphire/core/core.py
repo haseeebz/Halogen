@@ -17,6 +17,7 @@ class SapphireCore():
 	def __init__(self, root: str) -> None:
 
 		self.root = Path(root).resolve().parents[1]
+		print(self.root)
 		# The directory where sapphire resides
 		
 		self.config: SapphireConfig = SapphireConfig()
@@ -26,7 +27,7 @@ class SapphireCore():
 		self.shutdown_requested = False
 
 		self.is_dev = self.args.dev
-		
+
 		self.event_logs = self.root / "events.log"
 
 
