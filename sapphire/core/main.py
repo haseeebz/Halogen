@@ -1,5 +1,5 @@
 
-from sapphire.core.core import SapphireCore
+from .core import SapphireCore
 
 def main():
 	core = SapphireCore(__file__)

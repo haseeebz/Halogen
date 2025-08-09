@@ -1,5 +1,5 @@
-from sapphire.interface import SapphireInterface
-from sapphire.core.base import SapphireEvents
+from sapphire.ctl.base import SapphireInterface
+from sapphire.base import SapphireEvents
 
 import curses, time, threading, shlex
 

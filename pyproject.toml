@@ -17,5 +17,5 @@ build-backend = "setuptools.build_meta"
 packages = ["sapphire", "sapphire_ctl"]
 
 [project.scripts]
-sapphire = "sapphire.main:main"
-sapphire-tui = "sapphire_ctl.tui.main:main"
+sapphire = "sapphire.core.main:main"
+sapphire-tui = "sapphire.ctl.tui.main:main"
