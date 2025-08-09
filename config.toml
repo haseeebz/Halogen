@@ -11,12 +11,6 @@ modules = [
 
 name = "Haseeb"
 
-dev = true
-# Activates dev features which include:
-# 1) Event logs
-# 2) Error raising instead of suppressing in .handle() and the event loop.
-
-
 
 [logger] #configurations for the built-in logger module
 

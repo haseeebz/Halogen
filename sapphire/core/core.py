@@ -5,7 +5,8 @@ from typing import Callable, MutableSequence, Literal
 from .base import (
 	EventBus, 
 	SapphireModule, 
-	SapphireConfig, 
+	SapphireConfig,
+	SapphireArgs,
 	SapphireEvents,
 	SapphireModuleManager
 )
@@ -19,11 +20,13 @@ class SapphireCore():
 		# The directory where sapphire resides
 		
 		self.config: SapphireConfig = SapphireConfig()
+		self.args: SapphireArgs = SapphireArgs()
 
 		self.is_running: bool = True
 		self.shutdown_requested = False
-		self.is_dev = self.config.get("user.dev", False)
 
+		self.is_dev = self.args.dev
+		
 		self.event_logs = self.root / "events.log"
 
 
