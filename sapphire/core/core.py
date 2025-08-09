@@ -5,6 +5,7 @@ from typing import Callable, MutableSequence, Literal
 from sapphire.base import (
 	SapphireModule, 
 	SapphireConfig,
+	SapphireConfigLoader,
 	SapphireEvents
 )
 
@@ -22,7 +23,8 @@ class SapphireCore():
 		print(self.root)
 		# The directory where sapphire resides
 		
-		self.config: SapphireConfig = SapphireConfig()
+		self.config: SapphireConfig = SapphireConfigLoader().load()
+		
 		self.args: SapphireArgs = SapphireArgs()
 
 		self.is_running: bool = True

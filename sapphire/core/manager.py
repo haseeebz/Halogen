@@ -1,10 +1,8 @@
 from types import MethodType
-
 from typing import Callable, MutableSequence, Type, Literal
 from pathlib import Path
 import importlib
 import inspect
-
 
 from sapphire.base import (
 	SapphireModule, 
@@ -13,7 +11,6 @@ from sapphire.base import (
 )
 
 from sapphire.modules import MODULES
-
 from sapphire.modules import SapphireLogger
 
 
@@ -180,35 +177,40 @@ class SapphireModuleManager():
 
 	def handle_module_commands(self, module: SapphireModule):
 		mod_name = module.name()
+
 		for name, mem in inspect.getmembers(module, inspect.ismethod):
-			if hasattr(mem, "_is_command"):
-				ev = SapphireEvents.CommandRegisterEvent(
-					module.name(),
-					SapphireEvents.make_timestamp(),
-					SapphireEvents.chain(),
-					mod_name,
-					mem._name, #type: ignore
-					mem._info, #type: ignore // These SHOULD exist if _is_command exists
-					mem
-				)
-				self.emit_event(ev)
+			if not hasattr(mem, "_is_command"):
+				continue
+		
+			ev = SapphireEvents.CommandRegisterEvent(
+				module.name(),
+				SapphireEvents.make_timestamp(),
+				SapphireEvents.chain(),
+				mod_name,
+				mem._name, #type: ignore
+				mem._info, #type: ignore // These SHOULD exist if _is_command exists
+				mem
+			)
+			self.emit_event(ev)
 
 
 	def handle_module_tasks(self, module: SapphireModule):
 		mod_name = module.name()
 		for name, mem in inspect.getmembers(module, inspect.ismethod):
-			if hasattr(mem, "_is_task"):
-				ev = SapphireEvents.TaskRegisterEvent(
-					module.name(),
-					SapphireEvents.make_timestamp(),
-					SapphireEvents.chain(),
-					mod_name,
-					mem._name, #type: ignore
-					mem._args,#type: ignore
-					mem._info, #type: ignore // These SHOULD exist if _is_command exists
-					mem
-				)
-				self.emit_event(ev)
+			if not hasattr(mem, "_is_task"):
+				continue
+
+			ev = SapphireEvents.TaskRegisterEvent(
+				module.name(),
+				SapphireEvents.make_timestamp(),
+				SapphireEvents.chain(),
+				mod_name,
+				mem._name, #type: ignore
+				mem._args,#type: ignore
+				mem._info, #type: ignore // These SHOULD exist if _is_task exists
+				mem
+			)
+			self.emit_event(ev)
 
 
 	
