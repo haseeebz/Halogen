@@ -37,6 +37,9 @@ def shell(cmd: str) -> bool:
     return False
 
 
+#
+# Initial
+#
 
 OS = platform.system().lower()
 
@@ -46,9 +49,21 @@ WORKING_DIR = Path(os.getcwd())
 VENV_DIR = Path(SAPPHIRE_DIR) / ".venv"
 
 
+if OS == "windows":
+    CONFIG_DIR = Path(os.environ["APPDATA"]) / "sapphire"
+elif OS == "linux":
+    CONFIG_DIR = Path(os.path.expanduser("~/.config/sapphire"))
+else:
+    color_print(RED, f"Unsupported operating system: {OS}")
+    exit(1)
+
+
+if not CONFIG_DIR.exists():
+    os.makedirs(CONFIG_DIR, exist_ok = True)
+
+
 color_print(GREEN, f"Detected OS : {OS}")
 color_print(BLUE, "Proceeding with installation...")
-
 
 
 if SAPPHIRE_DIR != WORKING_DIR:
@@ -56,7 +71,9 @@ if SAPPHIRE_DIR != WORKING_DIR:
     exit(1)
 
 
+#
 # Creating the venv
+#
 
 color_print(BLUE, "Creating virtual environment...")
 
@@ -69,8 +86,9 @@ except shutil.SameFileError:
 color_print(GREEN, f"Virtual environment created at {VENV_DIR}")
 
 
-
-# installing dependancies
+#
+# Installing dependancies
+#
 
 pip_path = VENV_DIR / "bin" / "pip3"
 
@@ -85,8 +103,9 @@ if not success:
 color_print(GREEN, "Dependancies installed.")
 
 
-
+#
 # Installing sapphire
+#
 
 color_print(BLUE, "Installing Sapphire in virtual env...")
 success = shell(f"{pip_path} install -e .")
@@ -96,3 +115,18 @@ if not success:
     exit(1)
 
 color_print(GREEN, "Sapphire installed.")
+
+#
+# Setting up
+#
+
+color_print(BLUE, f"Moving config.toml to {CONFIG_DIR}...")
+shutil.move("config.toml", CONFIG_DIR)
+
+color_print(BLUE, f"Moving modules/ to {CONFIG_DIR}...")
+shutil.move("modules", CONFIG_DIR)
+
+color_print(BLUE, f"Moving models/ to {CONFIG_DIR}...")
+shutil.move("models", CONFIG_DIR)
+
+color_print(GREEN, "Setup complete!")

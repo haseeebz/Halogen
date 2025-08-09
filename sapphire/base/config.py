@@ -76,7 +76,7 @@ class SapphireConfigLoader():
 		else:
 			raise SapphireError(f"Running in unsupported operating system: {OS}.")
 
-		if not CONFIG_DIR.exists():
+		if not self.directory.exists():
 			os.makedirs(CONFIG_DIR, exist_ok = True)
 
 
