@@ -6,13 +6,15 @@ import importlib
 import inspect
 
 
-from .base import (
+from sapphire.base import (
 	SapphireModule, 
 	SapphireConfig,
 	SapphireEvents
 )
 
 from sapphire.modules import MODULES
+
+from sapphire.modules import SapphireLogger
 
 
 class SapphireModuleManager():
@@ -146,13 +148,13 @@ class SapphireModuleManager():
 					raise e
 
 
-	def end_modules(self) -> Logger | None:
+	def end_modules(self) -> SapphireLogger | None:
 		"Calls .end() on all modules."
 
 		logger = None
 		for module in self.modules:
 
-			if isinstance(module, Logger): 
+			if isinstance(module, SapphireLogger): 
 				logger = module
 				continue
 

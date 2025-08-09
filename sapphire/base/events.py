@@ -11,7 +11,7 @@ class SapphireEvents():
 	"""
 	All Sapphire Events and helper functions.
 	"""
-
+	Chain = Chain
 	_lock = threading.Lock()
 	_intern_chain = Chain(0, 0)
 	_current_context = 0

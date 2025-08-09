@@ -1,4 +1,3 @@
-from .eventbus import EventBus
 from .events import SapphireEvents
 from .module import SapphireModule
 from .config import SapphireConfig

@@ -6,7 +6,7 @@ from sapphire.base import Chain
 class CommandData:
 	cmd: str
 	info: str
-	func: Callable[[list[str], SapphireEvents.Chain], str]
+	func: Callable[[list[str], Chain], str]
 
 @dataclass 
 class CommandNamespace:

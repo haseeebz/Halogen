@@ -1,1 +1,1 @@
-from .main import main
+version = "0.0.1"

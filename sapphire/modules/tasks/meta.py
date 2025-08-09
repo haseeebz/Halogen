@@ -1,13 +1,13 @@
 from dataclasses import dataclass, field
 from typing import Callable
-from sapphire.core.base import SapphireEvents
+from sapphire.base import Chain
 
 @dataclass
 class TaskData:
 	name: str
 	info: str
 	args: list[str]
-	func: Callable[[list[str], SapphireEvents.Chain], str]
+	func: Callable[[list[str], Chain], str]
 
 @dataclass 
 class TaskNamespace:

@@ -14,7 +14,7 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["sapphire", "sapphire_ctl"]
+packages = ["sapphire"]
 
 [project.scripts]
 sapphire = "sapphire.core.main:main"

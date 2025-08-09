@@ -2,7 +2,7 @@ import time, os
 from pathlib import Path
 from typing import Callable, MutableSequence, Literal
 
-from .base import (
+from sapphire.base import (
 	SapphireModule, 
 	SapphireConfig,
 	SapphireEvents
@@ -11,6 +11,7 @@ from .base import (
 from .args import SapphireArgs
 from .eventbus import EventBus
 from .manager import SapphireModuleManager
+
 
 
 class SapphireCore():
