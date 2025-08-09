@@ -79,6 +79,7 @@ class SapphireCommandHandler(SapphireModule):
 			ev.func
 		)
 
+
 		namespace.commands[ev.cmd] = command
 		namespace.defined.add(ev.cmd)
 
