@@ -1,4 +1,4 @@
-import curses, time, shlex
+import curses, time, shlex, math
 from sapphire.ctl.base import SapphireInterface
 from sapphire.base import SapphireEvents
 
@@ -47,6 +47,7 @@ class SapphireTUI():
 		self.event_buffer: list[str] = []
 		self.max_event_buffer_h, self.max_event_buffer_w = self.events_win.getmaxyx()
 		self.max_event_buffer_h -= 2
+		self.max_event_buffer_w -= 4
 
 
 
@@ -97,11 +98,22 @@ class SapphireTUI():
 		self.input_win.addstr(1, 2, "".join(displayed_buffer))
 		
 
+
+	def handle_event(self, ev: SapphireEvents.Event):
+		match ev:
+			case SapphireEvents.AIResponseEvent():
+				self.event_buffer.append(f"AI: {ev.message}")
+				self.show_events_buffer()
+
+
 	def show_events_buffer(self):
 		y = 1
 		for ev in self.event_buffer:
+			length = len(ev)
 			self.events_win.addstr(y, 1 ,ev)
-			y +=  1
+			
+			lines = math.ceil(length / self.max_event_buffer_w)
+			y +=  lines
 
 
 	def parse_input(self, s: str):
@@ -134,6 +146,9 @@ class SapphireTUI():
 		while self.is_running:
 			key = self.scr.getch()
 			self.handle_input_key(key)
+
+			ev = self.interface.check_event(0.05)
+			if ev: self.handle_event(ev)
 
 			self.input_win.refresh()
 			self.events_win.refresh()
