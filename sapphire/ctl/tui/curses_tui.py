@@ -1,4 +1,4 @@
-import curses, time
+import curses, time, shlex
 from sapphire.ctl.base import SapphireInterface
 from sapphire.base import SapphireEvents
 
@@ -99,8 +99,8 @@ class SapphireTUI():
 
 	def show_events_buffer(self):
 		y = 1
-		for ev in self.window_event_buffer:
-			self.window.addstr(y, 1 ,ev)
+		for ev in self.event_buffer:
+			self.events_win.addstr(y, 1 ,ev)
 			y +=  1
 
 
@@ -123,13 +123,13 @@ class SapphireTUI():
 
 	def send_user_msg(self, s: str):
 		self.interface.send_message(s)
-		self.window_event_buffer.append(f"You: {s}")
+		self.event_buffer.append(f"You: {s}")
 		self.show_events_buffer()
 
 
 	def run(self):
 
-		self.inteface.start()
+		self.interface.start()
 
 		while self.is_running:
 			key = self.scr.getch()

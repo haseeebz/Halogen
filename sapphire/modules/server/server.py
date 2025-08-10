@@ -122,7 +122,7 @@ class SapphireServer(SapphireModule):
 			f"Encountered Error= {e.__class__.__name__}: {e.__str__()}. JSON STRING: {json_str}"
 
 		self.log(
-			Chain(),
+			SapphireEvents.chain(),
 			"critical",
 			error_msg
 		)
@@ -151,7 +151,7 @@ class SapphireServer(SapphireModule):
 			f"Encountered Error= {e.__class__.__name__} : {e.__str__()}. JSON STRING: {msg}"
 
 		self.log(
-			Chain(),
+			SapphireEvents.chain(),
 			"critical",
 			error_msg
 		)
@@ -187,7 +187,7 @@ class SapphireServer(SapphireModule):
 		)
 
 		self.log(
-			Chain(event),
+			SapphireEvents.chain(event),
 			"info",
 			msg
 		)
