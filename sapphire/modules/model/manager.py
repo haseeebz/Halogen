@@ -30,6 +30,7 @@ class SapphireModelManager(SapphireModule):
 		self.current_model: Union[BaseModelProvider, None] = None 
 		self.registered_providers: dict[str, BaseModelProvider] = {}
 		self.model_directory = self.config.directory / "models"
+		print(self.model_directory)
 		self.has_commands = True
 
 
@@ -98,29 +99,29 @@ class SapphireModelManager(SapphireModule):
 	
 		mods = []
 
-		for sub in self.model_directory.iterdir():
+		for sub_dir in self.model_directory.iterdir():
 
-			if not sub.is_dir():
+			if not sub_dir.is_dir():
 				self.log(
 					SapphireEvents.chain(),
 					"debug",
 					f"Ignoring {sub.absolute()}. Not a directory"
 				)
 				continue
-			 
-			mod_init = sub / "__init__.py"
 			
-			if not mod_init.exists():
+			sub_dir_init = sub_dir / "__init__.py"
+
+			if not sub_dir_init.exists():
 				self.log(
 					SapphireEvents.chain(),
 					"debug",
-					f"Ignoring {sub.absolute()}. Not a python module."
+					f"Ignoring {sub_dir.absolute()}. Not a python module."
 				)
 				continue
 
-			mod_name = f"models.{sub.name}"
+			mod_name = f"{sub_dir.name}"
 
-			spec = importlib.util.spec_from_file_location(mod_name, mod_init)
+			spec = importlib.util.spec_from_file_location(mod_name, sub_dir)
 
 			if not spec: continue
 			if not spec.loader: continue

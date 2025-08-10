@@ -58,5 +58,3 @@ class Gemini(BaseModelProvider):
 
 		return response
 
-
-		
