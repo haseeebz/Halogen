@@ -66,15 +66,24 @@ class SapphirePromptManager(SapphireModule):
 
 	def load_core_sections(self):
 
+		sections = []
 		for section in self.sections_dir.iterdir():
 			
 			if not section.is_file():
 				continue
+			
+			sections.append(section.name)
 
 			with open(section) as file:
 				section_text = file.read()
 
 			self.core_sections.append(section_text)
+
+		self.log(
+			SapphireEvents.chain(),
+			"debug",
+			f"Assembled core sections: {sections}"
+		)
 
 
 	def make_prompt_parts(self) -> list[str]:
@@ -87,6 +96,13 @@ class SapphirePromptManager(SapphireModule):
 
 
 	def handle_user_input(self, event: SapphireEvents.UserInputEvent):	
+
+		self.log(
+			SapphireEvents.chain(event),
+			"info",
+			"Received user input. Making prompt."
+		)
+
 		prompt = self.make_prompt_parts()
 		prompt.append("[USER]")
 		prompt.append(event.message)
@@ -106,6 +122,13 @@ class SapphirePromptManager(SapphireModule):
 
 
 	def handle_task_completion(self, ev: SapphireEvents.TaskCompletionEvent):
+
+		self.log(
+			SapphireEvents.chain(event),
+			"info",
+			"Received task completion info. Making prompt."
+		)
+
 		prompt = self.make_prompt()
 
 		prompt.append("[SAPPHIRE]")
