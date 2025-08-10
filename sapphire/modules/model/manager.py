@@ -1,7 +1,7 @@
 from collections.abc import Callable
 import importlib.util
 from pathlib import Path
-import os
+import os, sys
 from types import ModuleType
 from typing import Tuple, Union
 import inspect, importlib
@@ -72,7 +72,7 @@ class SapphireModelManager(SapphireModule):
 		"""
 
 		model_mods = self.import_models()
-		
+
 		for mod in model_mods:
 
 			model_class = self.get_model_from_module(mod)
@@ -94,7 +94,7 @@ class SapphireModelManager(SapphireModule):
 
 	def import_models(self) -> list[ModuleType]:
 		"""
-		Get all model classes returned by get_model() of all python modules within models/
+		Get all python modules within models/
 		"""
 	
 		mods = []
@@ -119,16 +119,19 @@ class SapphireModelManager(SapphireModule):
 				)
 				continue
 
-			mod_name = f"{sub_dir.name}"
+			mod_name = sub_dir.name
 
-			spec = importlib.util.spec_from_file_location(mod_name, sub_dir)
+			spec = importlib.util.spec_from_file_location(mod_name, sub_dir_init)
 
 			if not spec: continue
 			if not spec.loader: continue
 
 			mod = importlib.util.module_from_spec(spec)
+			sys.modules[mod_name] = mod
+			
 			spec.loader.exec_module(mod)
 			mods.append(mod)
+			
 		
 		return mods
 	

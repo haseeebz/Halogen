@@ -18,9 +18,7 @@ class SapphireCore():
 
 	def __init__(self) -> None:
 
-		
 		self.config: SapphireConfig = SapphireConfigLoader().load()
-		
 
 		self.is_running: bool = True
 		self.shutdown_requested = False

@@ -143,7 +143,7 @@ class SapphireConfigLoader():
 		cfg = SapphireConfig(
 			self.os,
 			self.directory,
-			self.cfg,
+			data,
 			self.dev
 		)
 

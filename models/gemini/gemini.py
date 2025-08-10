@@ -3,7 +3,6 @@ import json
 from sapphire.base import SapphireEvents, SapphireConfig
 from sapphire.modules.model.base import BaseModelProvider, ModelResponse
 
-
 try:
 	from google import genai
 	from google.genai import types
