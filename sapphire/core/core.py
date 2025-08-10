@@ -9,7 +9,6 @@ from sapphire.base import (
 	SapphireEvents
 )
 
-from .args import SapphireArgs
 from .eventbus import EventBus
 from .manager import SapphireModuleManager
 
@@ -22,12 +21,10 @@ class SapphireCore():
 		
 		self.config: SapphireConfig = SapphireConfigLoader().load()
 		
-		self.args: SapphireArgs = SapphireArgs()
 
 		self.is_running: bool = True
 		self.shutdown_requested = False
 
-		self.is_dev = self.args.dev
 
 		#self.event_logs = self.root / "events.log"
 
@@ -69,7 +66,7 @@ class SapphireCore():
 		
 	def run(self):
 		
-		self.manager.start_modules(self.is_dev)
+		self.manager.start_modules(self.config.dev)
 
 		while self.is_running: 
 
@@ -113,7 +110,7 @@ class SapphireCore():
 			f"Event = {event}. Encountered Error = {e.__class__.__name__}:{e}"
 		)
 
-		if self.is_dev: 
+		if self.config.dev: 
 			self.shutdown()
 			raise e
 

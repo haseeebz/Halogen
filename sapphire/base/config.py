@@ -1,4 +1,4 @@
-import tomllib, os
+import tomllib, os, argparse
 from typing import Any, Union
 import platform
 from pathlib import Path
@@ -22,10 +22,11 @@ class SapphireConfig():
 	[model.gemini] field.
 	"""
 
-	def __init__(self, os: str, directory: str, cfg: dict[str, Any]):
+	def __init__(self, os: str, directory: str, cfg: dict[str, Any], dev: bool):
 		self._os = os
 		self._directory = directory
 		self._cfg = cfg
+		self._dev = dev
 
 	@property
 	def os(self):
@@ -33,6 +34,10 @@ class SapphireConfig():
 
 	@property
 	def directory(self):
+		return self._directory
+
+	@property
+	def dev(self):
 		return self._directory
 
 	def get(self, path: str, default: Any = None) -> Any:	
@@ -51,7 +56,7 @@ class SapphireConfig():
 		if not isinstance(cfg, dict):
 			cfg = {}
 
-		return SapphireConfig(self._os, self._directory, cfg=cfg)
+		return SapphireConfig(self._os, self._directory, cfg, self._dev)
 
 
 
@@ -60,14 +65,56 @@ class SapphireConfigLoader():
 	def __init__(self):
 
 		self.os = platform.system().lower()
-		self.init_config()
+		self.make_parser()
+		
 
-		self.file: Path         
+		self.config_file: Path         
 		self.directory: Path	 
 		self.cfg: dict[str, Any] = {}	
+		
+		args = self.load_args()
+		self.dev = args.dev
+		self.configdir = args.configdir
+
+		if self.configdir:
+			self.init_config(Path(self.configdir))
+		else:
+			self.init_default_config()
+	
+	
+	def make_parser(self):
+
+		self.parser = argparse.ArgumentParser(
+			prog = "sapphire",
+			description = "Boots up Sapphire. See --help for help."
+		)
+
+		self.parser.add_argument(
+			"--dev", 
+			help = "Run sapphire in dev mode.", 
+			default = False, 
+			action = "store_true"
+		)
+
+		self.parser.add_argument(
+			"--configdir", 
+			help = "Run sapphire in dev mode.", 
+			type = str
+		)
+
+	def load_args(self):
+		args = self.parser.parse_args()
+		return args
 
 
-	def init_config(self):
+	def init_config(self, directory: Path):
+		if not directory.exists():
+			print(f"Invalid Config Directory : {directory}")
+			
+		self.directory = directory
+
+
+	def init_default_config(self):
 
 		if self.os == "windows":
 			self.directory = Path(os.environ["APPDATA"]) / "sapphire"
@@ -82,24 +129,25 @@ class SapphireConfigLoader():
 
 	def load(self):
 		
-		self.file = self.directory / "config.toml"
+		self.config_file = self.directory / "config.toml"
 
-		if not self.file.exists():
-			raise SapphireError(f"Config file '{self.file}' does not exist! Cannot start sapphire.")
+		if not self.config_file.exists():
+			raise SapphireError(f"Config file '{self.config_file}' does not exist! Cannot start sapphire.")
 
-		with open(self.file, 'rb') as file:
+		with open(self.config_file, 'rb') as file:
 			try:
 				data = tomllib.load(file)
 			except tomllib.TOMLDecodeError:
-				raise SapphireError(f"Invalid config file '{self.file}'.")
+				raise SapphireError(f"Invalid config file '{self.config_file}'.")
 
-		self.cfg = SapphireConfig(
+		cfg = SapphireConfig(
 			self.os,
 			self.directory,
-			self.cfg
+			self.cfg,
+			self.dev
 		)
 
-		return self.cfg
+		return cfg
 
 	
 	
