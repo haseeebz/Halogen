@@ -1,6 +1,6 @@
 
 import socket, json, threading, queue
-from sapphire.core.base import SapphireEvents, Chain
+from sapphire.base import SapphireEvents, Chain
 from typing import Tuple
 from dataclasses import asdict
 
