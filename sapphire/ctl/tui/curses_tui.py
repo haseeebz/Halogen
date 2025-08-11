@@ -102,7 +102,8 @@ class SapphireTUI():
 	def handle_event(self, ev: SapphireEvents.Event):
 		match ev:
 			case SapphireEvents.AIResponseEvent():
-				self.event_buffer.append(f"AI: {ev.message}")
+				for i in range(0, len(ev.message), self.max_event_buffer_w):
+					self.event_buffer.append(ev.message[i:i + self.max_event_buffer_w])
 				self.show_events_buffer()
 
 
