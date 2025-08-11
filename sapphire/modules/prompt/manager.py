@@ -124,12 +124,12 @@ class SapphirePromptManager(SapphireModule):
 	def handle_task_completion(self, ev: SapphireEvents.TaskCompletionEvent):
 
 		self.log(
-			SapphireEvents.chain(event),
+			SapphireEvents.chain(ev),
 			"info",
 			"Received task completion info. Making prompt."
 		)
 
-		prompt = self.make_prompt()
+		prompt = self.make_prompt_parts()
 
 		prompt.append("[SAPPHIRE]")
 
