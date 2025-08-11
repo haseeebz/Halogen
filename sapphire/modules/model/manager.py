@@ -17,7 +17,7 @@ from sapphire.base import (
 
 from .base import BaseModelProvider, ModelResponse
 
-
+# TODO make module loading better
 
 class SapphireModelManager(SapphireModule):
 
@@ -30,7 +30,6 @@ class SapphireModelManager(SapphireModule):
 		self.current_model: Union[BaseModelProvider, None] = None 
 		self.registered_providers: dict[str, BaseModelProvider] = {}
 		self.model_directory = self.config.directory / "models"
-		print(self.model_directory)
 		self.has_commands = True
 
 

@@ -1,10 +1,8 @@
 from collections.abc import Callable
 from typing import Tuple
-from sapphire.core.base import SapphireEvents, SapphireModule, SapphireConfig, SapphireTask
+from sapphire.base import SapphireEvents, SapphireModule, SapphireConfig, SapphireTask
 
 
-def get_module():
-	return FileSystem
 
 class FileSystem(SapphireModule):
 	

@@ -1,7 +1,7 @@
-from types import MethodType
+from types import MethodType, ModuleType
 from typing import Callable, MutableSequence, Type, Literal
 from pathlib import Path
-import importlib
+import importlib, sys
 import inspect
 
 from sapphire.base import (
@@ -12,6 +12,8 @@ from sapphire.base import (
 
 from sapphire.modules import MODULES
 from sapphire.modules import SapphireLogger
+
+# TODO make module loading better
 
 
 class SapphireModuleManager():
@@ -33,16 +35,15 @@ class SapphireModuleManager():
 		for core_module in MODULES:
 			self.register_module(core_module)
 
-		module_names: list[str] = self.config.get("modules", [])
+		py_modules: list[ModuleType] = self.import_modules()
 
-		for module_name in module_names:
-			module = self.get_module(module_name)
+		for py_module in py_modules:
+			module = self.get_module(py_module)
 
 			if module is None: continue
 
 			self.register_module(module)
 			
-
 
 	def register_module(self, module_class: type[SapphireModule]) -> None:
 		"Get the module class and intialize it."
@@ -83,22 +84,10 @@ class SapphireModuleManager():
 		)
 
 	
-	def get_module(self, name: str) -> type[SapphireModule] | None:
+	def get_module(self, py_module: ModuleType) -> type[SapphireModule] | None:
 		"Dynamically getting a module."
 
 		#looking for python module that defines a get_module
-
-		try:
-			py_module = importlib.import_module(f"modules.{name}")
-			
-		except ModuleNotFoundError as e:
-			self.log(
-				SapphireEvents.chain(),
-				"warning",
-				f"Could not load module '{name}'. " \
-				f"The module does not exist or was'nt found. ({e.__class__.name}:{e})"
-			)
-			return None
 
 		if hasattr(py_module, "get_module"):
 			module: type[SapphireModule] = py_module.get_module()
@@ -107,12 +96,57 @@ class SapphireModuleManager():
 			self.log(
 				SapphireEvents.chain(),
 				"warning",
-				f"Could not load module '{name}'. " \
+				f"Could not load module '{py_module.__name__}'. " \
 				"The module does not define a standard 'get_module' method which should return a " \
 				"Sapphire module."
 			)
 			return None
+
+    
+	def import_modules(self) -> list[ModuleType]:
+		"""
+		Get all python modules within modules/
+		"""
+	
+		mods = []
+
+		for sub_dir in self.modules_dir.iterdir():
+
+			if not sub_dir.is_dir():
+				self.log(
+					SapphireEvents.chain(),
+					"debug",
+					f"Ignoring {sub.absolute()}. Not a directory"
+				)
+				continue
+			
+			sub_dir_init = sub_dir / "__init__.py"
+
+			if not sub_dir_init.exists():
+				self.log(
+					SapphireEvents.chain(),
+					"debug",
+					f"Ignoring {sub_dir.absolute()}. Not a python module."
+				)
+				continue
+
+			mod_name = sub_dir.name
+
+			spec = importlib.util.spec_from_file_location(mod_name, sub_dir_init)
+
+			if not spec: continue
+			if not spec.loader: continue
+
+			mod = importlib.util.module_from_spec(spec)
+			sys.modules[mod_name] = mod
+			
+			spec.loader.exec_module(mod)
+			mods.append(mod)
+
 		
+		return mods
+	
+	
 
 	def start_modules(self, dev = False):
 		"Calls .start() on all registered modules."
