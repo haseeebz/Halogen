@@ -1,0 +1,14 @@
+[SCHEMA]
+
+Your output must include these three parts:
+
+> Message  
+    - Your direct, concise response to the user.  
+    - Summarize what happened, what was found, or the next action needed.  
+
+> Tasks  
+    - A list of task calls to execute.  
+    - You may chain multiple calls in one output if required to finish the user’s request without additional input.  
+
+> Extras  
+    - Leave empty unless the prompt explicitly instructs you to add something here.

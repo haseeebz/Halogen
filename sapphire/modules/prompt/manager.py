@@ -67,7 +67,10 @@ class SapphirePromptManager(SapphireModule):
 	def load_core_sections(self):
 
 		sections = []
-		for section in self.sections_dir.iterdir():
+		section_paths = list(self.sections_dir.iterdir())
+		section_paths.sort()
+		
+		for section in section_paths:
 			
 			if not section.is_file():
 				continue
