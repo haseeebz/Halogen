@@ -165,7 +165,12 @@ class SapphirePromptManager(SapphireModule):
 
 	def make_task_section(self):
 		string = []
-		string.append("\n[TASKS AVAILABLE]\nAll available tasks that you can do.\n")
+		string.append("\n[TASKS AVAILABLE]\n")
+		string.append(
+			"All available tasks that you can do. These namespaces are modules and " \
+			"their defined tasks are given below. These are the functions that you can execute.\n"
+			)
+
 		for ns, taskslist in self.tasks_namespaces.items():
 			string.append(f"\nNamespace: '{ns}'\nDefined Tasks:\n")
 			for n, i, a in taskslist:
