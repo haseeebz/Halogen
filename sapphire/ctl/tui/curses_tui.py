@@ -105,6 +105,9 @@ class SapphireTUI():
 				for i in range(0, len(ev.message), self.max_event_buffer_w):
 					self.event_buffer.append(ev.message[i:i + self.max_event_buffer_w])
 				self.show_events_buffer()
+			case SapphireEvents.CommandExecutedEvent():
+				self.event_buffer.extend(ev.output.splitlines())
+				self.show_events_buffer()
 
 
 	def show_events_buffer(self):

@@ -89,7 +89,7 @@ class SapphirePromptManager(SapphireModule):
 	def make_prompt_parts(self) -> list[str]:
 		parts = []
 		parts.extend(self.core_sections)
-		parts.append("[MEMORY]")
+		parts.append("[MEMORY]\nThe list of all previous conversations. Basically chat history.")
 		parts.extend(self.memory_list)
 		parts.extend(self.tasks_section_string)
 		return parts
