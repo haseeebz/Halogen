@@ -74,3 +74,25 @@ class FileSystem(SapphireModule):
 		contents = [item.name for item in path.iterdir()]
 
 		return contents
+
+
+	@SapphireTask(
+		"search_file", "Search for a file within a given directory.", ["name:str","directory:str"]
+		)
+	def search_file(self, chain: SapphireEvents.Chain, name: str, directory: str):
+
+		path = Path(directory)
+
+		if not path.is_dir():
+			raise ValueError(f"{path} is not a directory!")
+
+		found = []
+		for item in path.iterdir():
+			if item.is_dir():
+				sub_found = self.search_file(chain, name, item.absolute())
+				found.extend(sub_found)
+
+			if item.name == name:
+				found.append(item.__str__())
+
+		return found

@@ -126,7 +126,7 @@ class SapphireTaskManager(SapphireModule):
 		except Exception as e:
 			output = f"{e.__class__.__name__}: {str(e)}"
 			success = False
-
+			raise e
 
 		output_event = SapphireEvents.TaskCompletionEvent(
 			self.name(),
