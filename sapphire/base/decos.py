@@ -23,8 +23,8 @@ def SapphireTask(name: str, info: str, args: list[str]):
 
 	def decorator(func):
 		
-		def wrapper(*args, **kwargs):
-			return func(*args, **kwargs)
+		def wrapper(*func_args, **kwargs):
+			return func(*func_args, **kwargs)
 		
 		wrapper._is_task = True
 		wrapper._name = name

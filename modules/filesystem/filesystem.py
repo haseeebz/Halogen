@@ -40,6 +40,28 @@ class FileSystem(SapphireModule):
 
 		return "".join(content)
 
+	
+	@SapphireTask("write_to_file", "Write content to a file.", ["path:str", "content:str"])
+	def write_file(self, chain: SapphireEvents.chain, path_raw: str, content: str):
+
+		path = Path(path_raw)
+
+		with open(path, "w") as file:
+			content = file.write(content)
+
+		return f"Successfully written to {path_raw}"
+
+	
+	@SapphireTask("append_to_file", "Append content to a file.", ["path:str", "content:str"])
+	def append_file(self, chain: SapphireEvents.chain, path_raw: str, content: str):
+
+		path = Path(path_raw)
+
+		with open(path, "a") as file:
+			content = file.write(content)
+
+		return f"Successfully appended to {path_raw}"
+
 
 	@SapphireTask("list_directory", "List the contents of a directory/folder.", ["path:str"])
 	def list_directory(self, chain: SapphireEvents.Chain, path_raw: str):

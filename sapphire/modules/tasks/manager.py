@@ -121,7 +121,7 @@ class SapphireTaskManager(SapphireModule):
 		func = namespace.tasks[ev.task_name].func
 
 		try:
-			output = func(ev.chain, **ev.args)
+			output = func(ev.chain, *ev.args)
 			success = True
 		except Exception as e:
 			output = f"{e.__class__.__name__}: {str(e)}"

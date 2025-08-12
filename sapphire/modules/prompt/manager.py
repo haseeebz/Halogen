@@ -132,12 +132,12 @@ class SapphirePromptManager(SapphireModule):
 		prompt = self.make_prompt_parts()
 
 		prompt.append("[SAPPHIRE]")
-
-		prompt.append(
-			f"Completed task '{ev.namespace}::{ev.task_name}'. " \
+		msg = f"Completed task '{ev.namespace}::{ev.task_name}'. " \
 			f"Success = {ev.success}. Output = {ev.output}"
-		)
-
+		
+		prompt.append(msg)
+		self.add_memory("Sapphire", msg)
+		
 		str_prompt = "\n".join(prompt)
 
 		prompt_event = SapphireEvents.PromptEvent(
