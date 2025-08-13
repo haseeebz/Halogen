@@ -4,6 +4,7 @@ from sapphire.base import SapphireModule, SapphireEvents, SapphireConfig, Chain
 from pathlib import Path
 import os
 
+from .memory import MemoryManager
 # TODO Make prompt manager more robust and modular cuz the current approach is literal duct tape
 
 
@@ -17,7 +18,8 @@ class SapphirePromptManager(SapphireModule):
 		super().__init__(emit_event, config)
 		
 		self.core_sections: list[str] = []
-		self.memory_list: list[str] = []
+		self.memory: MemoryManager = MemoryManager(self.config.get("memory_length", 50))
+
 		self.tasks_namespaces: dict[str, list[tuple[str, str, list[str]]]] = {}
 		self.tasks_section_string = ""
 
@@ -37,7 +39,7 @@ class SapphirePromptManager(SapphireModule):
 		match event:
 
 			case SapphireEvents.AIResponseEvent():
-				self.add_memory("you", event.message)
+				self.memory.add("you", event.message)
 
 			case SapphireEvents.UserInputEvent():
 				self.handle_user_input(event)
@@ -50,12 +52,12 @@ class SapphirePromptManager(SapphireModule):
 				self.handle_task_completion(event)
 				
 
-
 	def handled_events(self) -> list[type[SapphireEvents.Event]]:
 		return [
 			SapphireEvents.AIResponseEvent,
 			SapphireEvents.UserInputEvent,
 			SapphireEvents.TaskRegisteredEvent,
+			SapphireEvents.TaskEvent,
 			SapphireEvents.TaskCompletionEvent
 		]
 
@@ -92,8 +94,7 @@ class SapphirePromptManager(SapphireModule):
 	def make_prompt_parts(self) -> list[str]:
 		parts = []
 		parts.extend(self.core_sections)
-		parts.append("[MEMORY]\nThe list of all previous conversations. Basically chat history.")
-		parts.extend(self.memory_list)
+		parts.append(self.memory.stringify())
 		parts.extend(self.tasks_section_string)
 		return parts
 
@@ -121,7 +122,7 @@ class SapphirePromptManager(SapphireModule):
 
 		self.emit_event(prompt_event)
 
-		self.add_memory("user", event.message)
+		self.memory.add("user", event.message)
 
 
 	def handle_task_completion(self, ev: SapphireEvents.TaskCompletionEvent):
@@ -139,7 +140,7 @@ class SapphirePromptManager(SapphireModule):
 			f"Success = {ev.success}. Output = {ev.output}"
 		
 		prompt.append(msg)
-		self.add_memory("Sapphire", msg)
+		self.memory.add("sapphire", msg)
 		
 		str_prompt = "\n".join(prompt)
 
@@ -152,12 +153,6 @@ class SapphirePromptManager(SapphireModule):
 
 		self.emit_event(prompt_event)
 
-
-	def add_memory(self, subject: str, msg: str) -> None:
-		if len(self.memory_list) > self.config.get("memory_length", 30):
-			self.memory_list.pop(0)
-			
-		self.memory_list.append(f"{subject.capitalize()}: {msg}\n")
 
 
 	def add_task(self, ev: SapphireEvents.TaskRegisteredEvent):
