@@ -79,7 +79,7 @@ class SapphireTaskManager(SapphireModule):
 
 		self.log(
 			SapphireEvents.chain(ev),
-			"debug",
+			"info",
 			f"Registered task {ev.namespace}::{ev.task_name}"
 		)
 
@@ -101,7 +101,7 @@ class SapphireTaskManager(SapphireModule):
 
 		self.log(
 			SapphireEvents.chain(ev),
-			"debug",
+			"info",
 			f"Executing task {ev.chain} {ev.namespace}::{ev.task_name} with args {ev.args}"
 		)
 		

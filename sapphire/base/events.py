@@ -91,8 +91,7 @@ class SapphireEvents():
 	class ShutdownEvent(Event):
 		"Sent to core to intiate a shutdown."
 		emergency: bool
-		situation: Literal["request", "failure", "critical", "user"]
-		message: str = ""
+		reason: str = ""
 
 
 	@dataclass(frozen = True)

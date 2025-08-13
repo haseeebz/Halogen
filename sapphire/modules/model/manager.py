@@ -199,7 +199,7 @@ class SapphireModelManager(SapphireModule):
 				SapphireEvents.chain(),
 				True,
 				"critical",
-				f"Could not find model '{model}'. It was not registered."
+				f"Model '{model}' not found."
 			)
 
 			self.emit_event(event)
