@@ -4,7 +4,8 @@ from sapphire.base import SapphireModule, SapphireEvents, SapphireConfig, Chain
 from pathlib import Path
 import os
 
-from .memory import MemoryManager
+from .sub_managers.memory import MemoryManager
+from .sub_managers.tasks import TasksManager
 # TODO Make prompt manager more robust and modular cuz the current approach is literal duct tape
 
 
@@ -19,9 +20,7 @@ class SapphirePromptManager(SapphireModule):
 		
 		self.core_sections: list[str] = []
 		self.memory: MemoryManager = MemoryManager(self.config.get("memory_length", 50))
-
-		self.tasks_namespaces: dict[str, list[tuple[str, str, list[str]]]] = {}
-		self.tasks_section_string = ""
+		self.tasks: TasksManager = TasksManager()
 
 		self.sections_dir = Path(__file__).resolve().parent / "sections"
 	
@@ -45,8 +44,7 @@ class SapphirePromptManager(SapphireModule):
 				self.handle_user_input(event)
 
 			case SapphireEvents.TaskRegisteredEvent():
-				self.add_task(event)
-				self.make_task_section()
+				self.tasks.add_task(event)
 
 			case SapphireEvents.TaskCompletionEvent():
 				self.handle_task_completion(event)
@@ -95,7 +93,7 @@ class SapphirePromptManager(SapphireModule):
 		parts = []
 		parts.extend(self.core_sections)
 		parts.append(self.memory.stringify())
-		parts.extend(self.tasks_section_string)
+		parts.append(self.tasks.stringify())
 		return parts
 
 
@@ -154,26 +152,3 @@ class SapphirePromptManager(SapphireModule):
 		self.emit_event(prompt_event)
 
 
-
-	def add_task(self, ev: SapphireEvents.TaskRegisteredEvent):
-		task_list = self.tasks_namespaces.setdefault(ev.namespace, [])
-		data = (ev.task_name, ev.info, ev.args_info)
-		task_list.append(data)
-
-
-	def make_task_section(self):
-		string = []
-		string.append("\n[TASKS AVAILABLE]\n")
-		string.append(
-			"All available tasks that you can do. These namespaces are modules and " \
-			"their defined tasks are given below. These are the functions that you can execute.\n"
-			)
-
-		for ns, taskslist in self.tasks_namespaces.items():
-			string.append(f"\nNamespace: '{ns}'\nDefined Tasks:\n")
-			for n, i, a in taskslist:
-				string.append(f"{n}({a}) : {i}")
-			
-		self.tasks_section_string = "".join(string)
-			
-		
