@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from typing import Tuple
 from pathlib import Path
+import os, shutil
 from sapphire.base import SapphireEvents, SapphireModule, SapphireConfig, SapphireTask
 
 
@@ -96,3 +97,31 @@ class FileSystem(SapphireModule):
 				found.append(item.__str__())
 
 		return found
+
+
+	@SapphireTask("make_directory", "Creates a directory along with missing parents", ["path:str"])
+	def make_directory(self, chain: SapphireEvents.Chain, path: str):
+
+		path = Path(path)
+
+		if path.exists():
+			raise ValueError(f"{path} already exists!")
+
+		path.mkdir(0o777, True, True)
+
+
+	@SapphireTask("remove_directory", "Deletes a directory recursively! Dangerous", ["path:str"])
+	def remove_directory(self, chain: SapphireEvents.Chain, path: str):
+
+		path = Path(path)
+
+		if not path.exists():
+			raise ValueError(f"{path} does not exists!")
+
+		if not path.is_dir():
+			raise ValueError(f"{path} is not a directory or folder.")
+			
+		shutil.rmtree(path)
+
+
+
