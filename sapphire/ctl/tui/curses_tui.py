@@ -160,9 +160,3 @@ class SapphireTUI():
 
 		self.interface.end()
 
-
-def main(scr):
-	tui = SapphireTUI(scr)
-	tui.run()
-
-curses.wrapper(main)
