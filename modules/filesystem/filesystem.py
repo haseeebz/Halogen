@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from typing import Tuple
 from pathlib import Path
-import os, shutil
+import os, shutil, re
 from sapphire.base import SapphireEvents, SapphireModule, SapphireConfig, SapphireTask
 
 
@@ -70,33 +70,11 @@ class FileSystem(SapphireModule):
 		path = Path(path_raw)
 
 		if not path.is_dir():
-			raise ValueError(f"{path} is not a directory!")
+			return f"{path} is not a directory!"
 
 		contents = [item.name for item in path.iterdir()]
 
 		return contents
-
-
-	@SapphireTask(
-		"search_file", "Search for a file within a given directory.", ["name:str","directory:str"]
-		)
-	def search_file(self, chain: SapphireEvents.Chain, name: str, directory: str):
-
-		path = Path(directory)
-
-		if not path.is_dir():
-			raise ValueError(f"{path} is not a directory!")
-
-		found = []
-		for item in path.iterdir():
-			if item.is_dir():
-				sub_found = self.search_file(chain, name, item.absolute())
-				found.extend(sub_found)
-
-			if item.name == name:
-				found.append(item.__str__())
-
-		return found
 
 
 	@SapphireTask("make_directory", "Creates a directory along with missing parents", ["path:str"])
@@ -105,7 +83,7 @@ class FileSystem(SapphireModule):
 		path = Path(path)
 
 		if path.exists():
-			raise ValueError(f"{path} already exists!")
+			return f"{path} already exists!"
 
 		path.mkdir(0o777, True, True)
 
@@ -116,12 +94,90 @@ class FileSystem(SapphireModule):
 		path = Path(path)
 
 		if not path.exists():
-			raise ValueError(f"{path} does not exists!")
+			return f"{path} does not exists!"
 
 		if not path.is_dir():
-			raise ValueError(f"{path} is not a directory or folder.")
+			return f"{path} is not a directory or folder."
 			
 		shutil.rmtree(path)
+
+
+	@SapphireTask("create_file", "Create a file at the specified location, extension included.", ["path:str"])
+	def create_file(self, chain: SapphireEvents.Chain, path: str):
+
+		path = Path(path)
+
+		if path.exists():
+			return f"Path {path} already exists. Did not create a file."
+
+		open(path, "x").close()
+
+	
+
+	@SapphireTask("remove_file", "Remove a file at the specified location.", ["path:str"])
+	def remove_file(self, chain: SapphireEvents.Chain, path: str):
+
+		path = Path(path)
+
+		if not path.exists():
+			return f"Path {path} does not exist. Did not remove the file."
+
+		os.remove(path)
+
+
+
+	@SapphireTask("search_file", "Search for a file within a given directory.", ["name:str","directory:str"])
+	def search_file(self, chain: SapphireEvents.Chain, name: str, directory: str):
+
+		path = Path(directory)
+
+		if not path.is_dir():
+			return f"{path} is not a directory!"
+
+		found = []
+		for item in path.iterdir():
+			if item.is_dir():
+				sub_found = self.search_file(chain, name, item.absolute())
+				found.extend(sub_found)
+				continue
+
+			if item.name == name:
+				found.append(item.__str__())
+
+		return found
+
+
+	@SapphireTask(
+		"regex_file_search",
+		"Search files within a directory by a given a regex pattern. The pattern arg must be valid regex.",
+		["directory:str", "pattern:str"]
+	)
+	def regex_search_file(self, chain: SapphireEvents.Chain, directory: str, pattern: str):
+
+		path = Path(directory)
+
+		if not path.exists():
+			return f"{path} does not exist. Cannot conduct regex search."
+
+		try: 
+			regex_compiled = re.compile(pattern)
+		except re.error:
+			return f"Invalid regex pattern: {pattern}"
+
+		found = []
+
+		for item in path.iterdir():
+			if item.is_dir():
+				sub_found = self.regex_search_file(chain, item.absolute(), pattern)
+				found.extend(sub_found)
+				continue
+
+			if regex_compiled.search(item.name):
+				found.append(item.__str__())
+
+		return found
+
+
 
 
 
