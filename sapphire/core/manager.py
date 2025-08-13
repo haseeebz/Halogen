@@ -31,7 +31,8 @@ class SapphireModuleManager():
 
 	def load_modules(self) -> None:
 		"Loading all modules and passing them to registration."
-
+		self.modules.clear()
+		
 		for core_module in MODULES:
 			self.register_module(core_module)
 

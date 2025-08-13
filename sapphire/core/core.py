@@ -199,7 +199,7 @@ class SapphireCore():
 		self.eventbus.emit(event)
 
 		return "Requested Sapphire to shutdown."
-	
+
 
 	_get_terms = {}
 	def get_command(self, args: list[str], chain: SapphireEvents.Chain) -> str:
@@ -208,6 +208,7 @@ class SapphireCore():
 			self._get_terms = {
 				"chain" : lambda: SapphireEvents._intern_chain.__str__(),
 				"user" : lambda: self.config.get("user.name", "Unknown"),
+				"config" : lambda: f"Using config dir : {self.config.directory}",
 				"help" : lambda: f"Accessible terms: {[x for x in self._get_terms.keys()]}"
 			}
 

@@ -99,11 +99,6 @@ class SapphireServer(SapphireModule):
 				self.out_buffer.put(event)
 	
 
-	@SapphireCommand("address", "Get the socket address of the sapphire server.")
-	def get_address(self, args: list[str], chain: Chain) -> str:
-		return f"{self.HOST}:{self.PORT}"
-
-
 	def serialize_event(self, event: SapphireEvents.Event) -> str:
 		dict_form = {}
 
@@ -250,6 +245,20 @@ class SapphireServer(SapphireModule):
 					f"Client has chain id: {event.chain}" 
 				)
 				self.cleanup_client(client)
+
+
+	
+	@SapphireCommand("address", "Get the socket address of the sapphire server.")
+	def get_address(self, args: list[str], chain: Chain) -> str:
+		return f"{self.HOST}:{self.PORT}"
+
+	@SapphireCommand("clients", "Get all connected clients and their info.")
+	def get_clients(self, args: list[str], chain: Chain) -> str:
+		string = []
+		for context, client in self.clients.items():
+			string.append(f"Client : ({context}:0)")
+		return "\n".join(string)
+
 
 
 			
