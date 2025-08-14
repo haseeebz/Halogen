@@ -24,8 +24,8 @@ class SapphireTaskManager(SapphireModule):
 		self.namespaces: dict[str, TaskNamespace] = {}
 		
 	
-	@classmethod
-	def name(cls) -> str:
+	@property
+	def name(self) -> str:
 		return "tasks"
 	
 

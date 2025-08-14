@@ -25,8 +25,8 @@ class SapphirePromptManager(SapphireModule):
 		self.sections_dir = Path(__file__).resolve().parent / "sections"
 	
 
-	@classmethod
-	def name(cls) -> str:
+	@property
+	def name(self) -> str:
 		return "prompt"
 	
 
