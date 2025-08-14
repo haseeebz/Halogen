@@ -39,14 +39,14 @@ class SapphireCommandHandler(SapphireModule):
 		]
 
 
-	@property
-	def name(self):
+	@classmethod
+	def name(cls):
 		return "command"
 		
 
-	@property
-	def info(self):
-		return self.__class__.__doc__()
+	@classmethod
+	def info(cls):
+		return "Core module which handles the commands sent to Sapphire."
 
 
 	def handle(self, event: SapphireEvents.Event) -> None:

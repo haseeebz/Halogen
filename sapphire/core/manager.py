@@ -61,7 +61,7 @@ class SapphireModuleManager():
 
 		module = module_class(
 			self.emit_event,
-			self.config.get_sub_config(module_class.name)
+			self.config.get_sub_config(module_class.name())
 			)
 		
 		self.modules.append(module)
@@ -80,14 +80,14 @@ class SapphireModuleManager():
 		self.log(
 			SapphireEvents.chain(),
 			"info",
-			f"Initialized module '{module.name}'. " \
-			f"Info : {module.info}"
+			f"Initialized module '{module.name()}'. " \
+			f"Info : {module.info()}"
 		)
 
 		self.log(
 			SapphireEvents.chain(),
 			"debug",
-			f"Module '{module.name}' handles events: {[e.__name__ for e in handled_events]}"
+			f"Module '{module.name()}' handles events: {[e.__name__ for e in handled_events]}"
 		)
 
 	
@@ -223,10 +223,10 @@ class SapphireModuleManager():
 				continue
 		
 			ev = SapphireEvents.CommandRegisterEvent(
-				module.name,
+				module.name(),
 				SapphireEvents.make_timestamp(),
 				SapphireEvents.chain(),
-				module.name,
+				module.name(),
 				mem._name, #type: ignore
 				mem._info, #type: ignore // These SHOULD exist if _is_command exists
 				mem
@@ -241,10 +241,10 @@ class SapphireModuleManager():
 				continue
 
 			ev = SapphireEvents.TaskRegisterEvent(
-				module.name,
+				module.name(),
 				SapphireEvents.make_timestamp(),
 				SapphireEvents.chain(),
-				module.name,
+				module.name(),
 				mem._name, #type: ignore
 				mem._args,#type: ignore
 				mem._info, #type: ignore // These SHOULD exist if _is_task exists

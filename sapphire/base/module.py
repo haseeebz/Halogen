@@ -18,22 +18,22 @@ class SapphireModule(ABC):
 		self.has_tasks = False
 
 
-	@property
-	def name(self) -> str:
+	@classmethod
+	def name(cls) -> str:
 		"""
 		The name of the module. This is important for config file. By default, its the literal
 		name of the class. 
 		"""
-		return self.__class__.__name__
+		return cls.__name__
 	
 
-	@property
-	def info(self) -> str:
+	@classmethod
+	def info(cls) -> str:
 		"""
 		The info and details related to the module. 
 		"""
-		return f"No information provided for {self.name}"
-		
+		return f"No information provided for {cls.name()}"
+
 
 	def start(self) -> None:
 		"""
