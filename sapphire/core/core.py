@@ -21,7 +21,7 @@ class SapphireCore():
 		self.config: SapphireConfig = SapphireConfigLoader().load()
 
 		self.is_running: bool = True
-
+		self.shutdown_requested = False
 
 		#self.event_logs = self.root / "events.log"
 
@@ -115,10 +115,9 @@ class SapphireCore():
 	def handle(self, event: SapphireEvents.Event):
 		match event:
 			case SapphireEvents.ShutdownEvent():
-				if event.emergency:
-					self.shutdown() 
-					return
 				self.shutdown_requested = True
+				self.shutdown_reason = event.reason
+				if event.emergency: self.shutdown()
 
 
 	def log(self, chain: SapphireEvents.Chain, level: Literal["debug", "info", "warning", "critical"], msg: str):
@@ -139,7 +138,7 @@ class SapphireCore():
 			file.write(f"{event.__str__()}\n")
 
 
-	def shutdown(self, ev: SapphireEvents.ShutdownEvent):
+	def shutdown(self):
 		
 		self.is_running = False
 		logger = self.manager.end_modules()
@@ -155,7 +154,7 @@ class SapphireCore():
 			SapphireEvents.make_timestamp(),
 			SapphireEvents.chain(),
 			"info",
-			f"Sapphire is now shutting down. Reason : {ev.reason}"
+			f"Sapphire is now shutting down. Reason : {self.shutdown_reason}"
 		)
 
 		logger.handle(event)
