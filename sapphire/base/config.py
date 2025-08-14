@@ -102,6 +102,7 @@ class SapphireConfigLoader():
 			type = str
 		)
 
+
 	def load_args(self):
 		args = self.parser.parse_args()
 		return args

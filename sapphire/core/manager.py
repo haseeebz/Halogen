@@ -210,7 +210,7 @@ class SapphireModuleManager():
 			self.log(
 				SapphireEvents.chain(),
 				"info" if success else "warning",
-				f"Ended {module.name()}. {msg}"
+				f"Ended {module.name()}: {msg}"
 			) 
 			
 		return logger
