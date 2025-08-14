@@ -119,9 +119,11 @@ class SapphireCommandHandler(SapphireModule):
 
 			self.emit_event(output_event)
 			return
+
+		self.exceute(cmd_data ,ev)
 		
 
-	def exceute(self, ev: SapphireEvents.CommandEvent):
+	def exceute(self, cmd_data: CommandData, ev: SapphireEvents.CommandEvent):
 		"Executing the command."
 
 		try:
