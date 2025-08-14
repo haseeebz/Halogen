@@ -251,7 +251,6 @@ class SapphireModelManager(SapphireModule):
 		)
 		self.emit_event(ai_msg)
 
-
 		for task in response.tasks:
 			task_ev = SapphireEvents.TaskEvent(
 				self.name(),

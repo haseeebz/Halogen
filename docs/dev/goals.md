@@ -4,13 +4,13 @@ A list of all planned features (will add more to this list!)
 
 + Hot reloading modules.
 + (**DONE**) Loading them dynamically from a directory instead of the current python module hack.
-+ Also pass the "user" field in config along with the scoped field to a module.
++ (**CANCELED**) Also pass the "user" field in config along with the scoped field to a module.
 + Restarting.
 
 
 ### Functionality
 
-+ (**ONGOING**) Add a proper task manager and task execution.
++ (**DONE**) Add a proper task manager and task execution.
 + Routines which remind the AI to do some task or to remind the user.
 + Maybe add the option for indicating whether a task should be threaded, multiprocessed or maybe just ran in the main loop.
 + Add tags for the assitant so it knows whether the function is dangerous or not?
@@ -19,7 +19,7 @@ A list of all planned features (will add more to this list!)
 
 ### Prompts
 
-+ (**ONGOING**) Add more modular prompt formation, i.e have a proper memory system, tasks list.
++ (**DONE**) Add more modular prompt formation, i.e have a proper memory system, tasks list.
 + Add persistent memory
 + Add different types of modes? like normal mode, command mode, inspection mode etc
 + Maybe keep track of all the chat contexts in case of multiple clients, each having their own chat?
@@ -37,6 +37,7 @@ A list of all planned features (will add more to this list!)
 + Add other model providers like OpenAI, Deepseek etc. Also a local model provider like Ollama.
 + Hot reloading and switching providers.
 + Add a command to change the actual model of a provider? We can do this easily by asking each model provider to return a list/set of all the models they provide. Very useful for local providers.
++ Method checking for models.
 
 ### Modules
 
@@ -44,6 +45,7 @@ A list of all planned features (will add more to this list!)
 + (**ONGOING**) Filesystem
 + Applications (opening apps etc)
 + System control (brightness, sound etc.), easy on linux but might need more effort on windows
++ Method checking for modules.
 
 ### IPC
 

@@ -5,28 +5,22 @@ from typing import Callable, Literal, Tuple
 import shlex
 
 
-
-# Callable[[list[str], SapphireEvents.Chain], str]
-
-# A function that :
-# 1) takes a list of str arguments
-# 2) can take a chain object
-# 3) and returns a string
-
-
 class SapphireCommandHandler(SapphireModule):
 	"""
-	Class for handling commands which change the state of sapphire.
+	Module which handles the commands sent to Sapphire. Commands are generally sent from external 
+	sources but might be sent from somewhere internally in Sapphire.
 
-	All commands are namespaced using module names.
-	
+	All commands of a specific module are namespaced to avoid conflict issues.
+
+	Any module can define a command by using the @SapphireCommand decorator on a method.
+	The decorated function follows this pattern:
+	func(self, chain: SapphireEvents.Chain, args: list[str]) -> str | None
 	"""
 	
 
 	def __init__(self, emit_event: Callable[[SapphireEvents.Event], None], config: SapphireConfig):
 		super().__init__(emit_event, config)
 		self.namespaces: dict[str, CommandNamespace] = {}
-		
 		self.has_commands = True # yeah ironic
 
 	
@@ -35,7 +29,7 @@ class SapphireCommandHandler(SapphireModule):
 
 
 	def end(self) -> Tuple[bool, str]:
-		return (True, "")
+		return (True, "Did not need any specific end action.")
 
 	
 	def handled_events(self) -> list[type[SapphireEvents.Event]]:
@@ -44,10 +38,16 @@ class SapphireCommandHandler(SapphireModule):
 			SapphireEvents.CommandRegisterEvent
 		]
 
-	@classmethod
-	def name(cls):
+
+	@property
+	def name(self):
 		return "command"
 		
+
+	@property
+	def info(self):
+		return self.__class__.__doc__()
+
 
 	def handle(self, event: SapphireEvents.Event) -> None:
 		match event:
@@ -58,6 +58,7 @@ class SapphireCommandHandler(SapphireModule):
 
 
 	def define(self, ev: SapphireEvents.CommandRegisterEvent):
+		"For defining a new command and adding it to the specific namespace."
 
 		namespace = self.namespaces.setdefault(
 			ev.module,
@@ -84,11 +85,8 @@ class SapphireCommandHandler(SapphireModule):
 		namespace.defined.add(ev.cmd)
 
 
-	# TODO implement "module to command" map so commands can be deprecated once a module is removed
-	# TODO namespace commands
-
-
 	def interpret(self, ev: SapphireEvents.CommandEvent):
+		"Executing a command sent to this module"
 
 		namespace = self.namespaces.get(ev.module, None)
 

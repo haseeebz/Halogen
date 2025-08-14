@@ -9,5 +9,4 @@
 
 + Improve prompt manager
 
-+ fix shutdown in core - Fixed but now the event bus isn't flushed, nor are events passed to server.
 
