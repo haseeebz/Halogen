@@ -34,8 +34,8 @@ class SapphireLogger(SapphireModule):
 		self.log_file: str
 	
 
-	@property
-	def name(self) -> str:
+	@classmethod
+	def name(cls) -> str:
 		return "logger"
 	
 

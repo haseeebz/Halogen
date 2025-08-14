@@ -33,8 +33,8 @@ class SapphireModelManager(SapphireModule):
 		self.has_commands = True
 
 
-	@property
-	def name(self) -> str:
+	@classmethod
+	def name(cls) -> str:
 		return "model"
 	
 

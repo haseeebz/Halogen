@@ -13,7 +13,7 @@ class FileSystem(SapphireModule):
 		self.has_tasks = True
 
 
-	@property
+	@classmethod
 	def name(cls):
 		return "filesystem"
 	

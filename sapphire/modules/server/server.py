@@ -49,8 +49,8 @@ class SapphireServer(SapphireModule):
 		self.write_thread = threading.Thread(target = self.write)
 
 	
-	@property
-	def name(self):
+	@classmethod
+	def name(cls):
 		return "server"
 	
 	def start(self):
