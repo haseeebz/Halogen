@@ -66,7 +66,12 @@ class SapphireCommandHandler(SapphireModule):
 		)
 
 		if ev.cmd in namespace.defined:
-			raise ValueError()
+			self.log(
+				SapphireEvents.chain(ev),
+				"warning",
+				f"Module '{ev.module}' already registered command with name '{ev.cmd}'"
+			)
+			return
 		
 		self.log(
 			SapphireEvents.chain(ev),
@@ -80,13 +85,12 @@ class SapphireCommandHandler(SapphireModule):
 			ev.func
 		)
 
-
 		namespace.commands[ev.cmd] = command
 		namespace.defined.add(ev.cmd)
 
 
 	def interpret(self, ev: SapphireEvents.CommandEvent):
-		"Executing a command sent to this module"
+		"Checking the sent command for errors."
 
 		namespace = self.namespaces.get(ev.module, None)
 
@@ -95,17 +99,15 @@ class SapphireCommandHandler(SapphireModule):
 		else:
 			cmd_data = None
 
-		# TODO make it clear whether the command is not defined or the module namespace.
 		
 		if cmd_data is None:
 			
 			self.log(
 				SapphireEvents.chain(ev),
 				"warning",
-				f"Client with chain id '{ev.chain}' tried to execute invalid command {ev.module}::{ev.cmd}"
+				f"Client with chain id '{ev.chain}' tried to execute invalid command {ev.module}::{ev.cmd}."
 				)
 			
-		
 			output_event = SapphireEvents.CommandExecutedEvent(
 				"commands",
 				SapphireEvents.make_timestamp(),
@@ -119,7 +121,8 @@ class SapphireCommandHandler(SapphireModule):
 			return
 		
 
-		# executing 
+	def exceute(self, ev: SapphireEvents.CommandEvent):
+		"Executing the command."
 
 		try:
 			msg = cmd_data.func(ev.args, ev.chain)
@@ -128,7 +131,6 @@ class SapphireCommandHandler(SapphireModule):
 			msg = f"Failed to execute command. Encountered {e.__class__.__name__}: {e.__str__()}"
 			success = False
 
-		# output in case of both success and failure
 
 		execution_event = SapphireEvents.CommandExecutedEvent(
 			"commands",
