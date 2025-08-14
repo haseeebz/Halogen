@@ -13,6 +13,7 @@ from sapphire.base import (
 from sapphire.modules import MODULES
 from sapphire.modules import SapphireLogger
 
+# TODO make module loading better
 
 
 class SapphireModuleManager():
@@ -33,7 +34,7 @@ class SapphireModuleManager():
 		self.modules.clear()
 		
 		for core_module in MODULES:
-			self.initialize_module(core_module)
+			self.register_module(core_module)
 
 		py_modules: list[ModuleType] = self.import_modules()
 
@@ -42,10 +43,10 @@ class SapphireModuleManager():
 
 			if module is None: continue
 
-			self.initialize_module(module)
+			self.register_module(module)
 			
 
-	def initialize_module(self, module_class: type[SapphireModule]) -> None:
+	def register_module(self, module_class: type[SapphireModule]) -> None:
 		"Get the module class and intialize it."
 
 		valid = isinstance(module_class, type) and issubclass(module_class, SapphireModule)
@@ -61,13 +62,12 @@ class SapphireModuleManager():
 
 		module = module_class(
 			self.emit_event,
-			self.config.get_sub_config(module_class.name)
+			self.config.get_sub_config(module_class.name())
 			)
 		
 		self.modules.append(module)
 
 		handled_events = module.handled_events()
-
 		for event in handled_events:
 			self.dispatch_map.setdefault(event, []).append(module)
 
@@ -80,19 +80,13 @@ class SapphireModuleManager():
 		self.log(
 			SapphireEvents.chain(),
 			"info",
-			f"Initialized module '{module.name}'. " \
-			f"Info : {module.info}"
-		)
-
-		self.log(
-			SapphireEvents.chain(),
-			"debug",
-			f"Module '{module.name}' handles events: {[e.__name__ for e in handled_events]}"
+			f"Loaded module '{module.name()}'. " \
+			f"It handles events: {[e.__name__ for e in handled_events]}"
 		)
 
 	
 	def get_module(self, py_module: ModuleType) -> type[SapphireModule] | None:
-		"Get the SapphireModule from a python module."
+		"Dynamically getting a module."
 
 		#looking for python module that defines a get_module
 
@@ -154,45 +148,42 @@ class SapphireModuleManager():
 		return mods
 	
 	
+
 	def start_modules(self, dev = False):
 		"Calls .start() on all registered modules."
 
 		for module in self.modules:
-
 			try:
 				module.start()
-				continue
 			except Exception as e:
-				err = e
 
-			self.log(
-				SapphireEvents.chain(),
-				"critical",
-				f"Could not start module with name {module.name()} (type:{type(module)}). " \
-				f"Encountered Error = {err.__class__.__name__}:{str(err)}. " \
-				"Shutting down sapphire!"
-			)
+				self.log(
+					SapphireEvents.chain(),
+					"critical",
+					f"Could not start module with name {module.name()} (type:{type(module)}). " \
+					f"Encountered Error = {e.__class__.__name__}:{e}. " \
+					"Shutting down sapphire!"
+				)
 
-			event = SapphireEvents.ShutdownEvent(
-				"module",
-				SapphireEvents.make_timestamp(),
-				SapphireEvents.chain(),
-				True,
-				"critical"
-			)
-			
-			self.emit_event(event)
+				event = SapphireEvents.ShutdownEvent(
+					"module",
+					SapphireEvents.make_timestamp(),
+					SapphireEvents.chain(),
+					True,
+					"critical"
+				)
+				
+				self.emit_event(event)
 
-			if dev:
-				self.end_modules()
-				raise e
+				if dev:
+					self.end_modules()
+					raise e
 
 
 	def end_modules(self) -> SapphireLogger | None:
 		"Calls .end() on all modules."
 
 		logger = None
-
 		for module in self.modules:
 
 			if isinstance(module, SapphireLogger): 
@@ -200,16 +191,19 @@ class SapphireModuleManager():
 				continue
 
 			try:
-				success, msg = module.end()
+				success, err = module.end()
 			except Exception as e:
 				success = False
 				err = f"{type(e).__name__}({str(e)})"
-				msg = f"Could not properly end module '{module.name()}'. Error: {err}" 
 
-			
+			if success:
+				continue
+
+			msg = f"Could not properly end module '{module.name()}'. Error: {err}" 
+
 			self.log(
 				SapphireEvents.chain(),
-				"info" if success else "warning",
+				"warning",
 				msg
 			) 
 			
@@ -217,16 +211,17 @@ class SapphireModuleManager():
 
 
 	def handle_module_commands(self, module: SapphireModule):
+		mod_name = module.name()
 
 		for name, mem in inspect.getmembers(module, inspect.ismethod):
 			if not hasattr(mem, "_is_command"):
 				continue
 		
 			ev = SapphireEvents.CommandRegisterEvent(
-				module.name,
+				module.name(),
 				SapphireEvents.make_timestamp(),
 				SapphireEvents.chain(),
-				module.name,
+				mod_name,
 				mem._name, #type: ignore
 				mem._info, #type: ignore // These SHOULD exist if _is_command exists
 				mem
@@ -235,16 +230,16 @@ class SapphireModuleManager():
 
 
 	def handle_module_tasks(self, module: SapphireModule):
-
+		mod_name = module.name()
 		for name, mem in inspect.getmembers(module, inspect.ismethod):
 			if not hasattr(mem, "_is_task"):
 				continue
 
 			ev = SapphireEvents.TaskRegisterEvent(
-				module.name,
+				module.name(),
 				SapphireEvents.make_timestamp(),
 				SapphireEvents.chain(),
-				module.name,
+				mod_name,
 				mem._name, #type: ignore
 				mem._args,#type: ignore
 				mem._info, #type: ignore // These SHOULD exist if _is_task exists
