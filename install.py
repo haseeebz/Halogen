@@ -13,18 +13,6 @@ def color_print(color: str, string: str):
     print(f"{color}{string}{RESET}")
 
 
-def ask_user(msg: str, options: list[str]) -> str:
-
-    while True:
-        choice = input(f"{msg} {options} : ")
-
-        if choice not in options:
-            color_print(RED, "Incorrect option!")
-            continue
-
-        break
-
-
 def shell(cmd: str) -> bool:
     output = subprocess.run(
         cmd,
@@ -52,17 +40,16 @@ VENV_DIR = Path(SAPPHIRE_DIR) / ".venv"
 if OS == "windows":
     CONFIG_DIR = Path(os.environ["APPDATA"]) / "sapphire"
 elif OS == "linux":
-    CONFIG_DIR = Path(os.path.expanduser("~/.config/sapphire"))
+    CONFIG_DIR = Path.home() / ".config" / "sapphire"
+elif OS == "darwin":  
+    CONFIG_DIR = Path.home() / "Library" / "Application Support" / "sapphire"
 else:
     color_print(RED, f"Unsupported operating system: {OS}")
     exit(1)
 
-
-if not CONFIG_DIR.exists():
-    os.makedirs(CONFIG_DIR, exist_ok = True)
+CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
 
-color_print(GREEN, f"Detected OS : {OS}")
 color_print(BLUE, "Proceeding with installation...")
 
 
@@ -74,6 +61,7 @@ if SAPPHIRE_DIR != WORKING_DIR:
 #
 # Creating the venv
 #
+
 
 color_print(BLUE, "Creating virtual environment...")
 
@@ -116,17 +104,4 @@ if not success:
 
 color_print(GREEN, "Sapphire installed.")
 
-#
-# Setting up
-#
 
-color_print(BLUE, f"Copying config.toml to {CONFIG_DIR}...")
-shutil.copy("config.toml", CONFIG_DIR)
-
-color_print(BLUE, f"Copying modules/ to {CONFIG_DIR/'modules'}...")
-shutil.copytree("modules", CONFIG_DIR/'modules')
-
-color_print(BLUE, f"Copying models/ to {CONFIG_DIR/'models'}...")
-shutil.copytree("models", CONFIG_DIR/'models')
-
-color_print(GREEN, "Setup complete! Sapphire can be ran now!")
