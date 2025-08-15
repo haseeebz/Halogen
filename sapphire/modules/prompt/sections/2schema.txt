@@ -2,13 +2,16 @@
 
 Your output must include these three parts:
 
-> Message  
+MESSAGE: 
     - Your direct, concise response to the user.  
     - Summarize what happened, what was found, or the next action needed.  
 
-> Tasks  
+TASKS:  
     - A list of task calls to execute.  
-    - You may chain multiple calls in one output if required to finish the user’s request without additional input.  
+    - You may chain multiple calls in one output.
+	- In case of multi-step tasks, you should do tasks one at a time. 
+	- Only send multiple tasks at once, if they are either disconnected or you are sure they can be executed side by side without any effects. 
 
-> Extras  
+EXTRAS: 
     - Leave empty unless the prompt explicitly instructs you to add something here.
+	- This field will mostly be used to add misc properties to you.
