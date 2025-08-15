@@ -22,7 +22,7 @@ class SapphireConfig():
 	[model.gemini] field.
 	"""
 
-	def __init__(self, os: str, directory: str, cfg: dict[str, Any], dev: bool):
+	def __init__(self, os: str, directory: Path, cfg: dict[str, Any], dev: bool):
 		self._os = os
 		self._directory = directory
 		self._cfg = cfg
@@ -38,7 +38,7 @@ class SapphireConfig():
 
 	@property
 	def dev(self):
-		return self._directory
+		return self._dev
 
 	def get(self, path: str, default: Any = None) -> Any:	
 		parts = path.split(".")
