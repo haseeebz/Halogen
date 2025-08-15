@@ -11,25 +11,35 @@ modules = [
 
 name = "Haseeb"
 
+[dev]
 
-[logger] #configurations for the built-in logger module
+
+
+[logger] 
+#configurations for the built-in logger module
 
 logfile = "sapphire.log"
-#can use absolute paths.
+# The file where logs should be dumped. This currently dumps into the working directory
+# Should use absolute paths.
+
 
 level = "debug" 
-# valid values: debug, info, warning, critical 
+# The level upto which logs should be shown.
+# Valid values: debug, info, warning, critical 
 
 terminal = true
-#whether to log into the terminal or not
+# Whether to log into the terminal or not... Kinda useless. Created it just cuz I could.
 
 
 [model]
 #configurations for the model manager module
-name = "gemini"
 
-#see how the name corresponds to the sub-field down below.
-#this is essential for proper config transfer
+name = "gemini"
+# The name of the model you want to use once sapphire starts. If no model is found, it raises error.
+
+
+# See how the name corresponds to the sub-field down below.
+# This is essential for proper config transfer
 
 [model.gemini]
 
@@ -45,7 +55,10 @@ api_key = "load:secrets.txt"
 
 [prompt]
 #configurations for the prompt manager
+
 memory_length = 30
-#amount of interactions between the AI and the user to keep. Each individual message takes 1 memory slot.
+# Amount of messages the manager keeps at once.
+# A message could be user input, AI response and task results etc.
+# Each individual message takes 1 memory slot.
 
 
