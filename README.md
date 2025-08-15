@@ -1,24 +1,17 @@
+<br/>
+<div align='center'>
+  <h1>Sapphire</h1>
+  <h4>Modularity focused AI platform</h4>
+</div>
+<br/>
 
-# Sapphire
+## What is Sapphire?
 
-Sapphire is a highly modular and extensible system for AI integration with desktop. It's main goal is to make a platform where any model can be connected and turned into a proper assistant using configurable modules.
+Sapphire is a platform that allows you full freedom to:
 
-## Goals
++ Integrate and use any model, *Local* or *Cloud*.
++ Enhance AI functionality with *Custom Modules*.
++ Do tasks and *Automate* your workflow.
 
-+ Model Agnostic Architecture 
-+ Modular system
-+ Hot loading and changing models and providers at runtime.
-+ Managing, orchestrating and executing tasks intiated by the AI
-+ Add support for images and maybe live video streaming for models that support it
-+ Make it platform-independant
-+ Make it a hive mind daemon which can be connected to using clients
-+ Config file based architecture
-+ Allowing modules to implement their own user commands
-+ Namespacing said commands
-+ Allowing modules to implement tasks
-+ Hot loading modules at runtime
-+ Automate workflows
-+ Execute multiple tasks at once
-+ Maintain a proper history of chats and interactions
-+ Implement persistent memories
-+ Have a ton of functionality via tasks while also keeping the size of the prompt as short as possible
+The main goal of Sapphire is to be a modularity-focused AI runtime that could potentially take any LLM and alter it's functionality with custom modules while having the ability to create custom interfaces to communicate with said LLM.
+
