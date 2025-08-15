@@ -108,6 +108,7 @@ class SapphireCore():
 		)
 
 		if self.config.dev: 
+			self.shutdown_reason = f"Module '{mod.name()}' failed to handle event."
 			self.shutdown()
 			raise e
 
@@ -207,7 +208,7 @@ class SapphireCore():
 			self._get_terms = {
 				"chain" : lambda: SapphireEvents._intern_chain.__str__(),
 				"user" : lambda: self.config.get("user.name", "Unknown"),
-				"config" : lambda: f"Using config dir : {self.config.directory}",
+				"config" : lambda: f"Using config dir : {self.config.directory.absolute()}",
 				"help" : lambda: f"Accessible terms: {[x for x in self._get_terms.keys()]}"
 			}
 
