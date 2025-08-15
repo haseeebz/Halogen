@@ -23,8 +23,8 @@ class SapphireCore():
 		self.is_running: bool = True
 		self.shutdown_requested = False
 
-		#self.event_logs = self.root / "events.log"
-
+		self.event_logfile = self.config.get("dev.event_logfile", "events.log")
+	
 
 		self.core_events: MutableSequence[type[SapphireEvents.Event]] = [
 			SapphireEvents.ShutdownEvent,
@@ -81,8 +81,8 @@ class SapphireCore():
 
 	def pass_events(self, event: SapphireEvents.Event):
 
-		#if self.is_dev:
-		#	self.log_events(event)
+		if self.config.dev: self.log_events(event)
+
 		event_type = type(event)
 
 		if event_type in self.core_events: 
@@ -135,7 +135,7 @@ class SapphireCore():
 	def log_events(self, event: SapphireEvents.Event):
 		"Logs event to a event.log file. Only works when dev mode is on."
 
-		with open(self.event_logs, "a+") as file:
+		with open(self.event_logfile, "a+") as file:
 			file.write(f"{event.__str__()}\n")
 
 

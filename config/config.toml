@@ -13,6 +13,10 @@ name = "Haseeb"
 
 [dev]
 
+event_logfile = "events.log"
+# The file to which events are dumped. 
+# Useful to see which events are being emitted and which event results in another.
+
 
 
 [logger] 
@@ -40,6 +44,7 @@ name = "gemini"
 
 # See how the name corresponds to the sub-field down below.
 # This is essential for proper config transfer
+# This behaviour is handled manually by model manager and has nothing to do with the rest of Sapphire.
 
 [model.gemini]
 
