@@ -1,11 +1,28 @@
 from sapphire.ctl.base import SapphireInterface
+from sapphire.base import SapphireEvents
 import argparse
+
+
+class Color:
+	RESET = "\033[0m"
+	RED = "\033[31m"
+	GREEN = "\033[32m"
+	YELLOW = "\033[33m"
+	BLUE = "\033[34m"
+	MAGENTA = "\033[35m"
+	CYAN = "\033[36m"
+	GRAY = "\033[90m"
+
+	@staticmethod
+	def colorify(text:str, color):
+		return f"{color}{text}{Color.RESET}"
+	
 
 class SapphireCLI():
 
 	def __init__(self):
 		self.setup()
-		self.interface = SapphireInterface("sapphire.ctl/tui")
+		self.interface = SapphireInterface("sapphire.ctl/cli")
 
 	def setup(self):
 		
@@ -33,4 +50,34 @@ class SapphireCLI():
 			nargs = '*'
 		)
 
-	
+	def run(self):
+		cli_args = self.parser.parse_args() 
+		self.interface.start()
+
+		self.interface.send_command(
+			cli_args.module,
+			cli_args.command,
+			cli_args.args
+		)
+
+		while True:
+			event = self.interface.check_event(0.05)
+
+			if isinstance(event, (SapphireEvents.CommandExecutedEvent, SapphireEvents.ErrorEvent)):
+				self.handle_event(event)
+				self.interface.end()
+				break
+			else:
+				continue
+			
+
+	def handle_event(self, ev: SapphireEvents.Event) -> bool:
+		match ev:
+			case SapphireEvents.CommandExecutedEvent():
+				color = Color.GREEN if ev.success else Color.RED
+				print(Color.colorify(ev.output, color))
+			case SapphireEvents.ErrorEvent():
+				ev : SapphireEvents.ErrorEvent
+				color = Color.RED 
+				print(Color.colorify(ev.error, color))
+		

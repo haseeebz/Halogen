@@ -137,7 +137,6 @@ class SapphireEvents():
 	class ErrorEvent(Event):
 		"In case something goes wrong."
 		error: str
-		message = str 
 
 
 	@dataclass(frozen = True)

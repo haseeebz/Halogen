@@ -19,3 +19,5 @@ packages = ["sapphire"]
 [project.scripts]
 sapphire = "sapphire.core.main:main"
 sapphire-tui = "sapphire.ctl.tui.main:main"
+sapphire-cli = "sapphire.ctl.cli.main:main"
+
