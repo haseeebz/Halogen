@@ -55,7 +55,7 @@ class SapphireServer(SapphireModule):
 	
 	def start(self):
 
-		self.socket.settimeout(0.5)
+		self.socket.settimeout(0.2)
 		self.socket.listen()
 		self.read_thread.start()
 		self.write_thread.start()
@@ -212,7 +212,7 @@ class SapphireServer(SapphireModule):
 			except socket.timeout:
 				pass
 
-			readable: list[socket.socket] = select.select(self.clients.values(), [], [], 0.5)[0]
+			readable: list[socket.socket] = select.select(self.clients.values(), [], [], 0.2)[0]
 
 			for client in readable:
 				self.handle_client(client)
@@ -223,7 +223,7 @@ class SapphireServer(SapphireModule):
 		while self.is_running:
 			
 			try:
-				event = self.out_buffer.get(True, 0.5)
+				event = self.out_buffer.get(True, 0.2)
 			except queue.Empty:
 				continue
 

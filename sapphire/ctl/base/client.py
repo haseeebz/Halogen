@@ -28,7 +28,7 @@ class SapphireClient():
 		
 
 	def start(self):
-		self.socket.settimeout(1)
+		self.socket.settimeout(0.2)
 		
 		try:
 			self.socket.connect((self.HOST, self.PORT))
@@ -153,7 +153,7 @@ class SapphireClient():
 		while self.is_running:
 			
 			try:
-				event = self.out_buffer.get(True, 0.5)
+				event = self.out_buffer.get(True, 0.2)
 			except queue.Empty:
 				continue
 

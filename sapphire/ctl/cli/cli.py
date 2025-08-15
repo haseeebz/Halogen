@@ -46,9 +46,10 @@ class SapphireCLI():
 		self.parser.add_argument(
 			"args", 
 			help = "Arguments to sent to the command", 
-			type = list,
+			type = str,
 			nargs = '*'
 		)
+
 
 	def run(self):
 		cli_args = self.parser.parse_args() 
