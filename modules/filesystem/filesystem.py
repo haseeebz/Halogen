@@ -27,7 +27,7 @@ class FileSystem(SapphireModule):
 
 
 	def end(self) -> Tuple[bool, str]:
-		return (True, "")
+		return (True, "No specific end action needed.")
 	
 
 	@SapphireTask("read_file", "Read the contents of a file.", ["path:str", "lines:int"])
@@ -37,7 +37,7 @@ class FileSystem(SapphireModule):
 		lines = int(lines) if lines.isdigit() else 10
 
 		with open(path) as file:
-			content = file.readlines(lines)
+			content = [file.readline() for _ in range(lines)]
 
 		return "".join(content)
 
@@ -74,7 +74,10 @@ class FileSystem(SapphireModule):
 
 		contents = [item.name for item in path.iterdir()]
 
-		return contents
+		if len(contents) > 16:
+			return f"{contents[0:17]} + {len(contents)-16} items truncated to not overwhelm the AI."
+		else:
+			return contents
 
 
 	@SapphireTask("make_directory", "Creates a directory along with missing parents", ["path:str"])
@@ -86,6 +89,8 @@ class FileSystem(SapphireModule):
 			return f"{path} already exists!"
 
 		path.mkdir(0o777, True, True)
+
+		return f"Created directory at {path}."
 
 
 	@SapphireTask("remove_directory", "Deletes a directory recursively! Dangerous", ["path:str"])
@@ -101,6 +106,8 @@ class FileSystem(SapphireModule):
 			
 		shutil.rmtree(path)
 
+		return f"Removed directory at {path}."
+
 
 	@SapphireTask("create_file", "Create a file at the specified location, extension included.", ["path:str"])
 	def create_file(self, chain: SapphireEvents.Chain, path: str):
@@ -112,7 +119,8 @@ class FileSystem(SapphireModule):
 
 		open(path, "x").close()
 
-	
+		return f"Created file at {path}."
+
 
 	@SapphireTask("remove_file", "Remove a file at the specified location.", ["path:str"])
 	def remove_file(self, chain: SapphireEvents.Chain, path: str):
@@ -124,6 +132,7 @@ class FileSystem(SapphireModule):
 
 		os.remove(path)
 
+		return f"Removed file at {path}."
 
 
 	@SapphireTask("search_file", "Search for a file within a given directory.", ["name:str","directory:str"])
@@ -144,7 +153,10 @@ class FileSystem(SapphireModule):
 			if item.name == name:
 				found.append(item.__str__())
 
-		return found
+		if len(found) > 16:
+			return f"{found[0:17]} + {len(found)-16} files truncated to not overwhelm the AI."
+		else:
+			return found
 
 
 	@SapphireTask(
@@ -175,7 +187,10 @@ class FileSystem(SapphireModule):
 			if regex_compiled.search(item.name):
 				found.append(item.__str__())
 
-		return found
+		if len(found) > 16:
+			return f"{found[0:17]} + {len(found)-16} files truncated to not overwhelm the AI."
+		else:
+			return found
 
 
 
