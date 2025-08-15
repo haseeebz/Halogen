@@ -1,21 +1,22 @@
 
 app = "Sapphire"
 
-modules = [
-	
-]
-
 
 
 [user]
-
+#Some user stuff... Did'nt find any use for this yet"
 name = "Haseeb"
 
+
+
+
 [dev]
+# Just somethings that core uses when --dev mode is on.
 
 event_logfile = "events.log"
 # The file to which events are dumped. 
 # Useful to see which events are being emitted and which event results in another.
+
 
 
 
@@ -35,6 +36,8 @@ terminal = true
 # Whether to log into the terminal or not... Kinda useless. Created it just cuz I could.
 
 
+
+
 [model]
 #configurations for the model manager module
 
@@ -46,6 +49,7 @@ name = "gemini"
 # This is essential for proper config transfer
 # This behaviour is handled manually by model manager and has nothing to do with the rest of Sapphire.
 
+
 [model.gemini]
 
 api_key = "load:secrets.txt"
@@ -56,6 +60,8 @@ api_key = "load:secrets.txt"
 # Obviously this does'nt apply for local models 
 
 # api_key = "123abc" will also work
+
+
 
 
 [prompt]
