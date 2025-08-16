@@ -54,7 +54,24 @@ class SapphireModelManager(SapphireModule):
 	def start(self) -> None:
 		self.init_providers()
 		current_provider = self.config.get("name", None)
-		self.load_model(current_provider)
+		success, output = self.load_provider(current_provider)
+
+		if success:
+			self.log(
+				SapphireEvents.chain(),
+				"info",
+				output
+			)
+			return
+
+		ev = SapphireEvents.ShutdownEvent(
+			self.name(),
+			SapphireEvents.make_timestamp(),
+			SapphireEvents.chain(),
+			True,
+			output
+		)
+		self.emit_event(ev)
 
 
 	def end(self) -> Tuple[bool, str]:
@@ -192,9 +209,11 @@ class SapphireModelManager(SapphireModule):
 
 		return (True, msg)
 
+
 	def switch_provider_model(self, model: str) -> tuple[bool, str]:
 		pass
 	
+
 	def generate_response(self, event: SapphireEvents.PromptEvent):
 
 		if not self.current_model:
@@ -257,7 +276,15 @@ class SapphireModelManager(SapphireModule):
 
 		match choice:
 			case "provider":
-				self.load_model()
+				success, msg = self.load_model()
+			case "model":
+				success, msg = _, _ 
+			case _:
+				success = False
+				msg = f"Unknown switch argument : {choice}"
+
+		
+		
 
 
 

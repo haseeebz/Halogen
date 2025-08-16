@@ -127,7 +127,7 @@ class SapphireCommandHandler(SapphireModule):
 		"Executing the command."
 
 		try:
-			msg = cmd_data.func(ev.args, ev.chain)
+			success, msg = cmd_data.func(ev.args, ev.chain)
 			success = True
 		except Exception as e:
 			msg = f"Failed to execute command. Encountered {e.__class__.__name__}: {e.__str__()}"
