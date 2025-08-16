@@ -92,8 +92,8 @@ class SapphirePromptManager(SapphireModule):
 	def make_prompt_parts(self) -> list[str]:
 		parts = []
 		parts.extend(self.core_sections)
-		parts.append(self.memory.stringify())
 		parts.append(self.tasks.stringify())
+		parts.append(self.memory.stringify())
 		return parts
 
 

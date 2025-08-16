@@ -19,7 +19,7 @@ class TasksManager():
 		string.append(
 			"All available tasks that you can do. These namespaces are modules and " \
 			"their defined tasks are given below. These are the functions that you can execute. " \
-			"Make sure to follow the argument types.\n"
+			"Make sure to follow the argument types indicated after the ':' and in python type hint format.\n"
 			)
 
 		for ns, taskslist in self.task_map.items():
