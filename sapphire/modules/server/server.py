@@ -105,7 +105,7 @@ class SapphireServer(SapphireModule):
 		dict_form["type"] = event.__class__.__name__
 		dict_form["payload"] = asdict(event)
 
-		string_form = json.dumps(dict_form)
+		string_form = json.dumps(dict_form)+"\n"
 		return string_form
 
 
@@ -151,6 +151,13 @@ class SapphireServer(SapphireModule):
 			error_msg
 		)
 		
+	
+	def parse_client_input(self, msg: str) -> None:
+		for part in msg.splitlines():
+			event = self.deserialize_event(part)
+			if event:
+				self.emit_event(event)
+		
 		
 	def handle_client(self, client: socket.socket):
 		try:
@@ -162,10 +169,7 @@ class SapphireServer(SapphireModule):
 			self.cleanup_client(client)
 			return
 		
-		for msg in data.decode().splitlines():
-			event = self.deserialize_event(msg)
-			if event:
-				self.emit_event(event)
+		self.parse_client_input(data.decode())
 
 
 	def greet_client(self, client: socket.socket):

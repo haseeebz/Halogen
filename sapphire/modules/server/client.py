@@ -81,8 +81,9 @@ class SapphireClient():
 		dict_form["type"] = event.__class__.__name__
 		dict_form["payload"] = asdict(event)
 
-		string_form = json.dumps(dict_form)
+		string_form = json.dumps(dict_form)+"\n"
 		return string_form
+
 
 
 	def parse_json(self, json_str: str) -> dict | None:
@@ -116,6 +117,13 @@ class SapphireClient():
 		self.add_error_event(error_msg)
 		
 
+	def parse_server_input(self, msg: str) -> None:
+		for part in msg.splitlines():
+			event = self.deserialize_event(part)
+			if event:
+				 self.in_buffer.put(event)
+		
+
 	def add_error_event(self, msg):
 		event = SapphireEvents.ErrorEvent(
 			"sapphire-client",
@@ -143,9 +151,7 @@ class SapphireClient():
 				)
 				continue
 				
-			event = self.deserialize_event(data.decode())
-			if event: 
-				self.in_buffer.put(event)
+			self.parse_server_input(data.decode())
 			
 			
 	def write(self):
