@@ -36,7 +36,7 @@ class Gemini(BaseModelProvider):
 		}
 
 		self.thinking_budget = self.config.get("thinking_budget", 0)
-		self.model_name = self.config.get("model_name", )
+		self.model_name = self.config.get("model_name", "gemini-2.5-flash")
 
 		self.content_config = types.GenerateContentConfig(
 			thinking_config = types.ThinkingConfig(thinking_budget=self.thinking_budget),

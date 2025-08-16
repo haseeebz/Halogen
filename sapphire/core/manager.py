@@ -185,7 +185,7 @@ class SapphireModuleManager():
 
 			if dev:
 				self.end_modules()
-				raise e
+				raise err
 
 
 	def end_modules(self) -> SapphireLogger | None:

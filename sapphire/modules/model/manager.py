@@ -200,14 +200,14 @@ class SapphireModelManager(SapphireModule):
 		
 		if provider not in self.registered_providers.keys():
 			
-			msg = f"Could not find model '{model}'. It was not registered."
+			msg = f"Could not find provider '{provider}'. It was not registered."
 			return (False, msg)
 
 		if self.current_provider: self.current_provider.unload()
-		self.current_provider = self.registered_providers[model]
+		self.current_provider = self.registered_providers[provider]
 		self.current_provider.load()
 
-		msg = f"Loaded model '{model}'."
+		msg = f"Loaded provider '{provider}'."
 
 		return (True, msg)
 
