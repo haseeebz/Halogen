@@ -261,8 +261,8 @@ class SapphireModelManager(SapphireModule):
 
 
 	@SapphireCommand("current", "Get info about the current model")
-	def get_current_model_command(self, args: list[str], chain: Chain):
-		return f"Model: {self.current_model.name()}"
+	def get_current_model_command(self, args: list[str], chain: Chain) -> tuple[bool, str]:
+		return (True, f"Model: {self.current_model.name()}")
 
 
 	@SapphireCommand("switch", "Switch the model or provider. ARGS: [model/provider] name")
@@ -284,7 +284,7 @@ class SapphireModelManager(SapphireModule):
 				msg = f"Unknown switch argument : {choice}"
 
 		
-		
+
 
 
 

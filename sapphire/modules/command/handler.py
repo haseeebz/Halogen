@@ -128,7 +128,6 @@ class SapphireCommandHandler(SapphireModule):
 
 		try:
 			success, msg = cmd_data.func(ev.args, ev.chain)
-			success = True
 		except Exception as e:
 			msg = f"Failed to execute command. Encountered {e.__class__.__name__}: {e.__str__()}"
 			success = False
@@ -155,7 +154,7 @@ class SapphireCommandHandler(SapphireModule):
 
 	_help_str = ""
 	@SapphireCommand("help", "Get info about commands")
-	def help_command(self, args: list[str], chain: Chain) -> str:
+	def help_command(self, args: list[str], chain: Chain) -> tuple[bool, str]:
 		
 		if self._help_str:
 			return self._help_str
@@ -170,7 +169,7 @@ class SapphireCommandHandler(SapphireModule):
 				
 		self._help_str += "".join(temp)
 
-		return self._help_str
+		return (True, self._help_str)
 	
 	
 

@@ -198,11 +198,11 @@ class SapphireCore():
 		)
 		self.eventbus.emit(event)
 
-		return "Requested Sapphire to shutdown."
+		return (True, "Requested Sapphire to shutdown.")
 
 
 	_get_terms = {}
-	def get_command(self, args: list[str], chain: SapphireEvents.Chain) -> str:
+	def get_command(self, args: list[str], chain: SapphireEvents.Chain) -> tuple[bool, str]:
 
 		if not self._get_terms:
 			self._get_terms = {
@@ -215,10 +215,10 @@ class SapphireCore():
 		num_args = len(args)
 		if num_args != 1:
 			value = self._get_terms["help"]()
-			return value
+			return (True, value)
 		
 		item = args[0]
 		value = self._get_terms.get(item, "help")()
-		return value
+		return (True, value)
 
 

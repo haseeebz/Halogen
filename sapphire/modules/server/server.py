@@ -253,15 +253,15 @@ class SapphireServer(SapphireModule):
 
 	
 	@SapphireCommand("address", "Get the socket address of the sapphire server.")
-	def get_address(self, args: list[str], chain: Chain) -> str:
-		return f"{self.HOST}:{self.PORT}"
+	def get_address(self, args: list[str], chain: Chain) -> tuple[bool, str]:
+		return (True, f"{self.HOST}:{self.PORT}")
 
 	@SapphireCommand("clients", "Get all connected clients and their info.")
-	def get_clients(self, args: list[str], chain: Chain) -> str:
+	def get_clients(self, args: list[str], chain: Chain) -> tuple[bool, str]:
 		string = []
 		for context, client in self.clients.items():
 			string.append(f"Client : ({context}:0)")
-		return "\n".join(string)
+		return (True, "\n".join(string))
 
 
 
