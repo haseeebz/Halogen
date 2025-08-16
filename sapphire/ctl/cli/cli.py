@@ -1,4 +1,4 @@
-from sapphire.ctl.base import SapphireInterface
+from sapphire.modules.server import SapphireInterface
 from sapphire.base import SapphireEvents
 import argparse
 
