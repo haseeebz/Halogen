@@ -27,7 +27,7 @@ class SapphireModelManager(SapphireModule):
 		config: SapphireConfig
 		):
 		super().__init__(emit_event, config)
-		self.current_model: Union[BaseModelProvider, None] = None 
+		self.current_provider: Union[BaseModelProvider, None] = None 
 		self.registered_providers: dict[str, BaseModelProvider] = {}
 		self.model_directory = self.config.directory / "models"
 		self.has_commands = True
@@ -75,8 +75,8 @@ class SapphireModelManager(SapphireModule):
 
 
 	def end(self) -> Tuple[bool, str]:
-		if self.current_model:
-			self.current_model.unload()
+		if self.current_provider:
+			self.current_provider.unload()
 		return (True, "Success")
 
 
@@ -192,7 +192,9 @@ class SapphireModelManager(SapphireModule):
 		
 		return model_cls
 
-	
+	# The only reason the next two functions return weird values is that i wanted to reuse their logic
+	# for both the normal flow and using them in commands.
+	# Maybe make this better in the future?
 
 	def load_provider(self, provider: str) -> tuple[bool, str]:
 		
@@ -201,25 +203,34 @@ class SapphireModelManager(SapphireModule):
 			msg = f"Could not find model '{model}'. It was not registered."
 			return (False, msg)
 
-		if self.current_model: self.current_model.unload()
-		self.current_model = self.registered_providers[model]
-		self.current_model.load()
+		if self.current_provider: self.current_provider.unload()
+		self.current_provider = self.registered_providers[model]
+		self.current_provider.load()
 
 		msg = f"Loaded model '{model}'."
 
 		return (True, msg)
 
 
-	def switch_provider_model(self, model: str) -> tuple[bool, str]:
-		pass
+	def switch_provider_model(self, model: str, chain: SapphireEvents.Chain) -> tuple[bool, str]:
+
+		success, output = self.current_provider.switch_model(model)
+
+		self.log(
+			chain,
+			"info" if success else "warning",
+			output
+		)
+		
+		return (success, output)
 	
 
 	def generate_response(self, event: SapphireEvents.PromptEvent):
 
-		if not self.current_model:
+		if not self.current_provider:
 			return 
 		
-		response = self.current_model.generate(event)
+		response = self.current_provider.generate(event)
 
 		if response is not None:
 			self.eval_ai_response(response, SapphireEvents.chain(event))
@@ -228,7 +239,7 @@ class SapphireModelManager(SapphireModule):
 		self.log(
 			SapphireEvents.chain(event),
 			"critical",
-			f"Could not get response from model '{self.current_model.name()}'"
+			f"Could not get response from model '{self.current_provider.name()}'"
 			)
 	
 	
@@ -262,7 +273,7 @@ class SapphireModelManager(SapphireModule):
 
 	@SapphireCommand("current", "Get info about the current model")
 	def get_current_model_command(self, args: list[str], chain: Chain) -> tuple[bool, str]:
-		return (True, f"Model: {self.current_model.name()}")
+		return (True, f"Model: {self.current_provider.name()}")
 
 
 	@SapphireCommand("switch", "Switch the model or provider. ARGS: [model/provider] name")
@@ -276,13 +287,14 @@ class SapphireModelManager(SapphireModule):
 
 		match choice:
 			case "provider":
-				success, msg = self.load_model()
+				success, msg = self.load_provider(name)
 			case "model":
-				success, msg = _, _ 
+				success, msg = self.switch_provider_model(name)
 			case _:
 				success = False
 				msg = f"Unknown switch argument : {choice}"
 
+		return (success, msg)
 		
 
 
