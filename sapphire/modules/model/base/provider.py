@@ -14,18 +14,23 @@ class BaseModelProvider(ABC):
 	
 	@classmethod
 	def name(cls) -> str:
-		"Returns the name of the model. By default, it's the name of the class."
+		"Returns the name of the provider. By default, it's the name of the class."
 		return cls.__name__
 	
 
 	def load(self) -> tuple[bool, str]:
-		"Setup to load the model. Not needed if model needs no loading."
+		"Setup to load the provider. Not needed if model needs no loading."
 		return True
 
 
 	def unload(self) -> tuple[bool, str]:
-		"Setup to unload the model. Not needed if model needs no unloading."
+		"Setup to unload the provider. Not needed if model needs no unloading."
 		return True
+
+	
+	def switch_model(self, name: str) -> tuple[bool, str]:
+		"Switching the model if the provider has multiple models that can be used."
+		return (False, "Not Implemented")
 		
 
 	def generate(self, prompt: SapphireEvents.PromptEvent) -> ModelResponse | None:

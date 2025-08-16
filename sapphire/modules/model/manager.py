@@ -52,9 +52,9 @@ class SapphireModelManager(SapphireModule):
 
 
 	def start(self) -> None:
-		self.init_models()
-		current_model = self.config.get("name", None)
-		self.load_model(current_model)
+		self.init_providers()
+		current_provider = self.config.get("name", None)
+		self.load_model(current_provider)
 
 
 	def end(self) -> Tuple[bool, str]:
@@ -63,18 +63,18 @@ class SapphireModelManager(SapphireModule):
 		return (True, "Success")
 
 
-	def init_models(self):
+	def init_providers(self):
 		"""
 		Search and Initialize all model providers.
 		All python modules within the model directories are searched for a get_model() 
 		method.
 		"""
 
-		model_mods = self.import_models()
+		model_mods = self.import_providers()
 
 		for mod in model_mods:
 
-			model_class = self.get_model_from_module(mod)
+			model_class = self.get_provider_from_module(mod)
 
 			if not model_class: continue
 			model: BaseModelProvider = model_class(
@@ -91,7 +91,7 @@ class SapphireModelManager(SapphireModule):
 			)
 
 
-	def import_models(self) -> list[ModuleType]:
+	def import_providers(self) -> list[ModuleType]:
 		"""
 		Get all python modules within models/
 		"""
@@ -135,7 +135,7 @@ class SapphireModelManager(SapphireModule):
 		return mods
 	
 
-	def get_model_from_module(self, mod: ModuleType) -> type[BaseModelProvider] | None:
+	def get_provider_from_module(self, mod: ModuleType) -> type[BaseModelProvider] | None:
 
 		if not hasattr(mod, "get_model"):
 			self.log(
@@ -177,50 +177,28 @@ class SapphireModelManager(SapphireModule):
 
 	
 
-	def load_model(self, model: str) -> None:
-
-		if self.current_model: 
-			self.current_model.unload()
-
-		if model not in self.registered_providers.keys():
-
-			self.log(
-				SapphireEvents.chain(),
-				"critical",
-				f"Could not find model '{model}'. It was not registered."
-			)
-
-			if self.current_model:
-				return
-			
-			event = SapphireEvents.ShutdownEvent(
-				self.name(),
-				SapphireEvents.make_timestamp(),
-				SapphireEvents.chain(),
-				True,
-				"critical",
-				f"Model '{model}' not found."
-			)
-
-			self.emit_event(event)
-
-			return
+	def load_provider(self, provider: str) -> tuple[bool, str]:
 		
+		if provider not in self.registered_providers.keys():
+			
+			msg = f"Could not find model '{model}'. It was not registered."
+			return (False, msg)
 
+		if self.current_model: self.current_model.unload()
 		self.current_model = self.registered_providers[model]
 		self.current_model.load()
 
-		self.log(
-			SapphireEvents.chain(),
-			"info",
-			f"Loaded model '{model}'."
-		)	
+		msg = f"Loaded model '{model}'."
 
+		return (True, msg)
+
+	def switch_provider_model(self, model: str) -> tuple[bool, str]:
+		pass
 	
 	def generate_response(self, event: SapphireEvents.PromptEvent):
 
 		if not self.current_model:
-			return # TODO error?
+			return 
 		
 		response = self.current_model.generate(event)
 
@@ -266,3 +244,20 @@ class SapphireModelManager(SapphireModule):
 	@SapphireCommand("current", "Get info about the current model")
 	def get_current_model_command(self, args: list[str], chain: Chain):
 		return f"Model: {self.current_model.name()}"
+
+
+	@SapphireCommand("switch", "Switch the model or provider. ARGS: [model/provider] name")
+	def switch_command(self, args: list[str], chain: Chain):
+
+		if len(args) != 2:
+			raise ValueError(f"Expected 2 args. Got {len(args)}.")
+
+		choice = args[0]
+		name = args[1]
+
+		match choice:
+			case "provider":
+				self.load_model()
+
+
+
