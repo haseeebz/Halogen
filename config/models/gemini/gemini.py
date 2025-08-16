@@ -7,14 +7,22 @@ try:
 	from google import genai
 	from google.genai import types
 except ModuleNotFoundError:
-	raise ModuleNotFoundError("google module is neccessary for Gemini Model")
+	raise ModuleNotFoundError("Google GenAI package is neccessary for Gemini Model")
 
-
+# TODO
+# Thinking budget in config + default model in config
+# Supporting more models than just the flash
+# Allowing it to change models using commands that model class will potentially define
+# Maybe notifying when the model runs out of tokens?
+# Error proning it
+# Not specific to gemini but add some way for it to log what went wrong
 
 class Gemini(BaseModelProvider):
 
 	def __init__(self, config: SapphireConfig) -> None:
+
 		super().__init__(config)
+
 
 		self.api_key = self.load_api_key()
 
@@ -29,7 +37,6 @@ class Gemini(BaseModelProvider):
 		)
 
 		
-
 	@classmethod
 	def name(cls) -> str:
 		return "gemini"
