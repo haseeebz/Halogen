@@ -33,9 +33,9 @@ A list of all planned features (will add more to this list!)
 
 ### Models
 
-+ Make the Gemini model more error prone.
++ (**ONGOING**) Make the Gemini model more error prone.
 + Add other model providers like OpenAI, Deepseek etc. Also a local model provider like Ollama.
-+ Hot reloading and switching providers.
++ (**ONGOING**) Hot reloading and switching providers.
 + Add a command to change the actual model of a provider? We can do this easily by asking each model provider to return a list/set of all the models they provide. Very useful for local providers.
 + Method checking for models.
 
@@ -51,7 +51,7 @@ A list of all planned features (will add more to this list!)
 
 + (**DONE**) Server/Client fails to parse json when repeated events are sent at the same time.
 + (**DONE**) The above is likely due to the fact that the current ctl follows the "One output for a single input" philosphy which means that other events are just stuck in the queue. This includes other AI response events which causes the crash.
-+ (**ONGOING**) So fix the ctl to either be a tui which can display events without blocking for user input. This is easy because the client side already receives events in a non-blocking way.
++ (**DONE**) So fix the ctl to either be a tui which can display events without blocking for user input. This is easy because the client side already receives events in a non-blocking way.
 + Maybe make a GUI one day.
 
 ### Development
@@ -64,3 +64,11 @@ A list of all planned features (will add more to this list!)
 + thoughts?
 + reasoning?
 + (**ONGOING**) multitasking?
+
+
+### IMPORTANT
+
++ AI is acting really dumb.
+	+ It doesnt understand tasks
+	+ It doesnt understand type hints and that it needs to make sure all arguements are passed
++ Model Manager seems like duct tape with all the `tuple[bool, str]`. Need to do something about that.
