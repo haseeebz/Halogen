@@ -29,6 +29,12 @@ class Gemini(BaseModelProvider):
 			api_key = self.api_key
 		)
 
+		self.supported_models = {
+			"gemini-2.5-pro",
+			"gemini-2.5-flash",
+			"gemini-2.5-flash-lite"
+		}
+
 		self.thinking_budget = self.config.get("thinking_budget", 0)
 		self.model_name = self.config.get("model_name", )
 
@@ -50,6 +56,20 @@ class Gemini(BaseModelProvider):
 
 	def unload(self) -> tuple[bool, str]:
 		return (True, "No unloading action needed.")
+
+
+	def switch_model(self, name: str) -> tuple[bool, str]:
+		
+		if name not in self.supported_models:
+			return (False, f"Unknown model: {name}")
+
+		self.model_name = name
+
+		return (True, f"Successfully switched model to {name}.")
+
+
+	def get_available_models(self) -> set[str]:
+		return self.supported_models
 
 
 	def generate(self, prompt: SapphireEvents.PromptEvent) -> ModelResponse | None:

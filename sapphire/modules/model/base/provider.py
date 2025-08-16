@@ -31,7 +31,10 @@ class BaseModelProvider(ABC):
 	def switch_model(self, name: str) -> tuple[bool, str]:
 		"Switching the model if the provider has multiple models that can be used."
 		return (False, "Not Implemented")
-		
+
+	def get_available_models(self) -> set[str]:
+		"The set of models that the provider supports."
+		raise NotImplementedError(f"get_available_models method of model '{self.name()}'")
 
 	def generate(self, prompt: SapphireEvents.PromptEvent) -> ModelResponse | None:
 		"""
