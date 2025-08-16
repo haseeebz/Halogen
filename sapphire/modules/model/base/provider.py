@@ -18,12 +18,12 @@ class BaseModelProvider(ABC):
 		return cls.__name__
 	
 
-	def load(self) -> bool:
+	def load(self) -> tuple[bool, str]:
 		"Setup to load the model. Not needed if model needs no loading."
 		return True
 
 
-	def unload(self) -> bool:
+	def unload(self) -> tuple[bool, str]:
 		"Setup to unload the model. Not needed if model needs no unloading."
 		return True
 		

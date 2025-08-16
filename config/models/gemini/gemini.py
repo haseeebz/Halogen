@@ -17,12 +17,11 @@ except ModuleNotFoundError:
 # Error proning it
 # Not specific to gemini but add some way for it to log what went wrong
 
+
 class Gemini(BaseModelProvider):
 
 	def __init__(self, config: SapphireConfig) -> None:
-
 		super().__init__(config)
-
 
 		self.api_key = self.load_api_key()
 
@@ -30,17 +29,28 @@ class Gemini(BaseModelProvider):
 			api_key = self.api_key
 		)
 
+		self.thinking_budget = self.config.get("thinking_budget", 0)
+		self.model_name = self.config.get("model_name", )
+
 		self.content_config = types.GenerateContentConfig(
-			thinking_config = types.ThinkingConfig(thinking_budget=0),
+			thinking_config = types.ThinkingConfig(thinking_budget=self.thinking_budget),
 			response_schema = ModelResponse,
 			response_mime_type = "application/json"
 		)
 
-		
+
 	@classmethod
 	def name(cls) -> str:
 		return "gemini"
-	
+
+
+	def load(self) -> tuple[bool, str]:
+		return (True, "No loading action needed.")
+
+
+	def unload(self) -> tuple[bool, str]:
+		return (True, "No unloading action needed.")
+
 
 	def generate(self, prompt: SapphireEvents.PromptEvent) -> ModelResponse | None:
 		
@@ -57,7 +67,7 @@ class Gemini(BaseModelProvider):
 	def send_request(self, content: str):
 
 		response = self.client.models.generate_content(
-			model = "gemini-2.5-flash",
+			model = self.model_name,
 			contents = content,
 			config = self.content_config
 		)
