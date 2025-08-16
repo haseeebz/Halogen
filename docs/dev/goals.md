@@ -49,8 +49,8 @@ A list of all planned features (will add more to this list!)
 
 ### IPC
 
-+ Server/Client fails to parse json when repeated events are sent at the same time.
-+ The above is likely due to the fact that the current ctl follows the "One output for a single input" philosphy which means that other events are just stuck in the queue. This includes other AI response events which causes the crash.
++ (**DONE**) Server/Client fails to parse json when repeated events are sent at the same time.
++ (**DONE**) The above is likely due to the fact that the current ctl follows the "One output for a single input" philosphy which means that other events are just stuck in the queue. This includes other AI response events which causes the crash.
 + (**ONGOING**) So fix the ctl to either be a tui which can display events without blocking for user input. This is easy because the client side already receives events in a non-blocking way.
 + Maybe make a GUI one day.
 
@@ -63,4 +63,4 @@ A list of all planned features (will add more to this list!)
 
 + thoughts?
 + reasoning?
-+ multitasking?
++ (**ONGOING**) multitasking?
