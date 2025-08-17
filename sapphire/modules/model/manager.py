@@ -15,7 +15,7 @@ from sapphire.base import (
 	Chain
 )
 
-from .base import BaseModelProvider, ModelResponse
+from .base import BaseModelProvider, ModelResponse, SapphireModelResponseError
 
 # TODO make module loading better
 
@@ -230,17 +230,19 @@ class SapphireModelManager(SapphireModule):
 		if not self.current_provider:
 			return 
 		
-		response = self.current_provider.generate(event)
-
-		if response is not None:
-			self.eval_ai_response(response, SapphireEvents.chain(event))
-			return
-
-		self.log(
+		try:
+			response = self.current_provider.generate(event)
+		except SapphireModelResponseError as e:
+			self.log(
 			SapphireEvents.chain(event),
 			"critical",
-			f"Could not get response from model '{self.current_provider.name()}'"
+			f"Could not get response from model '{self.current_provider.name()}'. " \
+			f"Encountered Error: {e.__class__.__name__} : {str(e)}."
 			)
+			return 
+
+		self.eval_ai_response(response, SapphireEvents.chain(event))
+
 	
 	
 	def eval_ai_response(self, response: ModelResponse, chain: Chain):

@@ -1,13 +1,15 @@
 
 import json
 from sapphire.base import SapphireEvents, SapphireConfig
-from sapphire.modules.model.base import BaseModelProvider, ModelResponse
+from sapphire.modules.model.base import (
+	ModelResponse,
+	BaseModelProvider,
+	SapphireModelLoadError,
+	SapphireModelResponseError
+)
 
-try:
-	from google import genai
-	from google.genai import types
-except ModuleNotFoundError:
-	raise ModuleNotFoundError("Google GenAI package is neccessary for Gemini Model")
+from google import genai
+from google.genai import types
 
 # TODO
 # Thinking budget in config + default model in config
@@ -72,10 +74,15 @@ class Gemini(BaseModelProvider):
 		return self.supported_models
 
 
-	def generate(self, prompt: SapphireEvents.PromptEvent) -> ModelResponse | None:
+	def generate(self, prompt: SapphireEvents.PromptEvent) -> ModelResponse:
 		
-		response = self.send_request(prompt.content)
 		
+		try:
+			response = self.send_request(prompt.content)
+		except genai.errors.ClientError as e:
+			msg = f"Client Error (Code:{e.code}) {e.message}!"
+			raise SapphireModelResponseError(msg)
+
 		if response.parsed is None: 
 			return None
 
