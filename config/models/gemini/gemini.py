@@ -29,6 +29,7 @@ class Gemini(BaseModelProvider):
 		]
 
 		self.default_model = self.config.get("model_name", "gemini-2.5-flash")
+		self.current_model = self.default_model
 		self.thinking_budget = self.config.get("thinking_budget", 0)
 
 		self.content_config = types.GenerateContentConfig(
@@ -51,6 +52,7 @@ class Gemini(BaseModelProvider):
 		if model not in self.supported_models:
 			raise SapphireModelLoadError(f"No model found with name '{model}'!")
 
+		self.current_model = model
 		return f"Loaded model '{model}'"
 
 
@@ -77,7 +79,7 @@ class Gemini(BaseModelProvider):
 	def send_request(self, content: str):
 
 		response = self.client.models.generate_content(
-			model = self.model_name,
+			model = self.current_model,
 			contents = content,
 			config = self.content_config
 		)
