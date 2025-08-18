@@ -15,9 +15,13 @@ from sapphire.base import (
 	Chain
 )
 
-from .base import BaseModelProvider, ModelResponse, SapphireModelResponseError
+from .base import (
+	BaseModelProvider,
+	ModelResponse, 
+	SapphireModelResponseError,
+	SapphireProviderError
+)
 
-# TODO make module loading better
 
 class SapphireModelManager(SapphireModule):
 
@@ -54,13 +58,19 @@ class SapphireModelManager(SapphireModule):
 	def start(self) -> None:
 		self.init_providers()
 		current_provider = self.config.get("name", None)
-		success, output = self.load_provider(current_provider)
+
+		try:
+			msg = self.change_provider(current_provider)
+			success = True
+		except SapphireProviderError as e:
+			msg = str(e)
+			success = False
 
 		if success:
 			self.log(
 				SapphireEvents.chain(),
 				"info",
-				output
+				msg
 			)
 			return
 
@@ -69,7 +79,7 @@ class SapphireModelManager(SapphireModule):
 			SapphireEvents.make_timestamp(),
 			SapphireEvents.chain(),
 			True,
-			output
+			f"{msg}"
 		)
 		self.emit_event(ev)
 
@@ -192,38 +202,22 @@ class SapphireModelManager(SapphireModule):
 		
 		return model_cls
 
-	# The only reason the next two functions return weird values is that i wanted to reuse their logic
-	# for both the normal flow and using them in commands.
-	# Maybe make this better in the future?
 
-	def load_provider(self, provider: str) -> tuple[bool, str]:
+	def change_provider(self, provider: str) -> str:
 		
-		if provider not in self.registered_providers.keys():
-			
-			msg = f"Could not find provider '{provider}'. It was not registered."
-			return (False, msg)
+		if provider not in self.registered_providers:
+			raise SapphireProviderError("Could not find provider '{provider}'. It was not registered.")
 
 		if self.current_provider: self.current_provider.unload()
 		self.current_provider = self.registered_providers[provider]
 		self.current_provider.load()
 
-		msg = f"Loaded provider '{provider}'."
-
-		return (True, msg)
+		return f"Loaded provider '{provider}'."
 
 
-	def switch_provider_model(self, model: str, chain: SapphireEvents.Chain) -> tuple[bool, str]:
+	def change_model(self, model: str) -> str:
+		return self.current_provider.load(model)
 
-		success, output = self.current_provider.switch_model(model)
-
-		self.log(
-			chain,
-			"info" if success else "warning",
-			output
-		)
-		
-		return (success, output)
-	
 
 	def generate_response(self, event: SapphireEvents.PromptEvent):
 
@@ -289,9 +283,9 @@ class SapphireModelManager(SapphireModule):
 
 		match choice:
 			case "provider":
-				success, msg = self.load_provider(name)
+				success, msg = self.change_provider(name)
 			case "model":
-				success, msg = self.switch_provider_model(name)
+				success, msg = self.change_model(name)
 			case _:
 				success = False
 				msg = f"Unknown switch argument : {choice}"

@@ -20,7 +20,7 @@ class BaseModelProvider(ABC):
 		return cls.__name__
 	
 
-	def load(self, model: str) -> str:
+	def load(self, model: str | None = None) -> str:
 		"""
 		Used by ModelManager to load a specific model of the provider.
 
