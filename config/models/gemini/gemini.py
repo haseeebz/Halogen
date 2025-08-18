@@ -11,13 +11,6 @@ from sapphire.modules.model.base import (
 from google import genai
 from google.genai import types
 
-# TODO
-# Thinking budget in config + default model in config
-# Supporting more models than just the flash
-# Allowing it to change models using commands that model class will potentially define
-# Maybe notifying when the model runs out of tokens?
-# Error proning it
-# Not specific to gemini but add some way for it to log what went wrong
 
 
 class Gemini(BaseModelProvider):
@@ -27,18 +20,16 @@ class Gemini(BaseModelProvider):
 
 		self.api_key = self.load_api_key()
 
-		self.client = genai.Client(
-			api_key = self.api_key
-		)
+		self.client = genai.Client(api_key = self.api_key)
 
-		self.supported_models = {
+		self.supported_models = [
 			"gemini-2.5-pro",
 			"gemini-2.5-flash",
 			"gemini-2.5-flash-lite"
-		}
+		]
 
+		self.default_model = self.config.get("model_name", "gemini-2.5-flash")
 		self.thinking_budget = self.config.get("thinking_budget", 0)
-		self.model_name = self.config.get("model_name", "gemini-2.5-flash")
 
 		self.content_config = types.GenerateContentConfig(
 			thinking_config = types.ThinkingConfig(thinking_budget=self.thinking_budget),
@@ -52,30 +43,26 @@ class Gemini(BaseModelProvider):
 		return "gemini"
 
 
-	def load(self) -> tuple[bool, str]:
-		return (True, "No loading action needed.")
-
-
-	def unload(self) -> tuple[bool, str]:
-		return (True, "No unloading action needed.")
-
-
-	def switch_model(self, name: str) -> tuple[bool, str]:
+	def load(self, model: str | None = None) -> str:
 		
-		if name not in self.supported_models:
-			return (False, f"Unknown model: {name}")
+		if not model:
+			model = self.default_model
+		
+		if model not in self.supported_models:
+			raise SapphireModelLoadError(f"No model found with name '{model}'!")
 
-		self.model_name = name
-
-		return (True, f"Successfully switched model to {name}.")
+		return f"Loaded model '{model}'"
 
 
-	def get_available_models(self) -> set[str]:
+	def unload(self) -> str:
+		return f"No unloading required."
+
+
+	def get_available_models(self) -> list[str]:
 		return self.supported_models
 
 
 	def generate(self, prompt: SapphireEvents.PromptEvent) -> ModelResponse:
-		
 		
 		try:
 			response = self.send_request(prompt.content)
@@ -83,11 +70,7 @@ class Gemini(BaseModelProvider):
 			msg = f"Client Error (Code:{e.code}) {e.message}!"
 			raise SapphireModelResponseError(msg)
 
-		if response.parsed is None: 
-			return None
-
-		res: BaseModelReponse = response.parsed #type:ignore
-
+		res: BaseModelReponse = response.parsed 
 		return res
 	
 		
