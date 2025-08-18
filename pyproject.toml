@@ -1,6 +1,6 @@
 [project]
 name = "sapphire"
-version = "0.0.1"
+version = "0.0.3"
 description = "Configurable system for AI integration with desktop."
 authors = [
     { name = "Haseeb"}
