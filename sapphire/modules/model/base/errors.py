@@ -10,7 +10,7 @@ class SapphireProviderError(SapphireError):
 	- Is unable to switch a model.
 	"""
 	def __init__(self, *args: object):
-		super.__init__(*args)
+		super().__init__(*args)
 
 
 class SapphireModelLoadError(SapphireError):
@@ -21,7 +21,7 @@ class SapphireModelLoadError(SapphireError):
 	- Is unable to switch a model.
 	"""
 	def __init__(self, *args: object):
-		super.__init__(*args)
+		super().__init__(*args)
 
 
 class SapphireModelResponseError(SapphireError):
@@ -29,7 +29,7 @@ class SapphireModelResponseError(SapphireError):
 	Error to be raised when a model fails to generate a proper ModelReponse object.
 	"""
 	def __init__(self, *args: object):
-		super.__init__(*args)
+		super().__init__(*args)
 
 	
 class SapphireModelApiError(SapphireError):
@@ -37,4 +37,4 @@ class SapphireModelApiError(SapphireError):
 	Error to be raised by a model provider when it fails to load an API KEY from the config or file.
 	"""
 	def __init__(self, *args: object):
-		super.__init__(*args)
+		super().__init__(*args)

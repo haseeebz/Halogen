@@ -281,11 +281,12 @@ class SapphireModelManager(SapphireModule):
 		choice = args[0]
 		name = args[1]
 
+		success = True
 		match choice:
 			case "provider":
-				success, msg = self.change_provider(name)
+				msg = self.change_provider(name)
 			case "model":
-				success, msg = self.change_model(name)
+				msg = self.change_model(name)
 			case _:
 				success = False
 				msg = f"Unknown switch argument : {choice}"
