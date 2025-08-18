@@ -1,9 +1,4 @@
 
-
-### What Sapphire is about
-
-I want Sapphire to be a modular platform that integrates with any LLM and can be enhanced with modules. 
-
 ## How to Contribute
 
 
@@ -52,15 +47,23 @@ sapphire --dev --configdir config
 + `--dev` enables some dev features like error raising instead of suppressing when handling events.
 + `--configdir` is used to specify the config directory to load. The above example uses the **config** directory present in the repo.
 
-### What is even going on?
+
+### Actually contributing 
+
+To contribute on the project, you can make changes to your local repo, and then make a pull request.
+
+Here are some guidelines:
+
++ Before making any kind of changes, please open an issue and explain what you plan to add/improve. 
++ Make sure that your changes only affect a certain part of sapphire and DO NOT have multiple changes through out the code.
++ Contributing need not be to Sapphire alone, you can contribute by making custom SapphireModules and SapphireModelProvider classes to increase functionality.
+
+
+### Basic Sapphire Structure
 
 The `sapphire` package consists of 4 main sub-modules which are:
 
 + `sapphire.core` which contains the core class of Sapphire. It starts sapphire, loads modules, handles and passes events.
 + `sapphire.base` contains the base definitions. Stuff like events, config, decos, base module class etc.
-+ `sapphire.ctl` contains the client side code, a CLI for command passing and a TUI for actually using Sapphire.
++ `sapphire.ctl` contains a CLI for command passing and a TUI for actually using Sapphire.
 + `sapphire.modules` contains the core sapphire modules.
-
-### Actually contributing 
-
-> WIP
