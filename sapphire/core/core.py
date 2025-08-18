@@ -1,4 +1,4 @@
-import time, os
+import time, os, threading
 from pathlib import Path
 from typing import Callable, MutableSequence, Literal
 
@@ -16,51 +16,37 @@ from .manager import SapphireModuleManager
 
 class SapphireCore():
 
-	def __init__(self) -> None:
 
-		self.config: SapphireConfig = SapphireConfigLoader().load()
+	def __init__(self) -> None:
+		self.eventbus = EventBus()
+
+		self.core_events: MutableSequence[type[SapphireEvents.Event]] = [
+			SapphireEvents.ShutdownEvent,
+			SapphireEvents.RestartEvent
+		]
+
+
+	def init(self) -> None:
 
 		self.is_running: bool = True
 		self.shutdown_requested = False
 
+		self.config: SapphireConfig = SapphireConfigLoader().load()
+		self.manager = SapphireModuleManager(self.config, self.eventbus.emit)
+		
 		self.event_logfile = self.config.get("dev.event_logfile", "events.log")
 	
-
-		self.core_events: MutableSequence[type[SapphireEvents.Event]] = [
-			SapphireEvents.ShutdownEvent,
-		]
-		
-		self.eventbus: EventBus = EventBus()
-		
 		self.log(
 			SapphireEvents.chain(), 
 			"info", 
 			f"Hello {self.config.get('user.name', 'User')} :D"
 		)
 
-		self.manager = SapphireModuleManager(self.config, self.eventbus.emit)
 		self.manager.load_modules()
-
 		self.define_core_commands()
 
+	### main loop functions start here
 
-	def define_core_commands(self):
-		# module manager cannot inspect the core itself
-		# so we have to resort to manual registration
-		
-		self.define_command(
-			"shutdown",
-			self.shutdown_command,
-			"Request Sapphire to shutdown."
-		)
-
-		self.define_command(
-			"get",
-			self.get_command,
-			"Get internal values from Sapphire. See 'get help'"
-		)
-
-		
 	def run(self):
 		
 		self.manager.start_modules(self.config.dev)
@@ -112,6 +98,7 @@ class SapphireCore():
 			self.shutdown()
 			raise e
 
+	# main loop functions end here
 
 	def handle(self, event: SapphireEvents.Event):
 		match event:
@@ -120,8 +107,16 @@ class SapphireCore():
 				self.shutdown_reason = event.reason
 				if event.emergency: self.shutdown()
 
+			case SapphireEvents.RestartEvent():
+				self.restart()
 
-	def log(self, chain: SapphireEvents.Chain, level: Literal["debug", "info", "warning", "critical"], msg: str):
+
+	def log(
+		self, 
+		chain: SapphireEvents.Chain, 
+		level: Literal["debug", "info", "warning", "critical"], 
+		msg: str
+		):
 		event = SapphireEvents.LogEvent(
 			"core",
 			SapphireEvents.make_timestamp(),
@@ -132,6 +127,47 @@ class SapphireCore():
 		self.eventbus.emit(event)
 
 
+	def define_command(
+		self, 
+		cmd: str, 
+		func: Callable[[list[str], SapphireEvents.Chain], str], 
+		info: str = ""
+		):
+		event = SapphireEvents.CommandRegisterEvent(
+			"core",
+			SapphireEvents.make_timestamp(),
+			SapphireEvents.chain(),
+			"core",
+			cmd,
+			info,
+			func
+		)
+		self.eventbus.emit(event)
+		
+
+	def define_core_commands(self):
+		# module manager cannot inspect the core itself
+		# so we have to resort to manual registration
+		
+		self.define_command(
+			"shutdown",
+			self.shutdown_command,
+			"Request Sapphire to shutdown."
+		)
+
+		self.define_command(
+			"restart",
+			self.restart_command,
+			"Request Sapphire to restart."
+		)
+
+		self.define_command(
+			"get",
+			self.get_command,
+			"Get internal values from Sapphire. See 'get help'"
+		)
+
+	
 	def log_events(self, event: SapphireEvents.Event):
 		"Logs event to a event.log file. Only works when dev mode is on."
 
@@ -162,24 +198,15 @@ class SapphireCore():
 		logger.end()
 
 
-	def define_command(
-		self, 
-		cmd: str, 
-		func: Callable[[list[str], SapphireEvents.Chain], str], 
-		info: str = ""
-		):
-		self.eventbus.emit(
-			SapphireEvents.CommandRegisterEvent(
-				"core",
-				SapphireEvents.make_timestamp(),
-				SapphireEvents.chain(),
-				"core",
-				cmd,
-				info,
-				func
-			)
-		)
+	def restart(self):
+		self.shutdown_reason = "Restarting Sapphire."
+		self.shutdown()
+		self.init()
+		t = threading.Thread(target = self.run)
+		t.start()
 
+
+	# COMMANDS
 
 	def shutdown_command(self, args: list[str], chain: SapphireEvents.Chain) -> str:
 		
@@ -199,6 +226,25 @@ class SapphireCore():
 		self.eventbus.emit(event)
 
 		return (True, "Requested Sapphire to shutdown.")
+
+
+	def restart_command(self, args: list[str], chain: SapphireEvents.Chain) -> str:
+		
+		self.log(
+			chain,
+			"info",
+			f"Client with chain id {chain} requested sapphire to restart."
+		)
+		
+		event = SapphireEvents.RestartEvent(
+			"core",
+			SapphireEvents.make_timestamp(),
+			chain,
+			"User request."
+		)
+		self.eventbus.emit(event)
+
+		return (True, "Requested Sapphire to restart.")
 
 
 	_get_terms = {}

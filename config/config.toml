@@ -61,7 +61,7 @@ api_key = "load:secrets.txt"
 
 # api_key = "123abc" will also work
 
-thinking_budget = 10
+thinking_budget = 0
 model_name = "gemini-2.5-flash"
 
 

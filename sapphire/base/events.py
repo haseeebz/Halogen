@@ -95,6 +95,12 @@ class SapphireEvents():
 
 
 	@dataclass(frozen = True)
+	class RestartEvent(Event):
+		"Sent to core to intiate a restart."
+		reason: str = ""
+
+
+	@dataclass(frozen = True)
 	class UserInputEvent(Event):
 		"All user messages are sent using this event."
 		message: str

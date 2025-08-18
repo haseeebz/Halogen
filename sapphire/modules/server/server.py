@@ -71,6 +71,7 @@ class SapphireServer(SapphireModule):
 		write_alive = self.write_thread.is_alive()
 		
 		self.socket.shutdown(socket.SHUT_WR)
+		self.socket.close()
 
 		if read_alive or write_alive:
 			return (
