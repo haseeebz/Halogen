@@ -17,3 +17,13 @@ class SapphireModelResponseError(SapphireError):
 	"""
 	def __init__(self, *args: object):
 		super.__init__(*args)
+
+	
+
+
+class SapphireModelApiError(SapphireError):
+	"""
+	Error to be raised by a model provider when it fails to load an API KEY from the config or file.
+	"""
+	def __init__(self, *args: object):
+		super.__init__(*args)

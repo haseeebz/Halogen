@@ -4,6 +4,8 @@ from pathlib import Path
 import os
 
 from .response import ModelResponse
+from .errors import SapphireModelApiError
+
 
 class BaseModelProvider(ABC):
 
@@ -82,7 +84,7 @@ class BaseModelProvider(ABC):
 		raw_value: str | None = self.config.get(f"api_key", None)
 
 		if raw_value is None:
-			raise ValueError(f"'model.{self.name()}.api_key' as not specified in the config.")
+			raise SapphireModelApiError(f"'model.{self.name()}.api_key' is not specified in the config.")
 		
 		if not raw_value.startswith("load:"):
 			return raw_value
@@ -90,7 +92,7 @@ class BaseModelProvider(ABC):
 		path = Path(raw_value.removeprefix("load:"))
 
 		if not path.is_file():
-			raise FileNotFoundError(f"{os.path.abspath(path)} is not a file or does not exist!")	
+			raise SapphireModelApiError(f"{os.path.abspath(path)} is not a file or does not exist!")	
 		
 		with open(path) as file:
 			key = file.read()
