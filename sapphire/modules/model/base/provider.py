@@ -18,23 +18,36 @@ class BaseModelProvider(ABC):
 		return cls.__name__
 	
 
-	def load(self) -> tuple[bool, str]:
-		"Setup to load the provider. Not needed if model needs no loading."
-		return True
+	def load(self, model: str) -> str:
+		"""
+		Used by ModelManager to load a specific model of the provider.
+
+		For Cloud models, it maybe just switching the name of the model. For local models, it may 
+		involve loading the model into memory. In that case, it's recommended to atleast thread the
+		process.
+
+		The returned string would be used for logging purposes.
+		"""
+		raise NotImplementedError(f"load method of model provider '{self.name()}'")
 
 
-	def unload(self) -> tuple[bool, str]:
-		"Setup to unload the provider. Not needed if model needs no unloading."
-		return True
+	def unload(self) -> str:
+		"""
+		Used by ModelManager to unload the current model.
+		Normally this is called when Sapphire is about to shutdown.
+
+		For local models, it involves unloading the model from memory. It's no really useful for 
+		cloud models.
+
+		The returned string is used for logging purposes.
+		"""
+		raise NotImplementedError(f"unload method of model provider '{self.name()}'")
 
 	
-	def switch_model(self, name: str) -> tuple[bool, str]:
-		"Switching the model if the provider has multiple models that can be used."
-		return (False, "Not Implemented")
-
-	def get_available_models(self) -> set[str]:
-		"The set of models that the provider supports."
+	def get_available_models(self) -> list[str]:
+		"A list of all supported models of the provider."
 		raise NotImplementedError(f"get_available_models method of model '{self.name()}'")
+
 
 	def generate(self, prompt: SapphireEvents.PromptEvent) -> ModelResponse | None:
 		"""
