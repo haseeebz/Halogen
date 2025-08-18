@@ -30,6 +30,7 @@ class SapphireCore():
 
 		self.is_running: bool = True
 		self.shutdown_requested = False
+		self.restart_requested = False
 
 		self.config: SapphireConfig = SapphireConfigLoader().load()
 		self.manager = SapphireModuleManager(self.config, self.eventbus.emit)
@@ -54,9 +55,8 @@ class SapphireCore():
 		while self.is_running: 
 
 			if self.eventbus.is_empty():
-				if self.shutdown_requested:
-					self.shutdown()
-					break
+				if self.shutdown_requested: self.shutdown() 
+				if self.restart_requested: self.restart()
 				time.sleep(0.05)
 				continue
 			
@@ -108,7 +108,8 @@ class SapphireCore():
 				if event.emergency: self.shutdown()
 
 			case SapphireEvents.RestartEvent():
-				self.restart()
+				self.restart_requested = True
+				self.restart_reason = event.reason
 
 
 	def log(
@@ -199,7 +200,7 @@ class SapphireCore():
 
 
 	def restart(self):
-		self.shutdown_reason = "Restarting Sapphire."
+		self.shutdown_reason = self.restart_reason
 		self.shutdown()
 		self.init()
 		t = threading.Thread(target = self.run)
