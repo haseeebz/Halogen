@@ -27,7 +27,7 @@ class Color:
 	
 LEVELS = {"debug":0, "info":1, "warning":2, "critical":3}
 
-class HalogenLoggger(HalogenModule):
+class HalogenLogger(HalogenModule):
 
 	def __init__(self, emit_event: Callable[[HalogenEvents.Event], None], config: HalogenConfig) -> None:
 		super().__init__(emit_event, config)
