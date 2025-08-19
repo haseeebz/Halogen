@@ -183,9 +183,10 @@ class HalogenCore():
 		
 		if not logger: return
 
-		for event in self.eventbus.get_all_queued():
-			if isinstance(event, HalogenEvents.LogEvent):
-				logger.handle(event)
+		while not self.eventbus.is_empty():
+			ev = self.eventbus.receive()
+			if isinstance(ev, HalogenEvents.LogEvent):
+				logger.handle(ev)
 
 		event = HalogenEvents.LogEvent(
 			"core",
@@ -200,9 +201,31 @@ class HalogenCore():
 
 
 	def restart(self):
-		self.shutdown_reason = self.restart_reason
-		self.shutdown()
+		
+		self.is_running = False
+		logger = self.manager.end_modules()
+		
+		if not logger: return
+
+		while not self.eventbus.is_empty():
+			ev = self.eventbus.receive()
+			if isinstance(ev, HalogenEvents.LogEvent):
+				logger.handle(ev)
+
+
+		event = HalogenEvents.LogEvent(
+			"core",
+			HalogenEvents.make_timestamp(),
+			HalogenEvents.chain(),
+			"info",
+			f"Halogen is now restarting. Reason : {self.restart_reason}"
+		)
+
+		logger.handle(event)
+		logger.end()
+
 		self.init()
+
 		t = threading.Thread(target = self.run)
 		t.start()
 
