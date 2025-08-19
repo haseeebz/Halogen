@@ -5,7 +5,7 @@ A list of all planned features (will add more to this list!)
 + Hot reloading modules.
 + (**DONE**) Loading them dynamically from a directory instead of the current python module hack.
 + (**CANCELED**) Also pass the "user" field in config along with the scoped field to a module.
-+ Restarting.
++ (**DONE**) Restarting.
 
 
 ### Functionality
@@ -15,7 +15,8 @@ A list of all planned features (will add more to this list!)
 + Maybe add the option for indicating whether a task should be threaded, multiprocessed or maybe just ran in the main loop.
 + Add tags for the assitant so it knows whether the function is dangerous or not?
 + If the assistant multitasks and sends mutliple tasks at once, then their result should be compiled before prompting again.
-
++ Shell commands that can be exceuted only after the user confirms.
++ Request Events to do what i just described in the previous point.
 
 ### Prompts
 
@@ -33,9 +34,9 @@ A list of all planned features (will add more to this list!)
 
 ### Models
 
-+ (**ONGOING**) Make the Gemini model more error prone.
++ (**DONE**) Make the Gemini model more error prone.
 + Add other model providers like OpenAI, Deepseek etc. Also a local model provider like Ollama.
-+ (**ONGOING**) Hot reloading and switching providers.
++ (**DONE**) Hot reloading and switching providers.
 + Add a command to change the actual model of a provider? We can do this easily by asking each model provider to return a list/set of all the models they provide. Very useful for local providers.
 + Method checking for models.
 
@@ -46,6 +47,9 @@ A list of all planned features (will add more to this list!)
 + Applications (opening apps etc)
 + System control (brightness, sound etc.), easy on linux but might need more effort on windows
 + Method checking for modules.
++ Reminders
++ Weather
++ Google Search? or maybe any browser search.
 
 ### IPC
 
@@ -53,11 +57,15 @@ A list of all planned features (will add more to this list!)
 + (**DONE**) The above is likely due to the fact that the current ctl follows the "One output for a single input" philosphy which means that other events are just stuck in the queue. This includes other AI response events which causes the crash.
 + (**DONE**) So fix the ctl to either be a tui which can display events without blocking for user input. This is easy because the client side already receives events in a non-blocking way.
 + Maybe make a GUI one day.
++ An event filter so clients cannot just send any event they want.
++ Admin clients which can send any event they want? maybe no.
+
 
 ### Development
 
 + (**DONE**) Add --dev.
-+ Add dev.modules which will be used to load modules.
++ (**CANCELED**) Add dev.modules which will be used to load modules.
++ A mock core that maybe can be used to test just a singular module? 
 
 ### Assistant
 
@@ -71,4 +79,3 @@ A list of all planned features (will add more to this list!)
 + AI is acting really dumb.
 	+ It doesnt understand tasks
 	+ It doesnt understand type hints and that it needs to make sure all arguements are passed
-+ Model Manager seems like duct tape with all the `tuple[bool, str]`. Need to do something about that.
