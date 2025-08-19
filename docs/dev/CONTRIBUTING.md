@@ -10,11 +10,11 @@ You should probably install first if you want to contribute...
 
 Using HTTPS:
 ```bash
-git clone https://github.com/haseeebz/Sapphire.git
+git clone https://github.com/haseeebz/Halogen.git
 ```
 Using SSH:
 ```bash
-git clone git@github.com:haseeebz/Sapphire.git
+git clone git@github.com:haseeebz/Halogen.git
 ```
 
 #### Then run the install script
@@ -22,27 +22,27 @@ git clone git@github.com:haseeebz/Sapphire.git
 For Linux, Windows and MacOS:
 
 ```bash
-cd Sapphire
+cd Halogen
 python3 install.py
 ```
 What this script would do:
 + Create a virtual python environment.
 + Install all dependancies currently needed.
-+ Install the 'sapphire' python package.
-+ Creates OS-specific config directories/folders for Sapphire.
++ Install the 'halogen' python package.
++ Creates OS-specific config directories/folders for Halogen.
 
 > [!TIP]
 > For Windows users, I'd recomend using WSL if you encounter any issue.
 
-### Running Sapphire
+### Running Halogen
 
-You can run the sapphire (daemon) by using the command.
+You can run the halogen (daemon) by using the command.
 ```bash
-sapphire
+halogen
 ```
-But while working on sapphire, you should run.
+But while working on halogen, you should run.
 ```bash
-sapphire --dev --configdir config
+halogen --dev --configdir config
 ```
 + `--dev` enables some dev features like error raising instead of suppressing when handling events.
 + `--configdir` is used to specify the config directory to load. The above example uses the **config** directory present in the repo.
@@ -55,15 +55,15 @@ To contribute on the project, you can make changes to your local repo, and then 
 Here are some guidelines:
 
 + Before making any kind of changes, please open an issue and explain what you plan to add/improve. 
-+ Make sure that your changes only affect a certain part of sapphire and DO NOT have multiple changes through out the code.
-+ Contributing need not be to Sapphire alone, you can contribute by making custom SapphireModules and SapphireModelProvider classes to increase functionality.
++ Make sure that your changes only affect a certain part of halogen and DO NOT have multiple changes through out the code.
++ Contributing need not be to Halogen alone, you can contribute by making custom HalogenModules and HalogenModelProvider classes to increase functionality.
 
 
-### Basic Sapphire Structure
+### Basic Halogen Structure
 
-The `sapphire` package consists of 4 main sub-modules which are:
+The `halogen` package consists of 4 main sub-modules which are:
 
-+ `sapphire.core` which contains the core class of Sapphire. It starts sapphire, loads modules, handles and passes events.
-+ `sapphire.base` contains the base definitions. Stuff like events, config, decos, base module class etc.
-+ `sapphire.ctl` contains a CLI for command passing and a TUI for actually using Sapphire.
-+ `sapphire.modules` contains the core sapphire modules.
++ `halogen.core` which contains the core class of Halogen. It starts halogen, loads modules, handles and passes events.
++ `halogen.base` contains the base definitions. Stuff like events, config, decos, base module class etc.
++ `halogen.ctl` contains a CLI for command passing and a TUI for actually using Halogen.
++ `halogen.modules` contains the core halogen modules.

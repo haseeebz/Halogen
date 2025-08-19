@@ -1,11 +1,11 @@
 
 import json
-from sapphire.base import SapphireEvents, SapphireConfig
-from sapphire.modules.model.base import (
+from halogen.base import HalogenEvents, HalogenConfig
+from halogen.modules.model.base import (
 	ModelResponse,
 	BaseModelProvider,
-	SapphireModelLoadError,
-	SapphireModelResponseError
+	HalogenModelLoadError,
+	HalogenModelResponseError
 )
 
 from google import genai
@@ -15,7 +15,7 @@ from google.genai import types
 
 class Gemini(BaseModelProvider):
 
-	def __init__(self, config: SapphireConfig) -> None:
+	def __init__(self, config: HalogenConfig) -> None:
 		super().__init__(config)
 
 		self.api_key = self.load_api_key()
@@ -50,7 +50,7 @@ class Gemini(BaseModelProvider):
 			model = self.default_model
 		
 		if model not in self.supported_models:
-			raise SapphireModelLoadError(f"No model found with name '{model}'!")
+			raise HalogenModelLoadError(f"No model found with name '{model}'!")
 
 		self.current_model = model
 		return f"Loaded model '{model}'"
@@ -64,13 +64,13 @@ class Gemini(BaseModelProvider):
 		return self.supported_models
 
 
-	def generate(self, prompt: SapphireEvents.PromptEvent) -> ModelResponse:
+	def generate(self, prompt: HalogenEvents.PromptEvent) -> ModelResponse:
 		
 		try:
 			response = self.send_request(prompt.content)
 		except genai.errors.ClientError as e:
 			msg = f"Client Error (Code:{e.code}) {e.message}!"
-			raise SapphireModelResponseError(msg)
+			raise HalogenModelResponseError(msg)
 
 		res: BaseModelReponse = response.parsed 
 		return res

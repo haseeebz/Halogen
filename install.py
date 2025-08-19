@@ -31,18 +31,18 @@ def shell(cmd: str) -> bool:
 
 OS = platform.system().lower()
 
-SAPPHIRE_DIR = Path(__file__).resolve().parent
+HALOGEN_DIR = Path(__file__).resolve().parent
 WORKING_DIR = Path(os.getcwd())
 
-VENV_DIR = Path(SAPPHIRE_DIR) / ".venv"
+VENV_DIR = Path(HALOGEN_DIR) / ".venv"
 
 
 if OS == "windows":
-    CONFIG_DIR = Path(os.environ["APPDATA"]) / "sapphire"
+    CONFIG_DIR = Path(os.environ["APPDATA"]) / "halogen"
 elif OS == "linux":
-    CONFIG_DIR = Path.home() / ".config" / "sapphire"
+    CONFIG_DIR = Path.home() / ".config" / "halogen"
 elif OS == "darwin":  
-    CONFIG_DIR = Path.home() / "Library" / "Application Support" / "sapphire"
+    CONFIG_DIR = Path.home() / "Library" / "Application Support" / "halogen"
 else:
     color_print(RED, f"Unsupported operating system: {OS}")
     exit(1)
@@ -53,7 +53,7 @@ CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 color_print(BLUE, "Proceeding with installation...")
 
 
-if SAPPHIRE_DIR != WORKING_DIR:
+if HALOGEN_DIR != WORKING_DIR:
     color_print(RED, "Current working directory is not the same directory with 'install.py'. Please change working directory.")
     exit(1)
 
@@ -92,16 +92,16 @@ color_print(GREEN, "Dependancies installed.")
 
 
 #
-# Installing sapphire
+# Installing halogen
 #
 
-color_print(BLUE, "Installing Sapphire in virtual env...")
+color_print(BLUE, "Installing Halogen in virtual env...")
 success = shell(f"{pip_path} install -e .")
 
 if not success:
-    color_print(RED, "Could not install Sapphire!")
+    color_print(RED, "Could not install Halogen!")
     exit(1)
 
-color_print(GREEN, "Sapphire installed.")
+color_print(GREEN, "Halogen installed.")
 
 

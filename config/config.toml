@@ -1,5 +1,5 @@
 
-app = "Sapphire"
+app = "Halogen"
 
 
 
@@ -23,7 +23,7 @@ event_logfile = "events.log"
 [logger] 
 #configurations for the built-in logger module
 
-logfile = "sapphire.log"
+logfile = "halogen.log"
 # The file where logs should be dumped. This currently dumps into the working directory
 # Should use absolute paths.
 
@@ -42,12 +42,12 @@ terminal = true
 #configurations for the model manager module
 
 name = "gemini"
-# The name of the model you want to use once sapphire starts. If no model is found, it raises error.
+# The name of the model you want to use once halogen starts. If no model is found, it raises error.
 
 
 # See how the name corresponds to the sub-field down below.
 # This is essential for proper config transfer
-# This behaviour is handled manually by model manager and has nothing to do with the rest of Sapphire.
+# This behaviour is handled manually by model manager and has nothing to do with the rest of Halogen.
 
 
 [model.gemini]

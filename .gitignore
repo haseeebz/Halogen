@@ -9,7 +9,7 @@ __pycache__/
 *.egg-info
 
 # dev stuff
-sapphire.log
+halogen.log
 events.log
 test.py
 secrets.txt

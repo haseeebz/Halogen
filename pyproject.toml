@@ -1,5 +1,5 @@
 [project]
-name = "sapphire"
+name = "halogen"
 version = "0.0.3"
 description = "Configurable system for AI integration with desktop."
 authors = [
@@ -14,10 +14,10 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["sapphire"]
+packages = ["halogen"]
 
 [project.scripts]
-sapphire = "sapphire.core.main:main"
-sapphire-tui = "sapphire.ctl.tui.main:main"
-sapphire-cli = "sapphire.ctl.cli.main:main"
+halogen = "halogen.core.main:main"
+halogen-tui = "halogen.ctl.tui.main:main"
+halogen-cli = "halogen.ctl.cli.main:main"
 

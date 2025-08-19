@@ -2,13 +2,13 @@ from collections.abc import Callable
 from typing import Tuple
 from pathlib import Path
 import os, shutil, re
-from sapphire.base import SapphireEvents, SapphireModule, SapphireConfig, SapphireTask
+from halogen.base import HalogenEvents, HalogenModule, HalogenConfig, HalogenTask
 
 
 
-class FileSystem(SapphireModule):
+class FileSystem(HalogenModule):
 	
-	def __init__(self, emit_event: Callable[[SapphireEvents.Event], None], config: SapphireConfig) -> None:
+	def __init__(self, emit_event: Callable[[HalogenEvents.Event], None], config: HalogenConfig) -> None:
 		super().__init__(emit_event, config)
 		self.has_tasks = True
 
@@ -18,7 +18,7 @@ class FileSystem(SapphireModule):
 		return "filesystem"
 	
 
-	def handled_events(self) -> list[type[SapphireEvents.Event]]:
+	def handled_events(self) -> list[type[HalogenEvents.Event]]:
 		return []
 	
 
@@ -30,8 +30,8 @@ class FileSystem(SapphireModule):
 		return (True, "No specific end action needed.")
 	
 
-	@SapphireTask("read_file", "Read the contents of a file.", ["path:str", "lines:int"])
-	def read_file(self, chain: SapphireEvents.chain, path_raw: str, lines: str):
+	@HalogenTask("read_file", "Read the contents of a file.", ["path:str", "lines:int"])
+	def read_file(self, chain: HalogenEvents.chain, path_raw: str, lines: str):
 
 		path = Path(path_raw)
 		lines = int(lines) if lines.isdigit() else 10
@@ -42,8 +42,8 @@ class FileSystem(SapphireModule):
 		return "".join(content)
 
 	
-	@SapphireTask("write_to_file", "Write content to a file.", ["path:str", "content:str"])
-	def write_file(self, chain: SapphireEvents.chain, path_raw: str, content: str):
+	@HalogenTask("write_to_file", "Write content to a file.", ["path:str", "content:str"])
+	def write_file(self, chain: HalogenEvents.chain, path_raw: str, content: str):
 
 		path = Path(path_raw)
 
@@ -53,8 +53,8 @@ class FileSystem(SapphireModule):
 		return f"Successfully written to {path_raw}"
 
 	
-	@SapphireTask("append_to_file", "Append content to a file.", ["path:str", "content:str"])
-	def append_file(self, chain: SapphireEvents.chain, path_raw: str, content: str):
+	@HalogenTask("append_to_file", "Append content to a file.", ["path:str", "content:str"])
+	def append_file(self, chain: HalogenEvents.chain, path_raw: str, content: str):
 
 		path = Path(path_raw)
 
@@ -64,8 +64,8 @@ class FileSystem(SapphireModule):
 		return f"Successfully appended to {path_raw}"
 
 
-	@SapphireTask("list_directory", "List the contents of a directory/folder.", ["path:str"])
-	def list_directory(self, chain: SapphireEvents.Chain, path_raw: str):
+	@HalogenTask("list_directory", "List the contents of a directory/folder.", ["path:str"])
+	def list_directory(self, chain: HalogenEvents.Chain, path_raw: str):
 
 		path = Path(path_raw)
 
@@ -80,8 +80,8 @@ class FileSystem(SapphireModule):
 			return contents
 
 
-	@SapphireTask("make_directory", "Creates a directory along with missing parents", ["path:str"])
-	def make_directory(self, chain: SapphireEvents.Chain, path: str):
+	@HalogenTask("make_directory", "Creates a directory along with missing parents", ["path:str"])
+	def make_directory(self, chain: HalogenEvents.Chain, path: str):
 
 		path = Path(path)
 
@@ -93,8 +93,8 @@ class FileSystem(SapphireModule):
 		return f"Created directory at {path}."
 
 
-	@SapphireTask("remove_directory", "Deletes a directory recursively! Dangerous", ["path:str"])
-	def remove_directory(self, chain: SapphireEvents.Chain, path: str):
+	@HalogenTask("remove_directory", "Deletes a directory recursively! Dangerous", ["path:str"])
+	def remove_directory(self, chain: HalogenEvents.Chain, path: str):
 
 		path = Path(path)
 
@@ -109,8 +109,8 @@ class FileSystem(SapphireModule):
 		return f"Removed directory at {path}."
 
 
-	@SapphireTask("create_file", "Create a file at the specified location, extension included.", ["path:str"])
-	def create_file(self, chain: SapphireEvents.Chain, path: str):
+	@HalogenTask("create_file", "Create a file at the specified location, extension included.", ["path:str"])
+	def create_file(self, chain: HalogenEvents.Chain, path: str):
 
 		path = Path(path)
 
@@ -122,8 +122,8 @@ class FileSystem(SapphireModule):
 		return f"Created file at {path}."
 
 
-	@SapphireTask("remove_file", "Remove a file at the specified location.", ["path:str"])
-	def remove_file(self, chain: SapphireEvents.Chain, path: str):
+	@HalogenTask("remove_file", "Remove a file at the specified location.", ["path:str"])
+	def remove_file(self, chain: HalogenEvents.Chain, path: str):
 
 		path = Path(path)
 
@@ -135,8 +135,8 @@ class FileSystem(SapphireModule):
 		return f"Removed file at {path}."
 
 
-	@SapphireTask("search_file", "Search for a file within a given directory.", ["name:str","directory:str"])
-	def search_file(self, chain: SapphireEvents.Chain, name: str, directory: str):
+	@HalogenTask("search_file", "Search for a file within a given directory.", ["name:str","directory:str"])
+	def search_file(self, chain: HalogenEvents.Chain, name: str, directory: str):
 
 		path = Path(directory)
 
@@ -159,12 +159,12 @@ class FileSystem(SapphireModule):
 			return found
 
 
-	@SapphireTask(
+	@HalogenTask(
 		"regex_file_search",
 		"Search files within a directory by a given a regex pattern. The pattern arg must be valid regex.",
 		["directory:str", "pattern:str"]
 	)
-	def regex_search_file(self, chain: SapphireEvents.Chain, directory: str, pattern: str):
+	def regex_search_file(self, chain: HalogenEvents.Chain, directory: str, pattern: str):
 
 		path = Path(directory)
 
