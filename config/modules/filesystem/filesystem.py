@@ -17,6 +17,10 @@ class FileSystem(HalogenModule):
 	@classmethod
 	def name(cls):
 		return "filesystem"
+
+	@classmethod
+	def info(cls):
+		return "Module for interacting with the filesystem."
 	
 
 	def handled_events(self) -> list[type[HalogenEvents.Event]]:
