@@ -31,4 +31,3 @@ class Chrono(HalogenModule):
 		return (True, "No specific end action needed.")
 
 
-]
