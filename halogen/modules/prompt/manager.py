@@ -23,6 +23,7 @@ class HalogenPromptManager(HalogenModule):
 		self.tasks: TasksManager = TasksManager()
 
 		self.sections_dir = Path(__file__).resolve().parent / "sections"
+		self.log_file = Path(__file__).resolve().parent / "halogen.log"
 	
 
 	@classmethod
@@ -33,6 +34,20 @@ class HalogenPromptManager(HalogenModule):
 	def	start(self) -> None:
 		self.load_core_sections()
 		
+		
+	def end(self) -> Tuple[bool, str]:
+		return (True, "")
+	
+
+	def handled_events(self) -> list[type[HalogenEvents.Event]]:
+		return [
+			HalogenEvents.AIResponseEvent,
+			HalogenEvents.UserInputEvent,
+			HalogenEvents.TaskRegisteredEvent,
+			HalogenEvents.TaskEvent,
+			HalogenEvents.TaskCompletionEvent
+		]
+
 
 	def handle(self, event: HalogenEvents.Event) -> None:
 		match event:
@@ -49,20 +64,6 @@ class HalogenPromptManager(HalogenModule):
 			case HalogenEvents.TaskCompletionEvent():
 				self.handle_task_completion(event)
 				
-
-	def handled_events(self) -> list[type[HalogenEvents.Event]]:
-		return [
-			HalogenEvents.AIResponseEvent,
-			HalogenEvents.UserInputEvent,
-			HalogenEvents.TaskRegisteredEvent,
-			HalogenEvents.TaskEvent,
-			HalogenEvents.TaskCompletionEvent
-		]
-
-	
-	def end(self) -> Tuple[bool, str]:
-		return (True, "")
-	
 
 	def load_core_sections(self):
 
@@ -106,7 +107,7 @@ class HalogenPromptManager(HalogenModule):
 		)
 
 		prompt = self.make_prompt_parts()
-		prompt.append("[USER]")
+		prompt.append("\n[USER]")
 		prompt.append(event.message)
 
 		str_prompt = "\n".join(prompt)
@@ -118,6 +119,7 @@ class HalogenPromptManager(HalogenModule):
 			str_prompt
 		)
 
+		self.print_prompt(prompt_event)
 		self.emit_event(prompt_event)
 
 		self.memory.add("user", event.message)
@@ -133,12 +135,12 @@ class HalogenPromptManager(HalogenModule):
 
 		prompt = self.make_prompt_parts()
 
-		prompt.append("[HALOGEN]")
+		prompt.append("\n[HALOGEN]")
 		msg = f"Completed task '{ev.namespace}::{ev.task_name}'. " \
 			f"Success = {ev.success}. Output = {ev.output}"
 		
 		prompt.append(msg)
-		self.memory.add("halogen", msg)
+		
 		
 		str_prompt = "\n".join(prompt)
 
@@ -149,6 +151,12 @@ class HalogenPromptManager(HalogenModule):
 			str_prompt
 		)
 
+		self.print_prompt(prompt_event)
+		self.memory.add("halogen", msg)
 		self.emit_event(prompt_event)
 
+	def print_prompt(self, ev: HalogenEvents.PromptEvent):
+		with open(self.log_file, "a") as file:
+			file.write("\n"*10)
+			file.write(ev.content)
 

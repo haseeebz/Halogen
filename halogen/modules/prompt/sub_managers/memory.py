@@ -1,5 +1,11 @@
 
 
+memory_intro = """
+[MEMORY]
+Previous chat history between the user, you and halogen.
+
+"""
+
 class MemoryManager():
 
 	def __init__(self, limit: str):
@@ -15,7 +21,4 @@ class MemoryManager():
 		self.storage.append(mem)
 
 	def stringify(self) -> str:
-		string = "[MEMORY]\n"
-		string += "Previous chat history. A list of previous conversations between you, user and halogen."
-
-		return string + "\n".join(self.storage)
+		return memory_intro + "\n".join(self.storage)
