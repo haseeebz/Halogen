@@ -10,6 +10,7 @@ from halogen.base import (
 )
 
 from .meta import TaskNamespace, TaskData
+from .base import HalogenTaskError
 
 
 class HalogenTaskManager(HalogenModule):
@@ -123,8 +124,11 @@ class HalogenTaskManager(HalogenModule):
 		try:
 			output = func(ev.chain, *ev.args)
 			success = True
+		except HalogenTaskError as e:
+			output = f"Error: {str(e)}"
+			success = False
 		except Exception as e:
-			output = f"{e.__class__.__name__}: {str(e)}"
+			output = f"Unexpected Error({e.__class__.__name__}): {str(e)}"
 			success = False
 
 		output_event = HalogenEvents.TaskCompletionEvent(
