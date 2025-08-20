@@ -2,7 +2,8 @@ from collections.abc import Callable
 from typing import Tuple
 from pathlib import Path
 import os, shutil, re
-from halogen.base import HalogenEvents, HalogenModule, HalogenConfig, HalogenTask
+from halogen.base import HalogenEvents, HalogenModule, HalogenConfig
+from halogen.modules.tasks.base import HalogenTask
 
 
 

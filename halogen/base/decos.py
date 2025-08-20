@@ -18,20 +18,3 @@ def HalogenCommand(name: str, info: str):
 	
 	return decorator
 
-
-def HalogenTask(name: str, info: str, args: list[str]):
-
-	def decorator(func):
-		
-		def wrapper(*func_args, **kwargs):
-			return func(*func_args, **kwargs)
-		
-		wrapper._is_task = True
-		wrapper._name = name
-		wrapper._info = info
-		wrapper._args = args
-		
-		return wrapper
-	
-	return decorator
-
