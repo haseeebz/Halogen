@@ -43,6 +43,7 @@ class HalogenPromptManager(HalogenModule):
 		return [
 			HalogenEvents.AIResponseEvent,
 			HalogenEvents.UserInputEvent,
+			HalogenEvents.NotifyEvent,
 			HalogenEvents.TaskRegisteredEvent,
 			HalogenEvents.TaskEvent,
 			HalogenEvents.TaskCompletionEvent
@@ -154,6 +155,36 @@ class HalogenPromptManager(HalogenModule):
 		self.print_prompt(prompt_event)
 		self.memory.add("halogen", msg)
 		self.emit_event(prompt_event)
+
+
+	def handle_notify_event(self, ev: HalogenEvents.NotifyEvent):
+
+		self.log(
+			HalogenEvents.chain(ev),
+			"info",
+			f"Received notify event from module '{ev.sender}'. Making prompt."
+		)
+
+		prompt = self.make_prompt_parts()
+
+		prompt.append("\n[HALOGEN]")
+		msg = f"{ev.sender} module send notify:: {ev.message}"
+		
+		prompt.append(msg)
+		
+		str_prompt = "\n".join(prompt)
+
+		prompt_event = HalogenEvents.PromptEvent(
+			self.name(),
+			HalogenEvents.make_timestamp(),
+			HalogenEvents.chain(ev),
+			str_prompt
+		)
+
+		self.print_prompt(prompt_event)
+		self.memory.add("halogen", msg)
+		self.emit_event(prompt_event)
+
 
 	def print_prompt(self, ev: HalogenEvents.PromptEvent):
 		with open(self.log_file, "a") as file:
