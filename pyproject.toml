@@ -19,5 +19,6 @@ packages = ["halogen"]
 [project.scripts]
 halogen = "halogen.core.main:main"
 halogen-gui = "halogen.ctl.gui.main:main"
+halogen-tui = "halogen.ctl.tui.main:main"
 halogen-cli = "halogen.ctl.cli.main:main"
 
