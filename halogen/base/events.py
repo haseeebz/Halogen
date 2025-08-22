@@ -101,12 +101,6 @@ class HalogenEvents():
 
 
 	@dataclass(frozen = True)
-	class UserInputEvent(Event):
-		"All user messages are sent using this event."
-		message: str
-
-
-	@dataclass(frozen = True)
 	class CommandRegisterEvent(Event):
 		"Sent to command handler to register a command"
 		module: str
@@ -143,6 +137,17 @@ class HalogenEvents():
 	class ErrorEvent(Event):
 		"In case something goes wrong."
 		error: str
+
+	@dataclass(frozen = True)
+	class UserInputEvent(Event):
+		"All user messages are sent using this event."
+		message: str
+
+
+	@dataclass(frozen = True)
+	class NotifyEvent(Event):
+		"Modules can use this event to send a message to the AI."
+		message: str
 
 
 	@dataclass(frozen = True)
