@@ -59,6 +59,9 @@ class HalogenPromptManager(HalogenModule):
 			case HalogenEvents.UserInputEvent():
 				self.handle_user_input(event)
 
+			case HalogenEvents.NotifyEvent():
+				self.handle_notify_event(event)
+
 			case HalogenEvents.TaskRegisteredEvent():
 				self.tasks.add_task(event)
 
