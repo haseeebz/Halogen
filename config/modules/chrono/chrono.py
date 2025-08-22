@@ -27,7 +27,7 @@ class Chrono(HalogenModule):
 		pass
 
 
-	def end(self) -> Tuple[bool, str]:
+	def end(self) -> tuple[bool, str]:
 		return (True, "No specific end action needed.")
 
 
