@@ -35,7 +35,11 @@ class FileSystem(HalogenModule):
 		return (True, "No specific end action needed.")
 	
 
-	@HalogenTask("read_file", "Read the contents of a file.", ["path:str", "lines:int"])
+	@HalogenTask(
+		"read_file", 
+		"Read the contents of a file.", 
+		["path:string", "lines:integar"]
+	)
 	def read_file(self, chain: HalogenEvents.chain, file_path: str, lines: str):
 
 		path = Path(file_path)
@@ -50,7 +54,11 @@ class FileSystem(HalogenModule):
 		return "".join(content)
 
 	
-	@HalogenTask("write_to_file", "Write content to a file.", ["path:str", "content:str"])
+	@HalogenTask(
+		"write_to_file", 
+		"Write content to a file.", 
+		["path:string", "content:string"]
+	)
 	def write_file(self, chain: HalogenEvents.chain, file_path: str, content: str):
 
 		path = Path(file_path)
@@ -64,7 +72,11 @@ class FileSystem(HalogenModule):
 		return f"Successfully written to {file_path}"
 
 	
-	@HalogenTask("append_to_file", "Append content to a file.", ["path:str", "content:str"])
+	@HalogenTask(
+		"append_to_file", 
+		"Append content to a file.", 
+		["path:string", "content:string"]
+	)
 	def append_file(self, chain: HalogenEvents.chain, file_path: str, content: str):
 
 		path = Path(file_path)
@@ -78,7 +90,11 @@ class FileSystem(HalogenModule):
 		return f"Successfully appended to {file_path}"
 
 
-	@HalogenTask("list_directory", "List the contents of a directory/folder.", ["path:str"])
+	@HalogenTask(
+		"list_directory", 
+		"List the contents of a directory/folder.", 
+		["path:string"]
+	)
 	def list_directory(self, chain: HalogenEvents.Chain, dir_path: str):
 
 		path = Path(dir_path)
@@ -96,7 +112,11 @@ class FileSystem(HalogenModule):
 			return contents
 
 
-	@HalogenTask("make_directory", "Creates a directory along with missing parents", ["path:str"])
+	@HalogenTask(
+		"make_directory", 
+		"Creates a directory along with missing parents", 
+		["path:string"]
+	)
 	def make_directory(self, chain: HalogenEvents.Chain, path: str):
 
 		path = Path(path)
@@ -109,7 +129,11 @@ class FileSystem(HalogenModule):
 		return f"Created directory at {path}."
 
 
-	@HalogenTask("remove_directory", "Deletes a directory recursively! Dangerous", ["path:str"])
+	@HalogenTask(
+		"remove_directory", 
+		"Deletes a directory recursively! Ask before executing.", 
+		["path:string"]
+	)
 	def remove_directory(self, chain: HalogenEvents.Chain, path: str):
 
 		path = Path(path)
@@ -125,7 +149,11 @@ class FileSystem(HalogenModule):
 		return f"Removed directory at {path}."
 
 
-	@HalogenTask("create_file", "Create a file at the specified location, extension included.", ["path:str"])
+	@HalogenTask(
+		"create_file", 
+		"Create a file at the specified location.", 
+		["path:string"]
+	)
 	def create_file(self, chain: HalogenEvents.Chain, path: str):
 
 		path = Path(path)
@@ -138,7 +166,11 @@ class FileSystem(HalogenModule):
 		return f"Created file at {path}."
 
 
-	@HalogenTask("remove_file", "Remove a file at the specified location.", ["path:str"])
+	@HalogenTask(
+		"remove_file", 
+		"Remove a file at the specified location.", 
+		["path:string"]
+	)
 	def remove_file(self, chain: HalogenEvents.Chain, path: str):
 
 		path = Path(path)
@@ -151,7 +183,11 @@ class FileSystem(HalogenModule):
 		return f"Removed file at {path}."
 
 
-	@HalogenTask("search_file", "Search for a file within a given directory.", ["name:str","directory:str"])
+	@HalogenTask(
+		"search_file", 
+		"Search for a file within a given directory.", 
+		["name:string","directory:string"]
+	)
 	def search_file(self, chain: HalogenEvents.Chain, name: str, directory: str):
 
 		path = Path(directory)
@@ -178,7 +214,7 @@ class FileSystem(HalogenModule):
 	@HalogenTask(
 		"regex_file_search",
 		"Search files within a directory by a given a regex pattern. The pattern arg must be valid regex.",
-		["directory:str", "pattern:str"]
+		["directory:string", "pattern:string(valid regex)"]
 	)
 	def regex_search_file(self, chain: HalogenEvents.Chain, directory: str, pattern: str):
 
