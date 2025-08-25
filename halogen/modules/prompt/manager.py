@@ -25,7 +25,7 @@ class HalogenPromptManager(HalogenModule):
 		self.sections_dir = Path(__file__).resolve().parent / "sections"
 		self.log_file = Path(__file__).resolve().parent / "halogen.log"
 
-		self.profiles_dir = self.config.dir / "profiles"
+		self.profiles_dir = self.config.directory / "profiles"
 		self.profiles: dict[str, str] = {}
 	
 
@@ -36,7 +36,6 @@ class HalogenPromptManager(HalogenModule):
 
 	def	start(self) -> None:
 		self.load_core_sections()
-		self.load
 		
 		
 	def end(self) -> Tuple[bool, str]:
