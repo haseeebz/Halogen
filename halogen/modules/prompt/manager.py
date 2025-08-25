@@ -98,22 +98,6 @@ class HalogenPromptManager(HalogenModule):
 		)
 
 
-	def load_profiles(self):
-
-		if not self.profiles_dir.exists(): 
-			self.log(
-				HalogenEvents.chain(),
-				"warning",
-				f"Could not find profiles directory : {self.profiles_dir.absolute().}"
-			)
-			return
-
-		for item in self.profiles_dir.iterdir():
-			if not item.is_file(): continue
-
-			
-
-
 	def make_prompt_parts(self) -> list[str]:
 		parts = []
 		parts.extend(self.core_sections)
