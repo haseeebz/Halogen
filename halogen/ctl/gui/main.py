@@ -1,10 +1,10 @@
 import sys
-from .app.window import Window
+from .app.window import HalogenWindow
 from PySide6.QtWidgets import QApplication
 
 def main():
 	app = QApplication(sys.argv)
-	win = Window()
+	win = HalogenWindow()
 	win.show()
 	app.exec()
 

@@ -3,19 +3,19 @@ from PySide6.QtWidgets import (
 	QHBoxLayout,
 	QLineEdit
 )
+from PySide6.QtCore import Qt, Signal
 from halogen.modules.server import HalogenInterface
 
-class InputBox(QWidget):
 
-	def __init__(self, interface: HalogenInterface):
-		self.interface = interface
+class InputBar(QLineEdit):
+	message_submitted = Signal(str)
 
-		self.setObjectName("input-box")
+	def __init__(self):
+		super().__init__()
+		self.setObjectName("input-bar")
+		self.returnPressed.connect(self._on_return)
 
-		self.layout_box = QHBoxLayout()
-
-		self.line_edit = QLineEdit()
-		self.layout_box.addWidget(self.line_edit)
-
-		self.setLayout(self.layout_box)
-
+	def _on_return(self):
+		text = self.text().strip()
+		if text:
+			self.message_submitted.emit(text)
