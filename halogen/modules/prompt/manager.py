@@ -24,6 +24,9 @@ class HalogenPromptManager(HalogenModule):
 
 		self.sections_dir = Path(__file__).resolve().parent / "sections"
 		self.log_file = Path(__file__).resolve().parent / "halogen.log"
+
+		self.profiles_dir = self.config.dir / "profiles"
+		self.profiles: dict[str, str] = {}
 	
 
 	@classmethod
@@ -33,6 +36,7 @@ class HalogenPromptManager(HalogenModule):
 
 	def	start(self) -> None:
 		self.load_core_sections()
+		self.load
 		
 		
 	def end(self) -> Tuple[bool, str]:
@@ -92,6 +96,22 @@ class HalogenPromptManager(HalogenModule):
 			"debug",
 			f"Assembled core sections: {sections}"
 		)
+
+
+	def load_profiles(self):
+
+		if not self.profiles_dir.exists(): 
+			self.log(
+				HalogenEvents.chain(),
+				"warning",
+				f"Could not find profiles directory : {self.profiles_dir.absolute().}"
+			)
+			return
+
+		for item in self.profiles_dir.iterdir():
+			if not item.is_file(): continue
+
+			
 
 
 	def make_prompt_parts(self) -> list[str]:
@@ -193,4 +213,6 @@ class HalogenPromptManager(HalogenModule):
 		with open(self.log_file, "a") as file:
 			file.write("\n"*10)
 			file.write(ev.content)
+
+	
 
