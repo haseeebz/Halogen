@@ -41,7 +41,7 @@ class Chrono(HalogenModule):
 		"Set a reminder (in integar seconds). Add detailed context to the message also.",
 		["message:string", "seconds:integar"]
 	)
-	def set_duration_rer(self, chain: HalogenEvents.Chain, msg: str, sec: str):
+	def set_duration_reminder(self, chain: HalogenEvents.Chain, msg: str, sec: str):
 
 		if not sec.isdigit():
 			raise HalogenTaskError(f"{sec} is not a valid integar.")
@@ -78,7 +78,7 @@ class Chrono(HalogenModule):
 		h = int(h)
 		m = int(m)
 
-		current = datetime().now()
+		current = datetime.now()
 
 		if h <= current.hour and m <= current.minute:
 			raise HalogenTaskError(f"Time {h}:{m} has already passed. Current : {h}:{m}.")
@@ -88,7 +88,7 @@ class Chrono(HalogenModule):
 			
 			while True:
 				current = datetime().now()
-				if h > current.hour and m > current.minute: break
+				if h <= current.hour and m <= current.minute: break
 
 			ev = HalogenEvents.NotifyEvent(
 				self.name(),
