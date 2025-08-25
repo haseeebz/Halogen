@@ -1,5 +1,6 @@
 from collections.abc import Callable
 from threading import Thread
+from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 import time
 
@@ -31,16 +32,16 @@ class Chrono(HalogenModule):
 
 
 	def end(self) -> tuple[bool, str]:
-		self.executor.shutdown(False, True)
+		self.executor.shutdown(False)
 		return (True, "Shutdown the ThreadPool and killed all timers.")
 
 
 	@HalogenTask(
-		"set_duration_timer", 
-		"Set a time (in integar seconds) based reminder. Add context to the message also.",
-		["message:str", "seconds:int"]
-		)
-	def set_duration_timer(self, chain: HalogenEvents.Chain, msg: str, sec: str):
+		"set_duration_reminder", 
+		"Set a reminder (in integar seconds). Add detailed context to the message also.",
+		["message:string", "seconds:integar"]
+	)
+	def set_duration_rer(self, chain: HalogenEvents.Chain, msg: str, sec: str):
 
 		if not sec.isdigit():
 			raise HalogenTaskError(f"{sec} is not a valid integar.")
@@ -62,5 +63,45 @@ class Chrono(HalogenModule):
 		self.executor.submit(timer)
 
 		return f"Set reminder to notify after {sec}s."
+
+
+	@HalogenTask(
+		"set_time_reminder", 
+		"Set a time based reminder for today. Add context to the message also.",
+		["message:string", "hour:integar(0-23)", "minute:integar(0-59)"]
+	)
+	def set_time_reminder(self, chain: HalogenEvents.Chain, msg: str, h: str, m: str):
+		
+		if not (h.isdigit() and m.isdigit()):
+			raise HalogenTaskError(f"{sec} is not a valid integar.")
+
+		h = int(h)
+		m = int(m)
+
+		current = datetime().now()
+
+		if h <= current.hour and m <= current.minute:
+			raise HalogenTaskError(f"Time {h}:{m} has already passed. Current : {h}:{m}.")
+
+
+		def timer():
+			
+			while True:
+				current = datetime().now()
+				if h > current.hour and m > current.minute: break
+
+			ev = HalogenEvents.NotifyEvent(
+				self.name(),
+				HalogenEvents.make_timestamp(),
+				chain,
+				f"Reminder for {h}:{m} Finished. Tell the user. Reminder: {msg}"
+			)
+
+			self.emit_event(ev)
+
+		self.executor.submit(timer)
+
+		return f"Set reminder to notify on {h}:{m}."
+
 
 
