@@ -17,5 +17,6 @@ class InputBar(QLineEdit):
 
 	def _on_return(self):
 		text = self.text().strip()
+		self.clear()
 		if text:
 			self.message_submitted.emit(text)

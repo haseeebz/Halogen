@@ -2,9 +2,12 @@ from PySide6.QtWidgets import (
 	QWidget,
 	QScrollArea,
 	QVBoxLayout,
+	QHBoxLayout,
+	QLabel,
 	QFrame
 )
 from halogen.modules.server import HalogenInterface
+from halogen.base import HalogenEvents
 
 
 class MessageBox(QFrame):
@@ -20,8 +23,7 @@ class MessageBox(QFrame):
 		layout.addWidget(self.label)
 
 
-class ChatArea(QScrollArea):
-
+class EventBoard(QScrollArea):
 
 	def __init__(self):
 		super().__init__(None)
@@ -33,7 +35,9 @@ class ChatArea(QScrollArea):
 
 		self.setWidget(self.container)
 
-	def add_message(self, text: str):
-		msg = MessageWidget(text)
+	def add_event(self, ev: HalogenEvents.Event):
+		if not isinstance(ev, HalogenEvents.AIResponseEvent): return
+
+		msg = MessageBox(ev.message)
 		self.layout.insertWidget(self.layout.count() - 1, msg)  
 		self.verticalScrollBar().setValue(self.verticalScrollBar().maximum())  
