@@ -31,13 +31,13 @@ class Chrono(HalogenModule):
 
 
 	def end(self) -> tuple[bool, str]:
-		self.executor.shutdown()
+		self.executor.shutdown(False, True)
 		return (True, "Shutdown the ThreadPool and killed all timers.")
 
 
 	@HalogenTask(
 		"set_duration_timer", 
-		"Set a time (in integar seconds) based reminder. The message should be a bit detailed for context.",
+		"Set a time (in integar seconds) based reminder. Add context to the message also.",
 		["message:str", "seconds:int"]
 		)
 	def set_duration_timer(self, chain: HalogenEvents.Chain, msg: str, sec: str):
@@ -54,7 +54,7 @@ class Chrono(HalogenModule):
 				self.name(),
 				HalogenEvents.make_timestamp(),
 				chain,
-				msg
+				f"Timer Finished. Tell the user. Reminder: {msg}"
 			)
 
 			self.emit_event(ev)
