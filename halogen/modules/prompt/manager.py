@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from typing import Tuple
-from halogen.base import HalogenModule, HalogenEvents, HalogenConfig, Chain
+from halogen.base import HalogenModule, HalogenEvents, HalogenConfig, Chain, HalogenError
 from pathlib import Path
 import os
 
@@ -22,11 +22,12 @@ class HalogenPromptManager(HalogenModule):
 		self.memory: MemoryManager = MemoryManager(self.config.get("memory_length", 50))
 		self.tasks: TasksManager = TasksManager()
 
-		self.sections_dir = Path(__file__).resolve().parent / "sections"
 		self.log_file = Path(__file__).resolve().parent / "halogen.log"
 
-		self.profiles_dir = self.config.directory / "profiles"
-		self.profiles: dict[str, str] = {}
+		self.prompts_dir = self.config.directory / "prompt"
+
+		if not self.prompts_dir.exists():
+			raise HalogenError(f"Prompts Config directory not found: {self.prompts_dir.absolute()}.")
 	
 
 	@classmethod
@@ -74,26 +75,22 @@ class HalogenPromptManager(HalogenModule):
 
 	def load_core_sections(self):
 
-		sections = []
-		section_paths = list(self.sections_dir.iterdir())
-		section_paths.sort()
-		
-		for section in section_paths:
-			
-			if not section.is_file():
-				continue
-			
-			sections.append(section.name)
+		system_prompt = Path(__file__).resolve().parent / "system.txt"
+		with open(system_prompt) as file:
+			self.core_sections.append(file.read())
 
-			with open(section) as file:
-				section_text = file.read()
+		profile_prompt = self.prompts_dir / "profile.txt"
+		with open(profile_prompt) as file:
+			self.core_sections.append(file.read())
 
-			self.core_sections.append(section_text)
+		user_prompt = self.prompts_dir / "user.txt"
+		with open(user_prompt) as file:
+			self.core_sections.append(file.read())
 
 		self.log(
 			HalogenEvents.chain(),
 			"debug",
-			f"Assembled core sections: {sections}"
+			f"Assembled core sections."
 		)
 
 
