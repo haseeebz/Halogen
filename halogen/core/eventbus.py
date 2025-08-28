@@ -1,34 +1,38 @@
-
 import threading
 from typing import Literal
 from halogen.base import HalogenEvents
+from queue import Queue, Empty
 
 
 class EventBus():
 
 	def __init__(self) -> None:
-		self.events: list[HalogenEvents.Event] = []
+		self.events: Queue[HalogenEvents.Event] = Queue()
 		self.lock = threading.Lock()
+		self._count = 0 
+
 
 	def emit(self, event: HalogenEvents.Event):
-		if not isinstance(event, HalogenEvents.Event):
-			return
-		with self.lock:
-			self.events.append(event)
+		if isinstance(event, HalogenEvents.Event):
+			self.events.put(event)
+			with self.lock: self._count += 1
 
-	def receive(self) -> HalogenEvents.Event:
-		with self.lock:
-			event = self.events.pop(0)
+
+	def receive(self, timeout: int) -> HalogenEvents.Event | None:
+		try:
+			event = self.events.get(True, timeout)
+			with self.lock: self._count -= 1
+		except Empty:
+			event = None
+
 		return event
+
+
+	def count(self) -> int: 
+		return self._count
 	
-	def is_empty(self) -> bool:
-		if len(self.events) > 0:
+
+	def empty(self) -> bool:
+		if self._count > 0:
 			return False
-		else:
-			return True
-		
-	def count(self) -> int:
-		return len(self.events)
-	
-	def get_all_queued(self) -> list[HalogenEvents.Event]:
-		return self.events
+		return True
