@@ -29,6 +29,11 @@ class HalogenLogModule(HalogenModule):
 	def name(cls) -> str:
 		return "logger"
 
+	
+	@classmethod
+	def info(cls) -> str:
+		return "Module for logging and halogen diagnostics."
+
 
 	def start(self) -> None:
 		
@@ -79,20 +84,21 @@ class HalogenLogModule(HalogenModule):
 			self.file_log(ev)
 			if self.to_terminal: self.terminal_log(ev)
 
-	def terminal_log(self, event: HalogenEvents.LogEvent) -> None:
 
-		timestamp = f"[{event.timestamp}]"
-		level = Color.colorify(f"[{event.level.upper()}]", Color.level_map[event.level])
-		sender = Color.colorify(f"({event.sender})", Color.MAGENTA)
-		message = event.message
+	def terminal_log(self, ev: HalogenEvents.LogEvent) -> None:
+
+		timestamp = f"[{ev.timestamp}]"
+		level = Color.colorify(f"[{ev.level.upper()}]", self.log_colors[ev.level])
+		sender = Color.colorify(f"({ev.sender})", Color.MAGENTA)
+		message = ev.message
 
 		log_str = f"{timestamp} {level} {sender} {message}"
 		print(log_str)
 
 
-	def file_log(self, event: HalogenEvents.LogEvent) -> None:
+	def file_log(self, ev: HalogenEvents.LogEvent) -> None:
 
-		log_str = f"[{event.timestamp}] [{event.level.upper()}] ({event.sender.capitalize()}) {event.message}\n"
+		log_str = f"[{ev.timestamp}] [{ev.level.upper()}] ({ev.sender.capitalize()}) {ev.message}\n"
 
 		with open(self.log_file, "a+") as file:
 			file.write(log_str)

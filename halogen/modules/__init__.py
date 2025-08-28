@@ -1,5 +1,5 @@
 from .command.handler import HalogenCommandHandler
-from .logger.logger   import HalogenLogger
+from .logger.module   import HalogenLogModule
 from .model.manager   import HalogenModelManager
 from .tasks.manager   import HalogenTaskManager
 from .prompt.manager  import HalogenPromptManager
@@ -9,7 +9,7 @@ from halogen.base.module import HalogenModule
 from typing import Type
 
 MODULES: list[Type[HalogenModule]] = [
-    HalogenLogger,
+    HalogenLogModule,
     HalogenCommandHandler,
     HalogenServer,
     HalogenModelManager,
