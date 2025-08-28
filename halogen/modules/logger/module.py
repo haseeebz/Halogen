@@ -1,87 +1,83 @@
 from collections.abc import Callable
 from typing import Tuple
+from pathlib import Path
 from halogen.base import HalogenModule, HalogenEvents, HalogenConfig
 import os
 from dataclasses import asdict
 
-class Color:
-	RESET = "\033[0m"
-	RED = "\033[31m"
-	GREEN = "\033[32m"
-	YELLOW = "\033[33m"
-	BLUE = "\033[34m"
-	MAGENTA = "\033[35m"
-	CYAN = "\033[36m"
-	GRAY = "\033[90m"
+from .colors import Color
 
-	@staticmethod
-	def colorify(text:str, color):
-		return f"{color}{text}{Color.RESET}"
-	
-	level_map = {
-		"debug" : CYAN,
-		"info" : GREEN,
-		"warning" : YELLOW,
-		"critical" : RED
-	}
-	
-LEVELS = {"debug":0, "info":1, "warning":2, "critical":3}
 
-class HalogenLogger(HalogenModule):
+class HalogenLogModule(HalogenModule):
 
 	def __init__(self, emit_event: Callable[[HalogenEvents.Event], None], config: HalogenConfig) -> None:
 		super().__init__(emit_event, config)
-		self.log_file: str
-	
 
+		self.log_file: Path
+
+		self.log_colors = {
+			"debug" : CYAN,
+			"info" : GREEN,
+			"warning" : YELLOW,
+			"critical" : RED
+		}
+	
+		self.log_levels = {"debug" : 0, "info" : 1, "warning" : 2, "critical" : 3}
+
+	
 	@classmethod
 	def name(cls) -> str:
 		return "logger"
-	
+
 
 	def start(self) -> None:
 		
 		path = self.config.get("logfile", "halogen.log")
+
 		if isinstance(path, str):
-			self.log_file = path
+			self.log_file = Path(path)
+
 		self.log(
 			HalogenEvents.chain(),
 			"info", 
-			f"Now logging into file: {os.path.abspath(self.log_file)}"
+			f"Now logging into file: {self.log_file.absolute()}"
 		)
 
+		self.current_level: str = self.config.get("level", "info")
 
-		self.log_level: str = self.config.get("level", "info")
-		if self.log_level not in LEVELS.keys():
+		if self.current_level not in self.log_levels.keys():
+
 			self.log(
 				HalogenEvents.chain(),
 				"warning",
-				f"Invalid log level specified in config.toml '{self.log_level}'. Defaulting to 'info'"
+				f"Invalid log level specified in config.toml '{self.current_level}'. Defaulting to 'info'"
 			)
-			self.log_level = "info"
-
+			self.current_level = "info"
 
 		self.to_terminal: bool = self.config.get("terminal", True)
 
 
+	def end(self) -> Tuple[bool, str]:
+		return (True, "")
+
+
 	def handled_events(self) -> list[type[HalogenEvents.Event]]:
 		return [
-			HalogenEvents.LogEvent,
-			HalogenEvents.UserInputEvent
+			HalogenEvents.LogEvent
 		]
 	
 
-	def handle(self, event: HalogenEvents.Event) -> None:
-		match event:
+	def handle(self, ev: HalogenEvents.Event) -> None:
+		match ev:
 
 			case HalogenEvents.LogEvent():
-				if LEVELS[event.level] >= LEVELS[self.log_level]:
-					self.file_log(event)
-					if self.to_terminal: self.terminal_log(event)
+				self.write_log(ev)
+				
 
-			case HalogenEvents.UserInputEvent():
-				pass
-
+	def write_log(self, ev: HalogenEvents.LogEvent) -> None:
+		if self.log_levels[ev.level] >= self.log_levels[self.current_level]:
+			self.file_log(ev)
+			if self.to_terminal: self.terminal_log(ev)
 
 	def terminal_log(self, event: HalogenEvents.LogEvent) -> None:
 
@@ -102,6 +98,5 @@ class HalogenLogger(HalogenModule):
 			file.write(log_str)
 
 
-	def end(self) -> Tuple[bool, str]:
-		return (True, "")
+	
 			
