@@ -41,7 +41,7 @@ class Chrono(HalogenModule):
 		"Set a reminder (in integar seconds). Add detailed context to the message also.",
 		["message:string", "seconds:integar"]
 	)
-	def set_duration_reminder(self, chain: HalogenEvents.Chain, msg: str, sec: str):
+	def set_duration_reminderw(self, chain: HalogenEvents.Chain, msg: str, sec: str):
 
 		if not sec.isdigit():
 			raise HalogenTaskError(f"{sec} is not a valid integar.")
