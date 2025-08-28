@@ -54,13 +54,13 @@ class HalogenCore():
 
 		while self.is_running: 
 
-			if self.eventbus.is_empty():
+			event = self.eventbus.receive(0.05)
+
+			if not event:
 				if self.shutdown_requested: self.shutdown() 
 				if self.restart_requested: self.restart()
-				time.sleep(0.05)
 				continue
 			
-			event = self.eventbus.receive() 
 			
 			self.pass_events(event)
 
@@ -183,8 +183,10 @@ class HalogenCore():
 		
 		if not logger: return
 
-		while not self.eventbus.is_empty():
-			ev = self.eventbus.receive()
+		while True:
+			ev = self.eventbus.receive(0.05)
+			if not ev: break
+			
 			if isinstance(ev, HalogenEvents.LogEvent):
 				logger.handle(ev)
 
@@ -207,8 +209,10 @@ class HalogenCore():
 		
 		if not logger: return
 
-		while not self.eventbus.is_empty():
-			ev = self.eventbus.receive()
+		while True:
+			ev = self.eventbus.receive(0.05)
+			if not ev: break
+
 			if isinstance(ev, HalogenEvents.LogEvent):
 				logger.handle(ev)
 
