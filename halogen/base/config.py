@@ -91,14 +91,14 @@ class HalogenConfigLoader():
 
 		self.parser.add_argument(
 			"--dev", 
-			help = "Run halogen in dev mode.", 
+			help = "Run Halogen in dev mode.", 
 			default = False, 
 			action = "store_true"
 		)
 
 		self.parser.add_argument(
 			"--configdir", 
-			help = "Run halogen in dev mode.", 
+			help = "Run Halogen using a specific config directory.", 
 			type = str
 		)
 
