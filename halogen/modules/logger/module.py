@@ -16,10 +16,10 @@ class HalogenLogModule(HalogenModule):
 		self.log_file: Path
 
 		self.log_colors = {
-			"debug" : CYAN,
-			"info" : GREEN,
-			"warning" : YELLOW,
-			"critical" : RED
+			"debug"    : Color.CYAN,
+			"info"     : Color.GREEN,
+			"warning"  : Color.YELLOW,
+			"critical" : Color.RED
 		}
 	
 		self.log_levels = {"debug" : 0, "info" : 1, "warning" : 2, "critical" : 3}

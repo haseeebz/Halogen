@@ -11,7 +11,7 @@ from halogen.base import (
 )
 
 from halogen.modules import MODULES
-from halogen.modules import HalogenLogger
+from halogen.modules import HalogenLogModule
 
 
 
@@ -188,14 +188,14 @@ class HalogenModuleManager():
 				raise err
 
 
-	def end_modules(self) -> HalogenLogger | None:
+	def end_modules(self) -> HalogenLogModule | None:
 		"Calls .end() on all modules."
 
 		logger = None
 
 		for module in self.modules:
 
-			if isinstance(module, HalogenLogger): 
+			if isinstance(module, HalogenLogModule): 
 				logger = module
 				continue
 
