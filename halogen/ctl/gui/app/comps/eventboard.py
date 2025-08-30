@@ -36,8 +36,9 @@ class EventBoard(QScrollArea):
 		self.setWidget(self.container)
 
 	def add_event(self, ev: HalogenEvents.Event):
-		if not isinstance(ev, HalogenEvents.AIResponseEvent): return
 
+		if not isinstance(ev, (HalogenEvents.AIResponseEvent, HalogenEvents.UserInputEvent)):
+			return
 		msg = MessageBox(ev.message)
 		self.layout.insertWidget(self.layout.count() - 1, msg)  
 		self.verticalScrollBar().setValue(self.verticalScrollBar().maximum())  

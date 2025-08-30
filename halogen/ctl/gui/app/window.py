@@ -49,9 +49,15 @@ class HalogenWindow(QWidget):
 
 		while True:
 			ev = self.interface.check_event(0.1)
-
 			if ev: self.event_received.emit(ev)
 
 
 	def send_input(self, text: str):
 		self.interface.send_message(text)
+		ev = HalogenEvents.UserInputEvent(
+			"test",
+			HalogenEvents.make_timestamp(),
+			HalogenEvents.chain(),
+			text
+		)
+		self.event_board.add_event(ev)
