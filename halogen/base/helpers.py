@@ -56,6 +56,11 @@ class PyModuleLoader():
 
 		if type(dir_path) is str: dir_path = Path(dir_path)
 
+		if not dir_path.is_dir():
+			raise PyModuleLoader.PyModuleError(
+				f"{dir_path.absolute()} is not a directory."
+			)
+
 		file_path = dir_path / "__init__.py"
 		mod = self.from_file(name, file_path)
 		return mod
