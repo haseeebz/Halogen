@@ -54,7 +54,7 @@ class HalogenServer(HalogenModule):
 	
 	def start(self):
 
-		self.socket.settimeout(0.2)
+		self.socket.settimeout(0.1)
 		self.socket.listen()
 		self.read_thread.start()
 		self.write_thread.start()
@@ -227,7 +227,7 @@ class HalogenServer(HalogenModule):
 		while self.is_running:
 			
 			try:
-				event = self.out_buffer.get(True, 0.2)
+				event = self.out_buffer.get(True, 0.1)
 			except queue.Empty:
 				continue
 
