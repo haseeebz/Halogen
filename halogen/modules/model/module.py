@@ -40,20 +40,12 @@ class HalogenModelManager(HalogenModule):
 	@classmethod
 	def name(cls) -> str:
 		return "model"
+
+
+	@classmethod
+	def info(cls) -> str:
+		return "Module for loading and managing Model Providers."
 	
-
-	def handled_events(self) -> list[type[HalogenEvents.Event]]:
-		return [
-			HalogenEvents.PromptEvent
-		]
-
-
-	def handle(self, event: HalogenEvents.Event) -> None:
-
-		match event:
-			case HalogenEvents.PromptEvent():
-				self.generate_response(event)
-
 
 	def start(self) -> None:
 		self.init_providers()
@@ -88,6 +80,19 @@ class HalogenModelManager(HalogenModule):
 		if self.current_provider:
 			self.current_provider.unload()
 		return (True, "Success")
+
+
+	def handled_events(self) -> list[type[HalogenEvents.Event]]:
+		return [
+			HalogenEvents.PromptEvent
+		]
+
+
+	def handle(self, event: HalogenEvents.Event) -> None:
+
+		match event:
+			case HalogenEvents.PromptEvent():
+				self.generate_response(event)
 
 
 	def init_providers(self):
