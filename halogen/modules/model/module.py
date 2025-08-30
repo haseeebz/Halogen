@@ -14,6 +14,8 @@ from halogen.base import (
 	HalogenCommand,
 	Chain
 )
+from halogen.base.helpers import PyModuleLoader
+
 
 from .base import (
 	BaseModelProvider,
@@ -31,10 +33,14 @@ class HalogenModelManager(HalogenModule):
 		config: HalogenConfig
 		):
 		super().__init__(emit_event, config)
-		self.current_provider: Union[BaseModelProvider, None] = None 
-		self.registered_providers: dict[str, BaseModelProvider] = {}
-		self.model_directory = self.config.directory / "models"
 		self.has_commands = True
+
+		self.registered_providers: dict[str, BaseModelProvider] = {}
+		self.current_provider: Union[BaseModelProvider, None] = None 
+		
+		self.model_directory = self.config.directory / "models"
+
+		self.module_loader = PyModuleLoader()
 
 
 	@classmethod
@@ -102,69 +108,47 @@ class HalogenModelManager(HalogenModule):
 		method.
 		"""
 
-		model_mods = self.import_providers()
+		providers = self.get_providers()
 
-		for mod in model_mods:
+		for provider in providers:
 
-			model_class = self.get_provider_from_module(mod)
-
-			if not model_class: continue
-			model: BaseModelProvider = model_class(
+			provider_obj: BaseModelProvider = model_class(
 				self.config.get_sub_config(model_class.name())
 				)
 			
-			
-			self.registered_providers[model.name()] = model
+			self.registered_providers[provider_obj.name()] = provider_obj
 
 			self.log(
 				HalogenEvents.chain(),
 				"info",
-				f"Registered Model '{model.name()}'"
+				f"Registered Model '{provider_obj.name()}'"
 			)
 
 
-	def import_providers(self) -> list[ModuleType]:
+	def get_providers(self) -> list[type[BaseModelProvider]]:
 		"""
 		Get all python modules within models/
 		"""
 	
-		mods = []
+		providers = []
 
 		for sub_dir in self.model_directory.iterdir():
 
-			if not sub_dir.is_dir():
-				self.log(
-					HalogenEvents.chain(),
-					"debug",
-					f"Ignoring {sub.absolute()}. Not a directory"
-				)
+			try:
+				mod = self.module_loader.from_directory(sub_dir)
+				provider = self.get_provider_from_module(mod)
+				if provider: providers.append(provider)
 				continue
-			
-			sub_dir_init = sub_dir / "__init__.py"
+			except PyModuleLoader.PyModuleError as e:
+				msg = str(e)
 
-			if not sub_dir_init.exists():
-				self.log(
-					HalogenEvents.chain(),
-					"debug",
-					f"Ignoring {sub_dir.absolute()}. Not a python module."
-				)
-				continue
-
-			mod_name = sub_dir.name
-
-			spec = importlib.util.spec_from_file_location(mod_name, sub_dir_init)
-
-			if not spec: continue
-			if not spec.loader: continue
-
-			mod = importlib.util.module_from_spec(spec)
-			sys.modules[mod_name] = mod
-			
-			spec.loader.exec_module(mod)
-			mods.append(mod)
-			
+			self.log(
+				HalogenEvents.chain(),
+				"warning",
+				f"PyModuleLoader Failure : {msg}"
+			)
 		
-		return mods
+		return providers
 	
 
 	def get_provider_from_module(self, mod: ModuleType) -> type[BaseModelProvider] | None:
@@ -178,7 +162,7 @@ class HalogenModelManager(HalogenModule):
 			return None
 
 		model_cls = mod.get_model()
-
+		
 		if not issubclass(model_cls, BaseModelProvider):
 			self.log(
 				HalogenEvents.chain(),
@@ -194,8 +178,7 @@ class HalogenModelManager(HalogenModule):
 
 			err = f"A python module found in model/: '{mod.__name__}' " \
 			"returned an invalid model provider." \
-			f"Model tried to register with name '{name}' but it already exists." \
-			"Could lead to security risks in case of API key transfers. Raising Error."
+			f"Model tried to register with name '{name}' but it already exists."
 
 			self.log(
 				HalogenEvents.chain(),
@@ -203,7 +186,7 @@ class HalogenModelManager(HalogenModule):
 				err
 			)
 
-			raise HalogenError(err)
+			return None
 		
 		return model_cls
 
