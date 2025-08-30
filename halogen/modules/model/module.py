@@ -54,9 +54,21 @@ class HalogenModelManager(HalogenModule):
 	
 
 	def start(self) -> None:
-		self.init_providers()
-		current_provider = self.config.get("name", None)
 
+		if not self.model_directory.exists():
+			ev = HalogenEvents.ShutdownEvent(
+				self.name(),
+				HalogenEvents.make_timestamp(),
+				HalogenEvents.chain(),
+				True,
+				f"{self.model_directory.absolute()} does not exist. Cannot proceed"
+			)
+			self.emit_event(ev)
+			return
+
+		self.init_providers()
+
+		current_provider = self.config.get("name", None)
 		try:
 			msg = self.change_provider(current_provider)
 			success = True
@@ -71,6 +83,7 @@ class HalogenModelManager(HalogenModule):
 				msg
 			)
 			return
+
 
 		ev = HalogenEvents.ShutdownEvent(
 			self.name(),
@@ -103,9 +116,7 @@ class HalogenModelManager(HalogenModule):
 
 	def init_providers(self):
 		"""
-		Search and Initialize all model providers.
-		All python modules within the model directories are searched for a get_model() 
-		method.
+		Initialize all providers found in models/
 		"""
 
 		providers = self.get_providers()
@@ -127,7 +138,7 @@ class HalogenModelManager(HalogenModule):
 
 	def get_providers(self) -> list[type[BaseModelProvider]]:
 		"""
-		Get all python modules within models/
+		Get all provider classes within models/
 		"""
 	
 		providers = []
@@ -152,6 +163,9 @@ class HalogenModelManager(HalogenModule):
 	
 
 	def get_provider_from_module(self, mod: ModuleType) -> type[BaseModelProvider] | None:
+		"""
+		Get a provider class from a python module.
+		"""
 
 		if not hasattr(mod, "get_model"):
 			self.log(
@@ -191,22 +205,6 @@ class HalogenModelManager(HalogenModule):
 		return model_cls
 
 
-	def change_provider(self, provider: str) -> str:
-		
-		if provider not in self.registered_providers:
-			raise HalogenProviderError("Could not find provider '{provider}'. It was not registered.")
-
-		if self.current_provider: self.current_provider.unload()
-		self.current_provider = self.registered_providers[provider]
-		self.current_provider.load()
-
-		return f"Loaded provider '{provider}'."
-
-
-	def change_model(self, model: str) -> str:
-		return self.current_provider.load(model)
-
-
 	def generate_response(self, event: HalogenEvents.PromptEvent):
 
 		if not self.current_provider:
@@ -223,11 +221,10 @@ class HalogenModelManager(HalogenModule):
 			)
 			return 
 
-		self.eval_ai_response(response, HalogenEvents.chain(event))
+		self.parse_response(response, HalogenEvents.chain(event))
 
-	
-	
-	def eval_ai_response(self, response: ModelResponse, chain: Chain):
+
+	def parse_response(self, response: ModelResponse, chain: Chain):
 
 		extras = {}
 		for ex in response.extras:
@@ -254,6 +251,23 @@ class HalogenModelManager(HalogenModule):
 			)
 			self.emit_event(task_ev)
 
+
+
+	def change_provider(self, provider: str) -> str:
+		
+		if provider not in self.registered_providers:
+			raise HalogenProviderError(f"Could not find provider '{provider}'. It was not registered.")
+
+		if self.current_provider: self.current_provider.unload()
+		self.current_provider = self.registered_providers[provider]
+		self.current_provider.load()
+
+		return f"Loaded provider '{provider}'."
+
+
+	def change_model(self, model: str) -> str:
+		return self.current_provider.load(model)
+	
 
 	@HalogenCommand("current", "Get info about the current model")
 	def get_current_model_command(self, args: list[str], chain: Chain) -> tuple[bool, str]:
