@@ -123,8 +123,8 @@ class HalogenModelManager(HalogenModule):
 
 		for provider in providers:
 
-			provider_obj: BaseModelProvider = model_class(
-				self.config.get_sub_config(model_class.name())
+			provider_obj: BaseModelProvider = provider(
+				self.config.get_sub_config(provider.name())
 				)
 			
 			self.registered_providers[provider_obj.name()] = provider_obj
@@ -146,7 +146,7 @@ class HalogenModelManager(HalogenModule):
 		for sub_dir in self.model_directory.iterdir():
 
 			try:
-				mod = self.module_loader.from_directory(sub_dir)
+				mod = self.module_loader.from_directory(sub_dir.name, sub_dir)
 				provider = self.get_provider_from_module(mod)
 				if provider: providers.append(provider)
 				continue
